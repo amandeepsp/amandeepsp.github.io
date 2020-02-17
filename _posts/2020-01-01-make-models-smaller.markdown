@@ -60,10 +60,42 @@ where $r$ is the original value of the weight, $s$ is the scale, $q$ is the quan
 
 While training the *Fake quantization* node calculate the ranges for the weights and  activations and store thier moving average. After training we quantize the network with this range to get a better performance. 
 
-More drastic bit-width also explored in papers on XOR nets by [*Rastegari et.al*][rast], Ternery nets by [*Courbariaux et. al.*][cour] and Binary nets by [*Zhu et. al.*][zhu] In PyTorch 1.3, quantization support was introduced. Three new data types are introduced for quantized operations `torch.quint8`, `torch.qint8` and `torch.qint32`. It also offer various qunatization techniques:
-1. **Post Training Dynamic quantization** : 
-2. **Post Training Static quantization** : 
-3. **Quantization Aware Training** : 
+More drastic bit-width also explored in papers on XOR nets by [*Rastegari et.al*][rast], Ternery nets by [*Courbariaux et. al.*][cour] and Binary nets by [*Zhu et. al.*][zhu] In PyTorch 1.3, quantization support was introduced. Three new data types are introduced for quantized operations `torch.quint8`, `torch.qint8` and `torch.qint32`. It also offer various qunatization techniques icluded in `torch.quantization` packge.
+
+- **Post Training Dynamic quantization** : Replaces float weights with dynamic quantized versions of them. Weight-only quantization by default is performed for layers with large weights size - i.e. Linear and RNN variants.
+
+~~~ python
+quantized_model = torch.quantization.quantize_dynamic(
+    model, {nn.LSTM, nn.Linear}, dtype=torch.qint8
+)
+~~~
+- **Post Training Static quantization** : Static quantization not only converts float weights to int, it also record distribution of activations and they are used to determine the scale of quantization at inference time. To support this calibration type quantization we add `QuantStub` at the start of the model and `DeQuantStub` and the end of the model. It invloves steps mentioned below.
+
+~~~ python
+myModel = load_model(saved_model_dir + float_model_file).to('cpu')
+# Fuse Conv, bn and relu
+myModel.fuse_model()
+
+# Specify quantization configuration
+# Start with simple min/max range estimation and per-tensor 
+# quantization of weights
+myModel.qconfig = torch.quantization.default_qconfig
+
+torch.quantization.prepare(myModel, inplace=True)
+
+# Calibrate with the training set
+evaluate(myModel, criterion, data_loader, 
+            neval_batches=num_calibration_batches)
+
+# Convert to quantized model
+torch.quantization.convert(myModel, inplace=True)
+~~~
+
+- **Quantization Aware Training** : Uses *fake quantization* modules to store scales while training. For eanbling QAT, we use the `qconfig` to be `torch.quantization.get_default_qat_qconfig('fbgemm')` and instead of `prepare` use `prepare_qat`. After this we can train or fine-tune our model and at the end of training, get out quantized model using `torch.quantization.convert` same as above.
+
+> Post training quantization in PyTorch currently only support operations on CPU.
+
+For detailed code examples visit the PyTorch documentation [*here*][torch_doc]. On Tensorflow side of things quantization can be done using TFLite's `tf.lite.TFLiteConverter` API by setting the `optimizations` parameter to `tf.lite.Optimize.OPTIMIZE_FOR_SIZE`. Fake quantization is enabled by `tf.contrib.quantize` package.
 
 <!--
 https://sahnimanas.github.io/post/quantization-in-tflite/
@@ -83,3 +115,4 @@ https://jackwish.net/2019/neural-network-quantization-introduction.html
 [zhu]: https://arxiv.org/abs/1612.01064
 [cour]: https://arxiv.org/abs/1602.02830
 [rast]: https://arxiv.org/abs/1603.05279
+[torch_doc]: https://pytorch.org/tutorials/advanced/dynamic_quantization_tutorial.html
