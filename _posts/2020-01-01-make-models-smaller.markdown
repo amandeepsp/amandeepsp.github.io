@@ -3,6 +3,7 @@ layout: post
 title:  "Make your models smaller! (Part 1)"
 date:   2019-12-26 10:55:06 +0530
 categories: ml
+use-math: true
 excerpt_separator: <!--more-->
 permalink: /ml-model-compression/
 ---
@@ -12,10 +13,11 @@ Machine Learning models are getting bigger and expensive to compute. Embedded de
 
 ## Pruning
 <!--proof-read-->
-Pruning is remove excess network connections that does not hugely contribute to the output. Ideas of pruning networks are very old dating back to 1990s namely [*Optimal Brain Damage*][obd] and [*Optimal Brain Surgeon*][obs]. These methods use Hessians to determine the importance of connections, which also makes them impractical to use with deep networks. Pruning methods use an interative training technique i.e. Train - Prune - Fine-tune. Fine-tuning after pruning restores the accuracy of the network lost after pruning. 
+Pruning is remove excess network connections that does not hugely contribute to the output. Ideas of pruning networks are very old dating back to 1990s namely [*Optimal Brain Damage*][obd] and [*Optimal Brain Surgeon*][obs]. These methods use Hessians to determine the importance of connections, which also makes them impractical to use with deep networks. Pruning methods use an interative training technique i.e. *Train $\Rightarrow$ Prune $\Rightarrow$ Fine-tune*. Fine-tuning after pruning restores the accuracy of the network lost after pruning. 
 One method is to rank the weights in the network using the L1/L2 norm and remove the last x% of them. Other types of methods which also use ranking use the mean acivation of neurons, the number of times a neuron's activation is zero on a validation set and many other creative methods. This approch is pioneered by [Han et.al.][han] in thier 2015 paper.
 
 ![pruning_image]
+*Fig 1. Pruning in neural networks from [Han et. al.][han]*
 
 Even more recently in 2019, the [Frankle et.al.][frankle] paper titled *The Lottery Ticket Hypothesis* the authors found out that within every deep neural network there exists a subset of it which gives the same accuracy for equal amount of training. These results hold true for unstructured pruning which prunes the whole network with gives us a sparse network. Sparse networks are inefficient on GPUs since there is no structure to their computation. To remedy this, structured pruning is done, which prunes a part of the network e.g. a layer or a channel. The Lottery Ticket discussed earlier is found no to work here by [Liu et.al.][liu] They instead discovered that it was better to retrain a network after pruning instead of fine-tuning.
 Aside from performace is there any other use of sparse networks? Yes, sparse networks are more robust to noise input as shown in a paper by [Ahmed et.al.][ahmed] Pruning is supported in both TF (`tensorflow_model_optimization` package) and PyTorch (`torch.nn.utils.prune`).
@@ -38,6 +40,36 @@ prune.ln_structured(module=conv_1, name='weight', amount=5, n=2, dim=1)
 
 This replaces the parameter `weight` with the pruned result and adds a parameter `weight_orig` that stores the upruned version of the input. The pruning mask is stored as `weight_mask` and saved as a module buffer. These can be checked by the `module.named_parameters()` and `module.named_buffers()`. To enable iterative pruning we can use just apply the pruning method for the next iteration and it just works, due to `PruningContainer` as it handles computation of final mask taking into account previous prunings using the `compute_mask` method.
 
+## Quantization
+Quantization is to restrict the number of possible values a weight can take, this will reduce the memory a weight can reduce and in turn reduce the model size. One way of doing this is changing the bit-width of the floating point number used for storing the weights. A number stored as a 32-bit floating point or FP32 to a FP16 or an 8-bit fixed point number and more increasingly an 8 bit integer. Bit width reductions has many advantages as below.
+-  Moving from 32 bit to 8 bit gives us a *4x* memory advantage straight away.
+-  Lower bit width also means that we can squeeze me more numbers in registers/caches with leads to less RAM access and in-turn less time and power consumption.
+-  Integer computation are always faster than floating point ones.
+
+This works because neural nets are pretty robust to small preturbations to thier weights and we can easily round off them without having much effect on the accuracy of the network. Moreover, weights are not contained in very large ranges due to reguralization techqniues used in training, hence we do not have to use large ranges, say ~ $-3.4\times10^{38}$ to  $3.4\times10^{38}$ for a 32-bit floating point. For example, in the image below the weight values in MobileNet are all very close to zero.
+
+![mobile_net_image]
+*Fig 2. Weight distribution of 10 layers of MobileNetV1.*
+
+A Quantization scheme is how we transform our real weights to quantized one, a very rudimentary form of the scheme is linear scaling. Say we want to transform values in range $[ r_{min}, r_{max} ]$ to an integer range of $[0, I_{max}]$, where $I_{max}$ is $2^B -1$, $B$ being the bit-width of our integer representation. Hence,
+\$$ r = \frac{r_{max} - r_{min}}{I_{max} - 0 } (q - z) = s (q-z) \$$
+where $r$ is the original value of the weight, $s$ is the scale, $q$ is the quantized value and $z$ is the value that maps to `0.0f`. This is also known as an *affine mapping*. Since $q$ is an integer results are rounded off. Now the problem arises how we choose $r_{min}$ and $r_{max}$. A simple method to achive this is generating distributions of weights and activations and then taking thier [*KL divergences*][kl] with quantized distributions and use the one with min divergence from the original. A more elegent way to do this is using *Fake Quantization* i.e. introduce quantization aware layers into the network during traing. This idea is proposed by [*Jacob et. al.*][jacob].
+
+![](/assets/fake_quant.png)
+*Fig 3. (a) Normal conv layer, (b) Conv layer with fake quantization units added, (c) Comparison of quantized network's latency and accuracy. Image from* [*Jacob et. al.*][jacob]
+
+While training the *Fake quantization* node calculate the ranges for the weights and  activations and store thier moving average. After training we quantize the network with this range to get a better performance. 
+
+More drastic bit-width also explored in papers on XOR nets by [*Rastegari et.al*][rast], Ternery nets by [*Courbariaux et. al.*][cour] and Binary nets by [*Zhu et. al.*][zhu] In PyTorch 1.3, quantization support was introduced. Three new data types are introduced for quantized operations `torch.quint8`, `torch.qint8` and `torch.qint32`. It also offer various qunatization techniques:
+1. **Post Training Dynamic quantization** : 
+2. **Post Training Static quantization** : 
+3. **Quantization Aware Training** : 
+
+<!--
+https://sahnimanas.github.io/post/quantization-in-tflite/
+https://jackwish.net/2019/neural-network-quantization-introduction.html
+-->
+
 [obd]: https://papers.nips.cc/paper/250-optimal-brain-damage.pdf
 [obs]: https://papers.nips.cc/paper/749-optimal-brain-surgeon-extensions-and-performance-comparisons.pdf
 [han]: https://arxiv.org/abs/1506.02626
@@ -45,3 +77,9 @@ This replaces the parameter `weight` with the pruned result and adds a parameter
 [liu]: https://arxiv.org/abs/1810.05270
 [ahmed]: https://arxiv.org/abs/1903.11257
 [pruning_image]: https://miro.medium.com/max/1934/1*4dJE_vHfGpPBtXLLXLmnBQ.png
+[mobile_net_image]: https://jackwish.net/images/2019/quantization/mobilenet1-weight-distribution.svg
+[jacob]: https://arxiv.org/abs/1712.05877
+[kl]: https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
+[zhu]: https://arxiv.org/abs/1612.01064
+[cour]: https://arxiv.org/abs/1602.02830
+[rast]: https://arxiv.org/abs/1603.05279
