@@ -3,7 +3,6 @@ layout: post
 title:  "Make your models smaller! (Part 1)"
 date:   2020-02-18 10:55:06 +0530
 categories: ml
-use-math: true
 excerpt_separator: <!--more-->
 permalink: /ml-model-compression-part1/
 ---
