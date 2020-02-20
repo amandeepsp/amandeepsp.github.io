@@ -2,4 +2,4 @@
 
 ## Latex inputs
 - $..$ for inline
-- \$$.. \$$ for block
+- \\$$..\\$$ for block
