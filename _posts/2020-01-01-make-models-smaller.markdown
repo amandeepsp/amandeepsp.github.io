@@ -1,8 +1,9 @@
 ---
 layout: post
 title:  "Make your models smaller! (Part 1)"
+description: "TLDR; Huge gains in inference speed and size."
 date:   2020-02-18 10:55:06 +0530
-categories: ml
+categories: [ML, On-device]
 excerpt_separator: <!--more-->
 permalink: /ml-model-compression-part1/
 ---
