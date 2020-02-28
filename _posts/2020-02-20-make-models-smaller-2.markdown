@@ -2,7 +2,7 @@
 layout: post
 title:  "Make your models smaller! (Part 2)"
 date:   2020-02-20 10:55:06 +0530
-categories: [ML]
+categories: [ML, On-device]
 excerpt_separator: <!--more-->
 permalink: /ml-model-compression-part2/
 ---
@@ -11,4 +11,11 @@ This post is direct continuation of [Part 1]({% post_url 2020-01-01-make-models-
 
 ## Low Rank Transforms
 
-Convolutions are expensive opertains and they represent a bulk of computation and storage used up by a network. Convolution filters are 4D tensors and the fully connected layers can be expressed as a 2D matrix. Decomposing tensors into smaller low-rank parts is not a new idea, it has been around for a long time in Singal Processing Litrature, e.g. high dimentional DCT (Discrete Cosine Transforms) and wavelets are constructed using their 1D DCT and wavelets respectively.
+Convolutions are expensive opertains and they represent a bulk of computation and storage used up by a network. To convolve a 2D matrix $x \in \Bbb{R} ^ {H \times W}$ with $N$ number of filters each of size $d \times d$, producing a feature map $ y \in \Bbb{R} ^ {H_o \times W_o}$, we need $ \mathcal{O}(d^2NH_oW_o)$ number of operations. Since filters in CNNs have channels too. If $C$ are the the number of channels in a filter, the complexity of convolution rises to $ \mathcal{O}(d^2NCH_oW_o)$. Fully connected layers can be compressed using plain old [Truncated SVD][tsvd] as a fully connected layer can be represented as a matrix. In truncated SVD matrix $M$ of size ${n \times m}$ is approximated by $ \tilde{M} = U \Sigma V^T$, where $U$ is $n \times t$, $\Sigma$ is $t \times t$ and $V$ is $t \times m$ in size. A fully connected layer can be represented as $Wx +b$, where $W$ is the weight matrix and $b$ are the biases. We now reprsent the FC layer as
+\$$ (U\Sigma V^Tx) + b = U(\Sigma V^Tx) + b\$$ 
+hence we can split our FC layer into two; 
+- First layer with shape $n \times t$, having no biases and weights taken from $\Sigma V^T$.
+- Second layer with shape $t \times m$, original biases and weights from $U$.
+This drops the number of weights from $n \times m$ to $ t(n+m) $. Time complexity is also reduced the same factor. All this is done after training the model. Since convolutional layers are 4D tensors, they use tensor decompositions to achieve the same effect. 
+
+[tsvd]: https://en.wikipedia.org/wiki/Singular_value_decomposition#Truncated_SVD
