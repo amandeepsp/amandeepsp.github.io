@@ -49,10 +49,43 @@ This results in size reduction from `528MB` to `195M` i.e. **~ 2.7x decrease**. 
 ## Efficient network architectures
 Rather than applying size reducing techniques to existing architechtures, we try to create novel architechtures that decrease model size and try to preserve the accuracy of the network over the time there have been many such architechtures, prominent of them being SqueezeNet, MobileNet V1 and MobileNet V2.
 ### SqueezeNet
-SqueezeNet by [*Iandola et.al. 2016*][iandola] is presumably the first to explore a new architechure for smaller CNNS. At the core of SqueezeNet are *Fire Modules*
+SqueezeNet by [*Iandola et.al.*][iandola] is presumably the first to explore a new architechure for smaller CNNs. At the core of SqueezeNet are *Fire Modules*. Fire modules use `1x1` filters rather than `3x3` filters as they have 9x lesser parameters and have lesser number of channels than normal, which is called a *sqeeze* layer. The lesser number of channels are recovered in the expand layer which consists of several zero-padded `1x1` filters and `3x3` filters. The number of filters in the squeeze layers and expand layers are hyper-parameters. If $e_{3 \times 3} + e_{1 \times 1}$ are the number of filters in expand layer and $s_{1 \times 1}$ is the number of filters in the squeeze layer. When using Fire module $s_{1 \times 1} < e_{3 \times 3} + e_{1 \times 1}$ works best.
+
+![](/assets/fire_module.png)
+
+*Fire module with $s_{1 \times 1} = 3$, $e_{1 \times 1} = 4$ and $e_{3 \times 3} = 4$. Image taken from [Iandola et.al.][iandola]*
+
+Code for the Fire Module adapted from `torchvision.models`. Here `inchannels` are the number of input channels, `squeeze_planes` are the number of output channels, `expand1x1_planes` and `expand3x3_planes` are the output channel number for the expand layer. They are generally same.
+~~~python
+class Fire(nn.Module):
+
+    def __init__(self, inplanes, squeeze_planes,
+                 expand1x1_planes, expand3x3_planes):
+        super(Fire, self).__init__()
+        self.inplanes = inplanes
+        self.squeeze = nn.Conv2d(inplanes, squeeze_planes, kernel_size=1)
+        self.squeeze_activation = nn.ReLU(inplace=True)
+        self.expand1x1 = nn.Conv2d(squeeze_planes, expand1x1_planes,
+                                   kernel_size=1)
+        self.expand1x1_activation = nn.ReLU(inplace=True)
+        self.expand3x3 = nn.Conv2d(squeeze_planes, expand3x3_planes,
+                                   kernel_size=3, padding=1)
+        self.expand3x3_activation = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        x = self.squeeze_activation(self.squeeze(x))
+        return torch.cat([
+            self.expand1x1_activation(self.expand1x1(x)),
+            self.expand3x3_activation(self.expand3x3(x))
+        ], 1)
+~~~
+SqueezeNet also uses delayed-sampling to create larger activation maps towards the *end* layers, which in-turn leads to greater accuracy. The full architechute can be visualized [*here*][squeezenet].
+
+### MobileNets
 
 [tsvd]: https://en.wikipedia.org/wiki/Singular_value_decomposition#Truncated_SVD
 [leb]: https://arxiv.org/pdf/1412.6553.pdf
 [kim]: https://arxiv.org/pdf/1511.06530.pdf
 [jacob]: https://jacobgil.github.io/deeplearning/tensor-decompositions-deep-learning
 [iandola]: https://arxiv.org/pdf/1602.07360.pdf
+[squeezenet]:https://dgschwend.github.io/netscope/#/preset/squeezenet
