@@ -109,8 +109,8 @@ https://jackwish.net/2019/neural-network-quantization-introduction.html
 [frankle]: https://arxiv.org/abs/1803.03635
 [liu]: https://arxiv.org/abs/1810.05270
 [ahmed]: https://arxiv.org/abs/1903.11257
-[pruning_image]: https://miro.medium.com/max/1934/1*4dJE_vHfGpPBtXLLXLmnBQ.png
-[mobile_net_image]: https://jackwish.net/images/2019/quantization/mobilenet1-weight-distribution.svg
+[pruning_image]: /assets/pruning.png
+[mobile_net_image]: /assets/mobilenet1-weight-distribution.svg
 [jacob]: https://arxiv.org/abs/1712.05877
 [kl]: https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
 [zhu]: https://arxiv.org/abs/1612.01064

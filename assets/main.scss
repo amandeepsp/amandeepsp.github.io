@@ -1,8 +1,8 @@
 ---
-# Only the main Sass file needs front matter (the dashes are enough)
 ---
 
 @import "minima";
+@import "syntax.scss";
 
 .page-description {
     color: #585858;
@@ -25,6 +25,6 @@
   opacity: 35%;
 }
 .category-tags-link {
-  color:rgb(136, 39, 39) !important;
+  color:#0078DB !important;
   font-size: 80% !important;
 }
