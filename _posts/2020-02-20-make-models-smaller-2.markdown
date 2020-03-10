@@ -49,11 +49,11 @@ This results in size reduction from `528MB` to `195M` i.e. **~ 2.7x decrease**. 
 ## Efficient network architectures
 Rather than applying size reducing techniques to existing architechtures, we try to create novel architechtures that decrease model size and try to preserve the accuracy of the network over the time there have been many such architechtures, prominent of them being SqueezeNet, MobileNet V1 and MobileNet V2.
 ### SqueezeNet
-SqueezeNet by [*Iandola et.al.*][iandola] is presumably the first to explore a new architechure for smaller CNNs. At the core of SqueezeNet are *Fire Modules*. Fire modules use `1x1` filters rather than `3x3` filters as they have 9x lesser parameters and have lesser number of channels than normal, which is called a *sqeeze* layer. The lesser number of channels are recovered in the expand layer which consists of several zero-padded `1x1` filters and `3x3` filters. The number of filters in the squeeze layers and expand layers are hyper-parameters. If $e_{3 \times 3} + e_{1 \times 1}$ are the number of filters in expand layer and $s_{1 \times 1}$ is the number of filters in the squeeze layer. When using Fire module $s_{1 \times 1} < e_{3 \times 3} + e_{1 \times 1}$ works best.
+SqueezeNet by [*Iandola et.al.*][iandola] is presumably the first to explore a new architechure for smaller CNNs. At the core of SqueezeNet are **Fire Modules**. Fire modules use `1x1` filters rather than `3x3` filters as they have 9x lesser parameters and have lesser number of channels than normal, which is called a *sqeeze* layer. The lesser number of channels are recovered in the expand layer which consists of several zero-padded `1x1` filters and `3x3` filters. The number of filters in the squeeze layers and expand layers are hyper-parameters. If $e_{3 \times 3} + e_{1 \times 1}$ are the number of filters in expand layer and $s_{1 \times 1}$ is the number of filters in the squeeze layer. When using Fire module $s_{1 \times 1} < e_{3 \times 3} + e_{1 \times 1}$ works best.
 
 ![](/assets/fire_module.png)
 
-*Fire module with $s_{1 \times 1} = 3$, $e_{1 \times 1} = 4$ and $e_{3 \times 3} = 4$. Image taken from [Iandola et.al.][iandola]*
+*Fig1. Fire module with $s_{1 \times 1} = 3$, $e_{1 \times 1} = 4$ and $e_{3 \times 3} = 4$. Image taken from [Iandola et.al.][iandola]*
 
 Code for the Fire Module adapted from `torchvision.models`. Here `inchannels` are the number of input channels, `squeeze_planes` are the number of output channels, `expand1x1_planes` and `expand3x3_planes` are the output channel number for the expand layer. They are generally same.
 ~~~python
@@ -82,6 +82,67 @@ class Fire(nn.Module):
 SqueezeNet also uses delayed-sampling to create larger activation maps towards the *end* layers, which in-turn leads to greater accuracy. The full architechute can be visualized [*here*][squeezenet].
 
 ### MobileNets
+MobileNets are specifically developed by Google to specifically run on mobile devices. MobileNets were first introduced in paper by [*Howard et.al.*][mobv1] in 2017, subsequently in 2018 an improved version was introduced called MobileNet v2 in [*Sandler et. al.*][mobv2]. The gist of optimization in MobileNet v1 lies in a special kind of convolution layer called **Depthwise seperable convolutions**. For a simple convolution layer if $k$ is the dimention of the kernel, $N_k$ is the number of kernels, and the input is of size $ N_c \times W \times H$, where $N_c$ are number of input channels. The total number of paramters and compulations are $k^2N_kN_cWH$. MobileNet Convolutions work in two stages
+1. Convolve a $k \times k$ for each channel of the input and stack $N_c$ of them, creating an output tensor of size $N_c \times W \times H$. Total number of ops in this layer is $k^2N_cWH$
+2. Convolve with a $1 \times 1$ filter with $N_k$ channels to create the final output. Total number of computations in this stage are $N_cN_kWH$
+
+Total computations in a MobileNet convulation are $k^2N_cWH + N_cN_kWH$. There total reduction in parameters in given by,
+\$$\frac{k^2N_cWH + N_cN_kWH}{k^2N_kN_cWH} = \frac{1}{N_k} + \frac{1}{k^2}\$$
+For $k = 3$, $N_k = 16$ we have a **~ 5.76x** reduction in number of parameters for a layer.
+![](/assets/depthwise.svg)
+*Fig 2. Depthwise seperable convolution followed by pointwise convolution. [Image credis][depth]*
+
+Implementing Depthwise conv. is quite simple. Chekout the code snippet below, `inp` donates the number of input channels and `oup` are the number of output channels.
+~~~python
+def conv_dw(inp, oup, stride):
+    return nn.Sequential(
+        nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
+        nn.BatchNorm2d(inp),
+        nn.ReLU(inplace=True),
+
+        nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
+        nn.BatchNorm2d(oup),
+        nn.ReLU(inplace=True),
+    )
+~~~
+**MobileNet v2** uses as inverted residual block as its main convolutional layer. A Residual block taken from the [*ResNets*][resnet] include bottleneck layers that decrease the number of channels followed by an expansion layer that restores the number of channels for the residual concat opertaion. The inverted block layer does the reverse of that it first expands the number of channels then reduce them. The last layer in the block is a bottleneck layer as it decreases the the channels of the output. This layer has to non-linearity attached to it. This becuase authors found out that a linear bottleneck does not lose information when a feature-map is embedded into a lower dimension space  i.e. reduced to a tensor with less number of channels. This is found to increase the accuracy of these networks. To calculate the number of parameters, presume $N_{in}$ is the number of input channels, $N_{out}$ the number of output channels and $t$ is the expansion ratio, the ratio between size of the intermediate layer to the input layer. The number of computations and parameters are $WHN_{in}t(N_{in} + k^2 + N_{out})$. But there is an extra `1x1` convolution component, still we have computational advantage because due to the nature of the block we can now decrease the input and output dimensions e.g. a layer with dimensions `112x112` can have only `16` channels and retaining the accuracy as compared to `64` for MobileNet v1.
+![](/assets/InvResidualBlock.png)
+
+*Fig. MobileNet v2 primary convolution block. [Image Credits][invres]*
+
+The code for the `InvertedResidual` block is adapted from `trochvision.models` package.
+~~~python
+class InvertedResidual(nn.Module):
+    def __init__(self, inp, oup, stride, expand_ratio):
+        super(InvertedResidual, self).__init__()
+        self.stride = stride
+        assert stride in [1, 2]
+
+        hidden_dim = int(round(inp * expand_ratio))
+        self.use_res_connect = self.stride == 1 and inp == oup
+
+        layers = []
+        if expand_ratio != 1:
+            # pw
+            layers.append(ConvBNReLU(inp, hidden_dim, kernel_size=1))
+        layers.extend([
+            # dw
+            ConvBNReLU(hidden_dim, hidden_dim, stride=stride, 
+                       groups=hidden_dim),
+            # pw-linear
+            nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False),
+            nn.BatchNorm2d(oup),
+        ])
+        self.conv = nn.Sequential(*layers)
+
+    def forward(self, x):
+        if self.use_res_connect:
+            return x + self.conv(x)
+        else:
+            return self.conv(x)
+~~~
+
+## Knowledge Distillation
 
 [tsvd]: https://en.wikipedia.org/wiki/Singular_value_decomposition#Truncated_SVD
 [leb]: https://arxiv.org/pdf/1412.6553.pdf
@@ -89,3 +150,8 @@ SqueezeNet also uses delayed-sampling to create larger activation maps towards t
 [jacob]: https://jacobgil.github.io/deeplearning/tensor-decompositions-deep-learning
 [iandola]: https://arxiv.org/pdf/1602.07360.pdf
 [squeezenet]:https://dgschwend.github.io/netscope/#/preset/squeezenet
+[mobv1]:https://arxiv.org/pdf/1704.04861.pdf
+[mobv2]:https://arxiv.org/pdf/1801.04381.pdf
+[depth]:https://eli.thegreenplace.net/2018/depthwise-separable-convolutions-for-machine-learning/
+[resnet]: https://arxiv.org/abs/1512.03385
+[invres]: https://machinethink.net/blog/mobilenet-v2/
