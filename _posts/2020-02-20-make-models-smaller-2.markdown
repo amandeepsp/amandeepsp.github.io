@@ -149,8 +149,40 @@ where $T$ the temperature parameter, $T =1$ gives the same result as a simple so
 \$$\mathcal{L} = \lambda \mathcal{L_{gt}} + (1-\lambda) \mathcal{L_{temp}}\$$
 where $\mathcal{L_{gt}}$ is the loss with ground truth outputs and $\mathcal{L_{temp}}$ is the softmax temperature loss. Both $\lambda$ and $T$ are tunable hyperparameters. The loss configuration is as in the image below.
 ![](/assets/kd.png)
-A major success story of KD is DistillBERT. HuggingFace
+A major success story of KD is [DistillBERT][distillbert]. [Hugging Face][huggingface] managed to use KD to reduce size of the BERT from 110M paramters to 66M parameters, while still retaining 97% of the performance of the original model. DistillBERT uses various additional tricks to achieve this such as using KD loss instead of standard cross-entropy to retain the probabliltity distribution of the teacher model. The code to train a KD model will go like below. This code is adapted from DistilBERT training sequence itself.
+~~~python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.optim import Optimizer
 
+celoss = nn.CrossEntropyLoss
+lambda_ = 0.5
+
+def kd_step(teacher: nn.Module,
+            student: nn.Module,
+            temperature: float,
+            inputs: torch.tensor,
+            optimizer: Optimizer):
+    teacher.eval()
+    student.train()
+    
+    with torch.no_grad():
+        logits_t = teacher(inputs=inputs)
+    logits_s = student(inputs=inputs)
+    
+    loss_gt = celoss(input=F.log_softmax(logits_s/temperature, dim=-1),target=labels) 
+    loss_temp = celoss(input=F.log_softma(logits_s/temperature, dim=-1), 
+                       target=F.softmax(logits_t/temperature, dim=-1))
+    loss = lambda_ * loss_gt + (1 - lambda_) * loss_temp
+    
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
+~~~
+
+
+This concludes the series on ML model compression. There are many more methods to the make ML models smaller which I cannot cover as the posts would become too long. More and more research is being done on this, to follow the research be sure to check to [arixv-sanity](https://www.arxiv-sanity.com/). Will try to introduce a further reading section in future.
 
 [tsvd]: https://en.wikipedia.org/wiki/Singular_value_decomposition#Truncated_SVD
 [leb]: https://arxiv.org/pdf/1412.6553.pdf
@@ -164,3 +196,5 @@ A major success story of KD is DistillBERT. HuggingFace
 [resnet]: https://arxiv.org/abs/1512.03385
 [invres]: https://machinethink.net/blog/mobilenet-v2/
 [distill1]: https://arxiv.org/pdf/1503.02531.pdf
+[distillbert]:https://medium.com/huggingface/distilbert-8cf3380435b5
+[huggingface]:https://huggingface.co/
