@@ -143,6 +143,14 @@ class InvertedResidual(nn.Module):
 ~~~
 
 ## Knowledge Distillation
+Knowledge Distillation (KD) is a model compression technique by which the behavior of a smaller (student) model is trained to replicate the behavior of a larger (teacher) model. Term was first coined by none other than Geoffrey Hinton in his [2015 paper][distill1]. KD invloves training a smaller network on the weighted average of soft target output of the larger model and the ground truth. Soft target output can be obtained by calculating the softmax on the logits of the larger model, but this creates large divides between the propablilities of the correct label and the wrong label, thus not creating much information other that the grounf truth. To remedy this problem Hinton introduces *softmax with temperature* given by
+\$$q_i = \frac{exp(\frac{z_i}{T})}{\sum_j exp(\frac{x_j}{T})}\$$
+where $T$ the temperature parameter, $T =1$ gives the same result as a simple softmax. AS $T$ grows the probabilities grow softer, providing more information about the model. The overall loss function of the now student-teacher pair becomes
+\$$\mathcal{L} = \lambda \mathcal{L_{gt}} + (1-\lambda) \mathcal{L_{temp}}\$$
+where $\mathcal{L_{gt}}$ is the loss with ground truth outputs and $\mathcal{L_{temp}}$ is the softmax temperature loss. Both $\lambda$ and $T$ are tunable hyperparameters. The loss configuration is as in the image below.
+![](/assets/kd.png)
+A major success story of KD is DistillBERT. HuggingFace
+
 
 [tsvd]: https://en.wikipedia.org/wiki/Singular_value_decomposition#Truncated_SVD
 [leb]: https://arxiv.org/pdf/1412.6553.pdf
@@ -155,3 +163,4 @@ class InvertedResidual(nn.Module):
 [depth]:https://eli.thegreenplace.net/2018/depthwise-separable-convolutions-for-machine-learning/
 [resnet]: https://arxiv.org/abs/1512.03385
 [invres]: https://machinethink.net/blog/mobilenet-v2/
+[distill1]: https://arxiv.org/pdf/1503.02531.pdf
