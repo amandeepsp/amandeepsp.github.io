@@ -1,6 +1,7 @@
 ---
 layout: post
 title:  "Make your models smaller! (Part 2)"
+description: "Create lean and mean models :zap: :muscle:"
 date:   2020-02-20 10:55:06 +0530
 categories: [ML, On-device]
 excerpt_separator: <!--more-->
@@ -51,7 +52,7 @@ Rather than applying size reducing techniques to existing architechtures, we try
 ### SqueezeNet
 SqueezeNet by [*Iandola et.al.*][iandola] is presumably the first to explore a new architechure for smaller CNNs. At the core of SqueezeNet are **Fire Modules**. Fire modules use `1x1` filters rather than `3x3` filters as they have 9x lesser parameters and have lesser number of channels than normal, which is called a *sqeeze* layer. The lesser number of channels are recovered in the expand layer which consists of several zero-padded `1x1` filters and `3x3` filters. The number of filters in the squeeze layers and expand layers are hyper-parameters. If $e_{3 \times 3} + e_{1 \times 1}$ are the number of filters in expand layer and $s_{1 \times 1}$ is the number of filters in the squeeze layer. When using Fire module $s_{1 \times 1} < e_{3 \times 3} + e_{1 \times 1}$ works best.
 
-![](/assets/fire_module.png)
+![](/assets/fire_module.png){: .center-image}
 
 *Fig1. Fire module with $s_{1 \times 1} = 3$, $e_{1 \times 1} = 4$ and $e_{3 \times 3} = 4$. Image taken from [Iandola et.al.][iandola]*
 
@@ -106,7 +107,7 @@ def conv_dw(inp, oup, stride):
     )
 ~~~
 **MobileNet v2** uses as inverted residual block as its main convolutional layer. A Residual block taken from the [*ResNets*][resnet] include bottleneck layers that decrease the number of channels followed by an expansion layer that restores the number of channels for the residual concat opertaion. The inverted block layer does the reverse of that it first expands the number of channels then reduce them. The last layer in the block is a bottleneck layer as it decreases the the channels of the output. This layer has to non-linearity attached to it. This becuase authors found out that a linear bottleneck does not lose information when a feature-map is embedded into a lower dimension space  i.e. reduced to a tensor with less number of channels. This is found to increase the accuracy of these networks. To calculate the number of parameters, presume $N_{in}$ is the number of input channels, $N_{out}$ the number of output channels and $t$ is the expansion ratio, the ratio between size of the intermediate layer to the input layer. The number of computations and parameters are $WHN_{in}t(N_{in} + k^2 + N_{out})$. But there is an extra `1x1` convolution component, still we have computational advantage because due to the nature of the block we can now decrease the input and output dimensions e.g. a layer with dimensions `112x112` can have only `16` channels and retaining the accuracy as compared to `64` for MobileNet v1.
-![](/assets/InvResidualBlock.png)
+![](/assets/InvResidualBlock.png){: .center-image}
 
 *Fig. MobileNet v2 primary convolution block. [Image Credits][invres]*
 
@@ -149,7 +150,7 @@ where $T$ the temperature parameter, $T =1$ gives the same result as a simple so
 \$$\mathcal{L} = \lambda \mathcal{L_{gt}} + (1-\lambda) \mathcal{L_{temp}}\$$
 where $\mathcal{L_{gt}}$ is the loss with ground truth outputs and $\mathcal{L_{temp}}$ is the softmax temperature loss. Both $\lambda$ and $T$ are tunable hyperparameters. The loss configuration is as in the image below.
 ![](/assets/kd.png)
-A major success story of KD is [DistillBERT][distillbert]. [Hugging Face][huggingface] managed to use KD to reduce size of the BERT from 110M paramters to 66M parameters, while still retaining 97% of the performance of the original model. DistillBERT uses various additional tricks to achieve this such as using KD loss instead of standard cross-entropy to retain the probabliltity distribution of the teacher model. The code to train a KD model will go like below. This code is adapted from DistilBERT training sequence itself.
+A major success story of KD is [DistillBERT][distillbert]. [Hugging Face :hugs:][huggingface] managed to use KD to reduce size of the BERT from 110M paramters to 66M parameters, while still retaining 97% of the performance of the original model. DistillBERT uses various additional tricks to achieve this such as using KD loss instead of standard cross-entropy to retain the probabliltity distribution of the teacher model. The code to train a KD model will go like below. This code is adapted from DistilBERT training sequence itself.
 ~~~python
 import torch
 import torch.nn as nn
@@ -182,7 +183,7 @@ def kd_step(teacher: nn.Module,
 ~~~
 
 
-This concludes the series on ML model compression. There are many more methods to the make ML models smaller which I cannot cover as the posts would become too long. More and more research is being done on this, to follow the research be sure to check to [arixv-sanity](https://www.arxiv-sanity.com/). Will try to introduce a further reading section in future.
+This concludes the series on ML model compression :raised_hands:. There are many more methods to the make ML models smaller which I cannot cover as the posts would become too long. More and more research is being done on this, to follow the research be sure to check to [arixv-sanity](https://www.arxiv-sanity.com/). Will try to introduce a further reading section in future.
 
 [tsvd]: https://en.wikipedia.org/wiki/Singular_value_decomposition#Truncated_SVD
 [leb]: https://arxiv.org/pdf/1412.6553.pdf
