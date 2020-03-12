@@ -52,9 +52,12 @@ Rather than applying size reducing techniques to existing architechtures, we try
 ### SqueezeNet
 SqueezeNet by [*Iandola et.al.*][iandola] is presumably the first to explore a new architechure for smaller CNNs. At the core of SqueezeNet are **Fire Modules**. Fire modules use `1x1` filters rather than `3x3` filters as they have 9x lesser parameters and have lesser number of channels than normal, which is called a *sqeeze* layer. The lesser number of channels are recovered in the expand layer which consists of several zero-padded `1x1` filters and `3x3` filters. The number of filters in the squeeze layers and expand layers are hyper-parameters. If $e_{3 \times 3} + e_{1 \times 1}$ are the number of filters in expand layer and $s_{1 \times 1}$ is the number of filters in the squeeze layer. When using Fire module $s_{1 \times 1} < e_{3 \times 3} + e_{1 \times 1}$ works best.
 
-![](/assets/fire_module.png){: .center-image}
-
-*Fig1. Fire module with $s_{1 \times 1} = 3$, $e_{1 \times 1} = 4$ and $e_{3 \times 3} = 4$. Image taken from [Iandola et.al.][iandola]*
+{% 
+    include image.html 
+    file="/assets/fire_module.png" 
+    caption="Fig 1. Fire module with $s_{1 \times 1} = 3$, $e_{1 \times 1} = 4$ and $e_{3 \times 3} = 4$."
+    source="https://eli.thegreenplace.net/2018/depthwise-separable-convolutions-for-machine-learning/"
+%}
 
 Code for the Fire Module adapted from `torchvision.models`. Here `inchannels` are the number of input channels, `squeeze_planes` are the number of output channels, `expand1x1_planes` and `expand3x3_planes` are the output channel number for the expand layer. They are generally same.
 ~~~python
@@ -90,8 +93,14 @@ MobileNets are specifically developed by Google to specifically run on mobile de
 Total computations in a MobileNet convulation are $k^2N_cWH + N_cN_kWH$. There total reduction in parameters in given by,
 \$$\frac{k^2N_cWH + N_cN_kWH}{k^2N_kN_cWH} = \frac{1}{N_k} + \frac{1}{k^2}\$$
 For $k = 3$, $N_k = 16$ we have a **~ 5.76x** reduction in number of parameters for a layer.
-![](/assets/depthwise.svg)
-*Fig 2. Depthwise seperable convolution followed by pointwise convolution. [Image credis][depth]*
+
+{% 
+    include image.html 
+    file="/assets/depthwise.svg" 
+    caption="Fig 2. Depthwise seperable convolution followed by pointwise convolution"
+    max-width="400"
+    source="https://arxiv.org/pdf/1602.07360.pdf"
+%}
 
 Implementing Depthwise conv. is quite simple. Chekout the code snippet below, `inp` donates the number of input channels and `oup` are the number of output channels.
 ~~~python
@@ -107,9 +116,13 @@ def conv_dw(inp, oup, stride):
     )
 ~~~
 **MobileNet v2** uses as inverted residual block as its main convolutional layer. A Residual block taken from the [*ResNets*][resnet] include bottleneck layers that decrease the number of channels followed by an expansion layer that restores the number of channels for the residual concat opertaion. The inverted block layer does the reverse of that it first expands the number of channels then reduce them. The last layer in the block is a bottleneck layer as it decreases the the channels of the output. This layer has to non-linearity attached to it. This becuase authors found out that a linear bottleneck does not lose information when a feature-map is embedded into a lower dimension space  i.e. reduced to a tensor with less number of channels. This is found to increase the accuracy of these networks. To calculate the number of parameters, presume $N_{in}$ is the number of input channels, $N_{out}$ the number of output channels and $t$ is the expansion ratio, the ratio between size of the intermediate layer to the input layer. The number of computations and parameters are $WHN_{in}t(N_{in} + k^2 + N_{out})$. But there is an extra `1x1` convolution component, still we have computational advantage because due to the nature of the block we can now decrease the input and output dimensions e.g. a layer with dimensions `112x112` can have only `16` channels and retaining the accuracy as compared to `64` for MobileNet v1.
-![](/assets/InvResidualBlock.png){: .center-image}
 
-*Fig. MobileNet v2 primary convolution block. [Image Credits][invres]*
+{% 
+    include image.html 
+    file="/assets/InvResidualBlock.png" 
+    caption="Fig 3. MobileNet v2 primary convolution block."
+    source=" https://machinethink.net/blog/mobilenet-v2/"
+%}
 
 The code for the `InvertedResidual` block is adapted from `trochvision.models` package.
 ~~~python
@@ -122,7 +135,7 @@ class InvertedResidual(nn.Module):
         hidden_dim = int(round(inp * expand_ratio))
         self.use_res_connect = self.stride == 1 and inp == oup
 
-        layers = []
+        layers = []https://arxiv.org/pdf/1602.07360.pdf
         if expand_ratio != 1:
             # pw
             layers.append(ConvBNReLU(inp, hidden_dim, kernel_size=1))
@@ -149,7 +162,14 @@ Knowledge Distillation (KD) is a model compression technique by which the behavi
 where $T$ the temperature parameter, $T =1$ gives the same result as a simple softmax. AS $T$ grows the probabilities grow softer, providing more information about the model. The overall loss function of the now student-teacher pair becomes
 \$$\mathcal{L} = \lambda \mathcal{L_{gt}} + (1-\lambda) \mathcal{L_{temp}}\$$
 where $\mathcal{L_{gt}}$ is the loss with ground truth outputs and $\mathcal{L_{temp}}$ is the softmax temperature loss. Both $\lambda$ and $T$ are tunable hyperparameters. The loss configuration is as in the image below.
-![](/assets/kd.png)
+
+{% 
+    include image.html 
+    file="/assets/kd.png" 
+    caption="Fig 4. Knowledge distillation model configuration."
+    source=" https://nervanasystems.github.io/distiller/knowledge_distillation.html"
+%}
+
 A major success story of KD is [DistillBERT][distillbert]. [Hugging Face :hugs:][huggingface] managed to use KD to reduce size of the BERT from 110M paramters to 66M parameters, while still retaining 97% of the performance of the original model. DistillBERT uses various additional tricks to achieve this such as using KD loss instead of standard cross-entropy to retain the probabliltity distribution of the teacher model. The code to train a KD model will go like below. This code is adapted from DistilBERT training sequence itself.
 ~~~python
 import torch
@@ -172,8 +192,9 @@ def kd_step(teacher: nn.Module,
         logits_t = teacher(inputs=inputs)
     logits_s = student(inputs=inputs)
     
-    loss_gt = celoss(input=F.log_softmax(logits_s/temperature, dim=-1),target=labels) 
-    loss_temp = celoss(input=F.log_softma(logits_s/temperature, dim=-1), 
+    loss_gt = celoss(input=F.log_softmax(logits_s/temperature, dim=-1),
+                     target=labels) 
+    loss_temp = celoss(input=F.log_softmax(logits_s/temperature, dim=-1), 
                        target=F.softmax(logits_t/temperature, dim=-1))
     loss = lambda_ * loss_gt + (1 - lambda_) * loss_temp
     
