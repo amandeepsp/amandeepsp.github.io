@@ -2,7 +2,7 @@
 layout: post
 title:  "Make your models smaller! (Part 2)"
 description: "Create lean and mean models :zap: :muscle:"
-date:   2020-02-20 10:55:06 +0530
+date:   2020-03-10 10:55:06 +0530
 categories: [ML, On-device]
 excerpt_separator: <!--more-->
 permalink: /ml-model-compression-part2/
