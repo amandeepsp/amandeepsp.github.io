@@ -6,6 +6,7 @@ date:   2020-03-10 10:55:06 +0530
 categories: [ML, On-device]
 excerpt_separator: <!--more-->
 permalink: /ml-model-compression-part2/
+image: /assets/InvResidualBlock.png
 ---
 
 This post is a direct continuation of [Part 1]({% post_url 2020-01-01-make-models-smaller %}), please try to go through it before proceeding. In this post, I will be going through Low rank transforms, efficient network architectures and knowledge distillation. Low rank transforms techniques decompose a convolution filter to lower rank parts decreasing the overall computational and storage complexity. Knowledge distillation or student-teacher models use techniques in which a larger model trains a smaller model. The smaller model inherits the *'knowledge'* of the larger model. <!--more-->
