@@ -11,8 +11,16 @@ github_username: amandeepsp
 theme: minima
 plugins:
   - jekyll-feed
+  - jemoji
 
 markdown: kramdown
+highlighter: rouge
+kramdown:
+  math_engine: katex
+  input: GFM
+  auto_ids: true
+  hard_wrap: false
+  syntax_highlighter: rouge
 show_excerpts: true
 google_analytics: UA-112449883-1
 disqus:
