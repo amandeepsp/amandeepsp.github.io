@@ -25,3 +25,10 @@ show_excerpts: true
 google_analytics: UA-112449883-1
 disqus:
   shortname: amandeeps-blog
+
+defaults:
+  scope:
+    path: "" # an empty string here means all files in the project
+    type: "posts"
+  values:
+    is_post: true
