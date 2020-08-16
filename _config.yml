@@ -1,8 +1,7 @@
-title: "{foo:bar}"
+title: "corpus curiosum"
 email: amandeepspdhr@gmail.com
-description: > 
-  Blog about my ramblings in Machine Learning and Software
-  Engineering. 
+description: >
+  Blog about my ramblings in software engineering, from the most pedantry to the highly esoteric. 
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://amandeepsp.github.io"
 github_username: amandeepsp
