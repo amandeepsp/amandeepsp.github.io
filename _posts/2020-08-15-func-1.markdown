@@ -113,6 +113,18 @@ filter f = foldr (\x xs -> if p x then x : xs else xs) []
 You might think that yeah, these are nice to have when we have to deal with lists, be we can conform these functions to many other applications. 
 A more real world example of this would be [Redux's][redux] reducers which are pure functions that essentially take a `state` object and an `action` object and returns a new `state` object that represents the state after applying the `action`. If think actions as a stream you can see how reducers are very much the same thing as `fold`.
 
+#### Lazy evaluation
+Lazy evaluation is an evalution strategy in which an expression is not evaluated until it is needed. Another name for this is call-by-need. Due to this startegy we can implment things like infinite data structures and ability to define control structures using as functions. Think of this, if you were to implement you own version of if/else using a function with if and else branches as parameters, it wouldn't be able to do it as both branches will be evaluated at the time of function call. But in a language with lazy evalution this is do-able as the if or the else statements will only be excecuted depending on the result of the if-predicate. Infinite data structures can be created by lazily evaluating the arguments of `:` constructor, hence in an ifinite list, initially we only have the head of the list and continue to discover the elements of a list are accessed. Let's go though an example
+~~~haskell
+factors n = filter (\x -> n `mod` x == 0) [1..n]
+isprime n = factors n == [1,n]
+primes = filter isprime [1..]
+take 4 primes -- > [2,3,5,7]
+~~~
+This generates the list of all the primes [^3] and you easily apply operations on it e.g primes between a nd b, sum of primes upto x etc. 
+
+### More!!
+
 For a more thorough example we can look into an implementation of the [Newton-Raphson method][newton] for finding square roots, provided in [SICP][sicp]. This basically boils down to iterating a function mentioned below, which gives you the square root of \$n\$. We also check for difference in subsequent values and stop if desired accuracy is reached.
 \$$ x_{i+1} = (x_i + n/x_i)/2\$$
 
@@ -153,8 +165,6 @@ sqrt n x0 eps =
     relative eps (repeat (next n) x0)
 ~~~
 
-#### Lazy evaluation
-
 ## Not all sunshine and rainbows
 
 ## Conclusion
@@ -165,6 +175,7 @@ sqrt n x0 eps =
 
 [^1]: This is an infinite sequence which is only possible in lazy languages, more on this later.
 [^2]: I am here not commenting about performances of these implementations, the aesthetics and modularity is stressed here. In real world programming readability generally comes first. The C code will generally be faster and consume less memory.
+[^3]: I know this is not the most speedy implimentation. We could also have implemented Sieve of Eratosthenes pretty neatly but it comes with its own set of problems. Read more [here][oneil]
 
 *[SICP]: Structure and Interpretation of Computer Programs
 
@@ -175,3 +186,4 @@ sqrt n x0 eps =
 [universal]:https://jeremykun.com/2013/09/30/the-universal-properties-of-map-fold-and-filter/
 [redux]: https://redux.js.org/
 [newton]: https://en.wikipedia.org/wiki/Newton%27s_method
+[oneil]: https://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf
