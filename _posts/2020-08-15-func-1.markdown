@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "A journey to the Ivory Tower and back"
+title:  "Functional Programming: A journey to the Ivory Tower and back"
 description: "Achieve programmer's enlightenment through Functional Programming :relieved:"
 date:   2020-08-12 10:55:06 +0530
 categories: [Functional Programming]
@@ -94,9 +94,7 @@ sum     = foldr (+) 0
 product = foldr (*) 1
 all     = foldr (&&) True
 any     = foldr (||) False
-length  = foldr (\_ y -> 1 + y) 0 
--- \_ y -> 1 + y is a lambda that takes two args but ignores the first,
--- y here basically behaves as a counter in the imperative sense.
+length  = foldr (\x acc -> 1 + acc) 0 
 append xs ys = foldr (:) ys xs
 
 foldl f id [] = []
@@ -106,12 +104,19 @@ foldl f id (x:xs) = foldl f (f id x) xs
 We can think of ways of defining `map` and `filter` using `fold`, these are described below. If you think that it is neat that we are able to express `map` and `filter` in terms of `fold`, it is not a coincidence, there's a bunch of maths involved that you can check [here][universal]
 
 ~~~haskell
-map f = foldr (\x xs -> f x : xs) []
-filter f = foldr (\x xs -> if p x then x : xs else xs) []
+map f = foldr (\x acc -> f x : acc) []
+filter f = foldr (\x acc -> if p x then x : acc else acc) []
 ~~~
 
 You might think that yeah, these are nice to have when we have to deal with lists, be we can conform these functions to many other applications. 
 A more real world example of this would be [Redux's][redux] reducers which are pure functions that essentially take a `state` object and an `action` object and returns a new `state` object that represents the state after applying the `action`. If think actions as a stream you can see how reducers are very much the same thing as `fold`.
+
+We could also glue two functions by composing them to make another function using Haskell's `.` operator where `(f . g) x` is the same as `f (g x)`, given the return type of `g` matches with the input of `f`. Some of neat stuff can be done using this.
+~~~haskell
+map f = foldr ((:) . f) []
+
+summatrix = (sum . map) sum
+~~~
 
 #### Lazy evaluation
 Lazy evaluation is an evalution strategy in which an expression is not evaluated until it is needed. Another name for this is call-by-need. Due to this startegy we can implment things like infinite data structures and ability to define control structures using as functions. Think of this, if you were to implement you own version of if/else using a function with if and else branches as parameters, it wouldn't be able to do it as both branches will be evaluated at the time of function call. But in a language with lazy evalution this is do-able as the if or the else statements will only be excecuted depending on the result of the if-predicate. Infinite data structures can be created by lazily evaluating the arguments of `:` constructor, hence in an ifinite list, initially we only have the head of the list and continue to discover the elements of a list are accessed. Let's go though an example
@@ -121,7 +126,7 @@ isprime n = factors n == [1,n]
 primes = filter isprime [1..]
 take 4 primes -- > [2,3,5,7]
 ~~~
-This generates the list of all the primes [^3] and you easily apply operations on it e.g primes between a nd b, sum of primes upto x etc. 
+This generates the list of all the primes [^1] and you easily apply operations on it e.g primes between a nd b, sum of primes upto x etc. 
 
 ### More!!
 
@@ -141,7 +146,7 @@ double sqrt(double n, double x0) {
     return x;
 }
 ~~~
-Ok. What if you need to change the stopping criteria?. In languages with no higher order function, we would have to write another function with duplicated logic for next value calculation application. Let's take a look inside functional land. First `next` is defined which produces the next `x` value based on the current value. Then `repeat`, generates a sequence of repeated function applications i.e. it generates `[x0, f x0, f (f x0), f (f (f x0)), … ]` [^1] and lastly a stopping criteria which goes though the sequence and returns the apt value. These fits like small lego blocks to generate a new functions. Here we can swap out `within` with `relative` it all works out. [^2]
+Ok. What if you need to change the stopping criteria?. In languages with no higher order function, we would have to write another function with duplicated logic for next value calculation application. Let's take a look inside functional land. First `next` is defined which produces the next `x` value based on the current value. Then `repeat`, generates a sequence of repeated function applications i.e. it generates `[x0, f x0, f (f x0), f (f (f x0)), … ]` and lastly a stopping criteria which goes though the sequence and returns the apt value. These fits like small lego blocks to generate a new functions. Here we can swap out `within` with `relative` it all works out. [^2]
 
 ~~~ haskell
 next n x = (x + n/x)/2
@@ -164,7 +169,6 @@ relative eps (a:b:rest) =
 sqrt n x0 eps = 
     relative eps (repeat (next n) x0)
 ~~~
-
 ## Not all sunshine and rainbows
 
 ## Conclusion
@@ -173,9 +177,8 @@ sqrt n x0 eps =
 
 **Footnotes**
 
-[^1]: This is an infinite sequence which is only possible in lazy languages, more on this later.
+[^1]: I know this is not the most speedy implimentation. We could also have implemented Sieve of Eratosthenes pretty neatly but it comes with its own set of problems. Read more [here][oneil].
 [^2]: I am here not commenting about performances of these implementations, the aesthetics and modularity is stressed here. In real world programming readability generally comes first. The C code will generally be faster and consume less memory.
-[^3]: I know this is not the most speedy implimentation. We could also have implemented Sieve of Eratosthenes pretty neatly but it comes with its own set of problems. Read more [here][oneil]
 
 *[SICP]: Structure and Interpretation of Computer Programs
 
