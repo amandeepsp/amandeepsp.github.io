@@ -1,11 +1,11 @@
 ---
 layout: post
-title:  "Functional Programming: A journey to the Ivory Tower and back"
-description: "Achieve programmer's enlightenment through Functional Programming :relieved:"
+title:  "Functional Programming is Awesome"
+description: "Journey to the Ivory tower :relieved:"
 date:   2020-08-12 10:55:06 +0530
 categories: [Functional Programming]
 excerpt_separator: <!--more-->
-permalink: /functional-programming-1/
+permalink: /fp-awesome/
 ---
 
 I have a few years of programming experience under my belt and until recently functional programming paradigm was completely unbeknownst to me. I don't have a formal degree in Computer Science, so I was looking to fill sometimes glaring gaps in my knowledge, when I found the amazing [Teach Yourself CS][teach] list of resources to follow.
@@ -15,7 +15,7 @@ A major takeaway from the first 3 chapters is a style of programming called func
 
 <!--more-->
 
-*Side-effects* is just jargon for the fact that a function with the same inputs produce same results. This facts breaks down if a function manipulates a mutable variable, we can't ensure the no side-effects rule, because the mutable variable's value could have changed between subsequent function calls.
+*Side-effects* is just jargon for the fact that a function with the same inputs produces same results. This fact breaks down if a function manipulates a mutable variable, we can't ensure the "no side-effects" rule, because the mutable variable's value could have changed between subsequent function calls.
 
 ## Why Functional?
 
@@ -49,24 +49,24 @@ Other times functional programming's link to [Category Theory][cattheo] is a big
     </iframe>
 </div>
 <br/>
-I would argue that these concepts are still worth learning as it disciplines you to think a program from a different prespective than that of imperative or OOP paradigm and makes you write programs which are not necessarily functional but contains elements of FP.
-The no side-effects rule essentially eliminates the worry of managing the order of execution as nothing now depends on it. This a huge blessing for concurrency as it basically does away with *shared mutable state*.
+I would argue that these concepts are still worth learning as it disciplines you to think a program from a different perspective than that of imperative or OOP paradigm and makes you write programs which are not necessarily functional but contains elements of FP.
+The no side-effects rule essentially eliminates the worry of managing the order of execution as nothing now depends on it. This a huge blessing for concurrency as it does away with *shared mutable state*.
 
-FP also provides *referential transparency* to programs, means that programs can be run at any time without any consequences. This can result in super easy unit testing of your code as there is no need to mock anything or add dependencies to your tests since there is no outside state that is modified by the function. It is theorized that a person can only hold 7 ± 2 item in their mind a time, an extensive state and dataflow system can easily overwhelm a developer, this is a problem that FP helps with a lot as functions are their own units and don't affect outside world.
+FP also provides *referential transparency* to programs, means that programs can be run at any time without any consequences. This can result in super easy unit testing of your code as there is no need to mock anything or add dependencies to your tests since there is no outside state that is modified by the function. It is theorized that a person can only hold 7 ± 2 items in their mind a time, an extensive state and dataflow system can easily overwhelm a developer, this is a problem that FP helps with a lot as functions are their own units and don't affect the outside world.
 
-I would go into details why FP provides benefits, but if you would insist on not finding this convincing enough, maybe "Uncle" Bob may be a little more enticing.
+I would go into details why FP provides benefits, but if you would insist on not finding this convincing enough, maybe "Uncle" Bob maybe a little more enticing.
 
 <blockquote class="twitter-tweet" data-dnt="true"><p lang="en" dir="ltr">Functional programming is not esoteric, theoretical, academic, obtuse, inefficient, or inaccessible. It is simple, obvious, approachable, and elegant. <br><br>Embrace it as part of your regular programming toolkit. Combine it with OO and structure. <br><br>Language is secondary.</p>&mdash; Uncle Bob Martin (@unclebobmartin) <a href="https://twitter.com/unclebobmartin/status/1214173706018312193?ref_src=twsrc%5Etfw">January 6, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-Functional languages basically try to provide two kinds of glues Higher-order functions and Lazy evaluation. Higher-order functions are nowadays present in most modern programming languages. Lazy evaluation is a kind of controversial topics, some functional languages have it, some choose not to and some implement it partially (e.g. Scheme providing only lazy lists).
-But all of them agree that lazy evaluation cannot be easily fit into an imperative prespective.
+Functional languages try to provide two kinds of glues Higher-order functions and Lazy evaluation. Higher-order functions are nowadays present in most modern programming languages. Lazy evaluation is a kind of controversial topics, some functional languages have it, some choose not to and some implement it partially (e.g. Scheme providing only lazy lists).
+But all of them agree that lazy evaluation cannot be easily fit into an imperative perspective.
 
 ### Glues
 
 #### Higher-order functions
 Higher-order functions are functions that receive other functions as their arguments
 
-First some Haskell basics... Haskell lists can be constructed as pairs with the `:` operator i.e `[1,2,3]` is `1:2:3:[]` which is also same as `1:2:[3]` or `1:[2,3]` etc. We can write functions on lists such as below. Haskell's functions can defined using pattern matching so rather having if-elses we can define functions in a more mathematical piecewise function kinda way. This can observed in the functions below, `sum` of `[]` is 0, otherwise it is `head` of the list plus the sum of the rest of elements.s
+First some Haskell basics... Haskell lists can be constructed as pairs with the `:` operator i.e `[1,2,3]` is `1:2:3:[]` which is also same as `1:2:[3]` or `1:[2,3]` etc. We can write functions on lists such as below. Haskell's functions can be defined using pattern matching so rather having if-else we can define functions in a more mathematical piecewise function kinda way. This can be observed in the functions below, `sum` of `[]` is 0, otherwise, it is `head` of the list plus the sum of the rest of elements.
 
 ~~~haskell
 sum [] = 0
@@ -82,7 +82,7 @@ length [] = 0
 length (x:xs) = 1 + length xs
 ~~~
 
-We can see a kind of abstraction emerging here, the operator and the starting value can be. This is not possible in languages that done have higher order functions. Here `foldr` accumulates values form right.
+We can see a kind of abstraction emerging here, the operator and the starting value can be. This is not possible in languages that do have higher-order functions. Here `foldr` accumulates values form right.
 We could also create a `foldl` that accumulates values form left by just recursing before applying `f` rather than after.
 
 ~~~haskell
@@ -100,15 +100,14 @@ foldl f id [] = []
 foldl f id (x:xs) = foldl f (f id x) xs
 ~~~
 Here `\x acc -> 1 + acc` is lambda function, they start with `\` in Haskell.
-We can think of ways of defining `map` and `filter` using `fold`, these are described below. If you think that it is neat that we are able to express `map` and `filter` in terms of `fold`, it is not a coincidence, there's a bunch of maths involved that you can check [here][universal]
+We can think of ways of defining `map` and `filter` using `fold`, these are described below. If you think that it is neat that we can express `map` and `filter` in terms of `fold`, it is not a coincidence, there's a bunch of maths involved that you can check [here][universal]
 
 ~~~haskell
 map f = foldr (\x acc -> f x : acc) []
 filter f = foldr (\x acc -> if p x then x : acc else acc) []
 ~~~
-
 You might think that yeah, these are nice to have when we have to deal with lists, be we can conform these functions to many other applications. 
-A more real world example of this would be [Redux's][redux] reducers which are pure functions that essentially take a `state` object and an `action` object and returns a new `state` object that represents the state after applying the `action`. If think actions as a stream you can see how reducers are very much the same thing as `fold`.
+A more real-world example of this would be [Redux's][redux] reducers which are pure functions that essentially take a `state` object and an `action` object and returns a new `state` object that represents the state after applying the `action`. If you think actions as a stream you can see how reducers are very much the same thing as `fold`.
 
 <!-- We could also glue two functions by composing them to make another function using Haskell's `.` operator where `(f . g) x` is the same as `f (g x)` aside from the fact that `(f . g)` is now a new function, given the return type of `g` matches with the input of `f`. Some of neat stuff can be done using this.
 ~~~haskell
@@ -119,7 +118,7 @@ summatrix = (sum . map) sum
 If we closely examine the first example `: . f` evaluates to  `\x y -> x : f y` -->
 
 #### Lazy evaluation
-Lazy evaluation is an evaluation strategy in which an expression is not evaluated until it is needed. Another name for this is call-by-need. Due to this strategy we can implement things like infinite data structures and ability to define control structures using as functions. Think of this, if you were to implement you own version of if/else using a function with if and else branches as parameters, it wouldn't be able to do it as both branches will be evaluated at the time of function call. But in a language with lazy evaluation this is do-able as the if or the else statements will only be executed depending on the result of the if-predicate. Infinite data structures can be created by lazily evaluating the arguments of `:` constructor, hence in an infinite list, initially we only have the head of the list and continue to discover the elements of a list are accessed. Let's go though an example
+Lazy evaluation is an evaluation strategy in which an expression is not evaluated until it is needed. Another name for this is call-by-need. Due to this strategy, we can implement things like infinite data structures and the ability to define control structures using as functions. Think of this, if you were to implement a version of if/else using a function with if and else branches as parameters, it wouldn't be able to do it as both branches will be evaluated at the time of function call. But in a language with lazy evaluation, this is do-able as the if or the else statements will only be executed depending on the result of the if-predicate. Infinite data structures can be created by lazily evaluating the arguments of `:` constructor, hence in an infinite list, initially we only have the head of the list and continue to discover the elements of a list are accessed. Let's go through an example...
 ~~~haskell
 factors n = filter (\x -> n `mod` x == 0) [1..n]
 isprime n = factors n == [1,n]
@@ -130,7 +129,7 @@ This generates the list of all the primes [^1] and you easily apply operations o
 
 ### More!!
 
-For a more thorough example we can look into an implementation of the [Newton-Raphson method][newton] for finding square roots, provided in [SICP][sicp]. This basically boils down to iterating a function mentioned below, which gives you the square root of \$n\$. We also check for difference in subsequent values and stop if desired accuracy is reached.
+For a more thorough example, we can look into an implementation of the [Newton-Raphson method][newton] for finding square roots, provided in [SICP][sicp]. This boils down to iterating a function mentioned below, which gives you the square root of \$n\$. We also check for the difference in subsequent values and stop if the desired accuracy is reached.
 \$$ x_{i+1} = (x_i + n/x_i)/2\$$
 
 Here's a C program to do this. Pretty straightforward.
@@ -146,7 +145,7 @@ double sqrt(double n, double x0) {
     return x;
 }
 ~~~
-Ok. What if you need to change the stopping criteria?. In languages with no higher order function, we would have to write another function with duplicated logic for next value calculation application. Let's take a look inside functional land. First `next` is defined which produces the next `x` value based on the current value. Then `repeat`, generates a sequence of repeated function applications i.e. it generates `[x0, f x0, f (f x0), f (f (f x0)), … ]` and lastly a stopping criteria which goes though the sequence and returns the apt value. These fits like small lego blocks to generate a new functions. Here we can swap out `within` with `relative` it all works out. [^2]
+Ok. What if you need to change the stopping criteria?. In languages with no higher-order function, we would have to write another function with duplicated logic for next value calculation application. Let's take a look inside functional land. First `next` is defined which produces the next `x` value based on the current value. Then `repeat`, generates a sequence of repeated function applications i.e. it generates `[x0, f x0, f (f x0), f (f (f x0)), … ]` and lastly, a stopping criterion which goes though the sequence and returns the apt value. These fit like small lego blocks to generate new functions. Here we can swap out `within` with `relative` it all works out. [^2]
 
 ~~~ haskell
 next n x = (x + n/x)/2
@@ -169,8 +168,7 @@ relative eps (a:b:rest) =
 sqrt n x0 eps = 
     relative eps (repeat (next n) x0)
 ~~~
-
-This repeated application of a function get us to the fixed point of a function. More things can be done using this fixed point finder program. We can use it to find $\phi$, the golden ratio for which the function application wil be something like $x_{i+1} = 1 + 1/x_i$. We can just plug a new next function and we get the value of $\phi$. 
+This repeated application of a function gets us to the fixed point of a function. More things can be done using this fixed point finder program. We can use it to find $\phi$, the golden ratio for which the function application will be something like $x_{i+1} = 1 + 1/x_i$. We can just plug a new next function and we get the value of $\phi$. 
 ~~~ haskell
 next_phi x = 1 + 1/x
 phi x0 eps = within eps (repeat next_phi x0)
@@ -178,14 +176,14 @@ phi x0 eps = within eps (repeat next_phi x0)
 This can even be taken to the next level in which we could also abstract out the process of constructing the next function. You can read more in SICP [Section 1.3][sect1.3].
 
 ## Not all sunshine and rainbows
-Eventually the ride comes to and end. You almost absolutely require side effects to do something meaningful say fetch data from network, query a database, write to a file/console, all these things are side-effects abd we need them. 100% functional code is very difficult to achieve and will make the code a bit unreadable. "Purely" functional code to almost always less performing that an imperative implementation even with tail-call optimization. FP was invented in 1950's before the advent of OO, the fact that it never rose to popularity then, is mainly because memory was not that cheap then. Runtime performance also takes a hit across the board. If you care about bare-metal performance of the code a functional style is difficult to adapt. If we dial down the percentage to a 70-80% range of functional code it is much more doable and can deliver the proposed benefits. For it is not about having no side-effects, but controlled and isolated side-effects. Lazy evaluation in languages is still a hot topic for debate from its power to represent to its runtime and implementation costs. 
+Eventually, the ride comes to an end. You almost absolutely require side effects to do something meaningful say fetch data from the network, query a database, write to a file/console, all these things are side-effects and we need them. 100% functional code is very difficult to achieve and will make the code a bit unreadable. "Purely" functional code to almost always less performing that an imperative implementation even with tail-call optimization. FP was invented in the 1950s before the advent of OO, the fact that it never rose to popularity then, is mainly because memory was not that cheap then. Runtime performance also takes a hit across the board. If you care about the bare-metal performance of the code a functional style is difficult to adapt. If we dial down the percentage to a 70-80% range of functional code it is much more doable and can deliver the proposed benefits. For it is not about having no side-effects, but controlled and isolated side-effects. Lazy evaluation in languages is still a hot topic for debate from its power to represent to its runtime and implementation costs. 
 
 I will leave you with a profound quote by Micheal Feathers which is just a great summary of what I just talked about in the post.
 <blockquote class="twitter-tweet" data-dnt="true"><p lang="en" dir="ltr">OO makes code understandable by encapsulating moving parts. FP makes code understandable by minimizing moving parts.</p>&mdash; Michael Feathers (@mfeathers) <a href="https://twitter.com/mfeathers/status/29581296216?ref_src=twsrc%5Etfw">November 3, 2010</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 **Footnotes**
 
-[^1]: I know this is not the most speedy implimentation. We could also have implemented Sieve of Eratosthenes pretty neatly but it comes with its own set of problems. Read more [here][oneil].
+[^1]: I know this is not the most speedy implementation. We could also have implemented Sieve of Eratosthenes pretty neatly but it comes with its own set of problems. Read more [here][oneil].
 [^2]: I am here not commenting about performances of these implementations, the aesthetics and modularity is stressed here. In real world programming readability generally comes first. The C code will generally be faster and consume less memory.
 
 *[SICP]: Structure and Interpretation of Computer Programs
