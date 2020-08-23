@@ -1,10 +1,12 @@
 title: "corpus curiosum"
 email: amandeepspdhr@gmail.com
 description: >
-  Blog about my ramblings in software engineering, from the most pedantry to the highly esoteric. 
+  Blog about my ramblings in software engineering, from the most pedantic to the highly esoteric. 
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://amandeepsp.github.io"
 github_username: amandeepsp
+twitter_username: theamndeepsingh
+linkedin_username: amandeepsp
 
 # Build settings
 theme: minima
@@ -14,14 +16,19 @@ plugins:
 
 markdown: kramdown
 highlighter: rouge
+
 kramdown:
   math_engine: katex
   input: GFM
   auto_ids: true
   hard_wrap: false
   syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+      
 show_excerpts: true
 google_analytics: UA-112449883-1
+
 disqus:
   shortname: amandeeps-blog
 
