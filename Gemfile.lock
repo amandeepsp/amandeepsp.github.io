@@ -266,6 +266,7 @@ DEPENDENCIES
   jekyll-octicons
   jekyll-relative-links
   jekyll-seo-tag
+  jekyll-sitemap
   jekyll-twitter-plugin
   jemoji
   minima (~> 2.5)
