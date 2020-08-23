@@ -12,21 +12,21 @@ image: /assets/ivory_tower.jpg
 I have a few years of programming experience under my belt and until recently functional programming paradigm was completely unbeknownst to me. I don't have a formal degree in Computer Science, so I was looking to fill sometimes glaring gaps in my knowledge, when I found the amazing [Teach Yourself CS][teach] list of resources to follow.
 
 The first book in the list I started reading was [SICP (Structure and Interpretation of Computer Programs)][sicp] and it was a wild ride, my notions of was can and can't be done were dispelled by the book. I even didn't realize that for the first two chapters no assignments statements were anywhere in the whole code. 
-A major takeaway from the first 3 chapters is a style of programming called functional programming. **Functional Programming** basically distills down to the fact that your functions should be pure, i.e. they could not have any side-effects. You might ask what side-effects? :thinking: functions.. side-effects? 
+A major takeaway from the first 3 chapters is a style of programming called functional programming. **Functional Programming** basically distils down to the fact that your functions should be pure, i.e. they could not have any side-effects. You might ask what side-effects? :thinking: functions.. side-effects?
 
 <!--more-->
 
 *Side-effects* is just jargon for the fact that a function with the same inputs produces same results. This fact breaks down if a function manipulates a mutable variable, we can't ensure the "no side-effects" rule, because the mutable variable's value could have changed between subsequent function calls. The code here is written in [Haskell][haskell], but the concepts are language agnostic. Different languages choose and implement these concepts differently.
 
 ## Why Functional?
-You might feel like it is overly restrictive and time consuming to not have any side effects. You are not alone.
+You might feel like it is overly restrictive and time-consuming to not have any side effects. You are not alone.
 
 > "The functional programmer sounds rather like a
 medieval monk, denying himself the pleasures of life in the hope that it will
 make him virtuous."
   -- quote from [Hughes et.al. 1990][whyfp]
 
-The benefits might not seem obvious, and are hugely language dependent but knowing these concepts is also a win. Other times functional programming's inspirations from [Category Theory][cattheo] is a big turnoff for developers. This is aptly summed up in this video adapted from the movie *Downfall*.
+The benefits might not seem obvious and are hugely language dependent but knowing these concepts is also a win. Other times functional programming's inspirations from [Category Theory][cattheo] is a big turnoff for developers. This is aptly summed up in this video adapted from the movie *Downfall*.
 
 <style>
     .embed-container {
@@ -54,7 +54,7 @@ I would argue that functional concepts are still worth learning as it discipline
 
 FP provides *referential transparency* to programs, means that function body can be dropped at the call site, and this operation doesn't change the execution of the program. Also, functions can be run at any time without any consequences and they don't have any external dependency aside from parameters that are passed in. This can result in super easy unit testing of your code as there is no need to mock anything or add dependencies to your tests since there is no outside state that is modified by the function. It is theorized that a person can only hold 7 ± 2 items in their mind a time, an extensive state and dataflow system can easily overwhelm a developer, this is a problem that FP helps with a lot as functions are their own units and don't affect the outside world.
 
-Here is tweet by "Uncle" Bob Martin about functional programming, that is a little more assuring than all the mumbo-jumbo I dropped above.
+Here is a tweet by "Uncle" Bob Martin about functional programming, that is a little more assuring than all the mumbo-jumbo I dropped above.
 
 <blockquote class="twitter-tweet" data-dnt="true"><p lang="en" dir="ltr">Functional programming is not esoteric, theoretical, academic, obtuse, inefficient, or inaccessible. It is simple, obvious, approachable, and elegant. <br><br>Embrace it as part of your regular programming toolkit. Combine it with OO and structure. <br><br>Language is secondary.</p>&mdash; Uncle Bob Martin (@unclebobmartin) <a href="https://twitter.com/unclebobmartin/status/1214173706018312193?ref_src=twsrc%5Etfw">January 6, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
@@ -66,7 +66,7 @@ But all of them agree that lazy evaluation cannot be easily fit into an imperati
 #### Higher-order functions
 Higher-order functions are functions that receive other functions as their arguments
 
-First some [Haskell][haskell] basics... Here obviously I am going at a light speed. If you want to learn Haskell, I would recommend [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/). But things I like about haskell is that it basically reads like pseudocode. Haskell lists can be constructed as pairs with the `:` operator i.e `[1,2,3]` is `1:2:3:[]` which is also same as `1:2:[3]` or `1:[2,3]` etc. We can write functions on lists such as below. Haskell's functions can be defined using pattern matching so rather having if-else we can define functions in a more mathematical piecewise function kinda way. You can see in the functions below, `sum` of `[]` is 0, otherwise, it is `head` of the list plus the sum of the rest of elements.
+First some [Haskell][haskell] basics... Here obviously I am going at light speed. If you want to learn Haskell, I would recommend [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/). But the things I like about Haskell is that it reads like pseudocode. Haskell lists can be constructed as pairs with the `:` operator i.e `[1,2,3]` is `1:2:3:[]` which is also same as `1:2:[3]` or `1:[2,3]` etc. We can write functions on lists such as below. Haskell's functions can be defined using pattern matching so rather having if-else we can define functions in a more mathematical piecewise function kinda way. You can see in the functions below, `sum` of `[]` is 0, otherwise, it is `head` of the list plus the sum of the rest of elements.
 
 ~~~haskell
 sum [] = 0
@@ -82,7 +82,7 @@ length [] = 0
 length (x:xs) = 1 + length xs
 ~~~
 
-We can see a kind of abstraction emerging here, the operator and the starting value can be can abstracted out. This is not possible in languages that do have higher-order functions. Here `foldr` accumulates values form right.
+We can see a kind of abstraction emerging here, the operator and the starting value can be abstracted out. This is not possible in languages that do have higher-order functions. Here `foldr` accumulates values form right.
 We could also create a `foldl` that accumulates values form left by just recursing before applying `f` rather than after.
 
 ~~~haskell
@@ -109,13 +109,13 @@ filter f = foldr (\x acc -> if p x then x : acc else acc) []
 You might think that yeah, these are nice to have when we have to deal with lists, be we can conform these functions to many other applications. 
 A more real-world example of this would be [Redux's][redux] reducers which are pure functions that essentially take a `state` object and an `action` object and returns a new `state` object that represents the state after applying the `action`. If you think actions as a stream you can see how reducers are very much the same thing as `fold`.
 
-We could also glue two functions by composing them to make another function using Haskell's `.` operator where `(f . g) x` is the same as `\x -> f (g x)` aside from the fact that `(f . g)` is now a new function, given the return type of `g` matches with the input of `f`. Some of neat stuff can be done using this.
+We could also glue two functions by composing them to make another function using Haskell's `.` operator where `(f . g) x` is the same as `\x -> f (g x)` aside from the fact that `(f . g)` is now a new function, given the return type of `g` matches with the input of `f`. Some of the neat stuff can be done using this.
 ~~~haskell
 map f = foldr ((:) . f) []
 
 summatrix = (sum . map) sum
 ~~~
-If we closely examine the first example `: . f` evaluates to  `\x acc-> f x : acc`. Similarly we can sum a list of list by glueing together `sum` and `map`, which gives us `\f x -> sum (map f x)` where f is `sum` and x is a list of lists.
+If we closely examine the first example `: . f` evaluates to  `\x acc-> f x : acc`. Similarly, we can sum a list of lists by glueing together `sum` and `map`, which gives us `\f x -> sum (map f x)` where f is `sum` and x is a list of lists.
 
 #### Lazy evaluation
 Lazy evaluation is an evaluation strategy in which an expression is not evaluated until it is needed. Another name for this is call-by-need. Due to this strategy, we can implement things like infinite data structures and the ability to define control structures using as functions. Think of this, if you were to implement a version of if/else using a function with if and else branches as parameters, it wouldn't be able to do it as both branches will be evaluated at the time of function call. But in a language with lazy evaluation, this is do-able as the if or the else statements will only be executed depending on the result of the if-predicate. Infinite data structures can be created by lazily evaluating the arguments of `:` constructor, hence in an infinite list, initially we only have the head of the list and continue to discover the elements of a list are accessed. 
@@ -178,7 +178,7 @@ phi x0 eps = within eps (repeat next_phi x0)
 This can even be taken to the next level in which we could also abstract out the process of constructing the next function. You can read more in SICP [Section 1.3][sect1.3].
 
 ## Not all sunshine and rainbows
-Eventually, the ride comes to an end. You almost absolutely require side effects to do something meaningful say fetch data from the network, query a database, write to a file/console, all these things are side-effects and we need them. Pure functional languages usually push all the side-effects to the edges of the program ans still maintain a pure FP core. 100% functional code is very difficult to achieve and will make the code a bit unreadable. "Purely" functional code to almost always less performing that an imperative implementation even with tail-call optimization. FP was invented in the 1950s before the advent of OO, the fact that it never rose to popularity then, is mainly because memory was not that cheap then. Runtime performance also takes a hit across the board. If you care about the bare-metal performance of the code a functional style is difficult to adapt. If we dial down the percentage to a 70-80% range of functional code it is much more doable and can deliver the proposed benefits. For it is not about having no side-effects, but controlled and isolated side-effects. Lazy evaluation in languages is still a hot topic for debate from its power to represent to its runtime and implementation costs. 
+Eventually, the ride comes to an end. You almost absolutely require side effects to do something meaningful say fetch data from the network, query a database, write to a file/console, all these things are side-effects and we need them. Pure functional languages usually push all the side-effects to the edges of the program and still maintain a pure FP core. 100% functional code is very difficult to achieve and will make the code a bit unreadable. "Purely" functional code to almost always less performing that an imperative implementation even with tail-call optimization. FP was invented in the 1950s before the advent of OO, the fact that it never rose to popularity then, is mainly because memory was not that cheap then. Runtime performance also takes a hit across the board. If you care about the bare-metal performance of the code a functional style is difficult to adapt. If we dial down the percentage to a 70-80% range of functional code it is much more doable and can deliver the proposed benefits. For it is not about having no side-effects, but controlled and isolated side-effects. Lazy evaluation in languages is still a hot topic for debate from its power to represent to its runtime and implementation costs. 
 
 I will leave you with a profound quote by Micheal Feathers which is just a great summary of what I just talked about in the post.
 <blockquote class="twitter-tweet" data-dnt="true"><p lang="en" dir="ltr">OO makes code understandable by encapsulating moving parts. FP makes code understandable by minimizing moving parts.</p>&mdash; Michael Feathers (@mfeathers) <a href="https://twitter.com/mfeathers/status/29581296216?ref_src=twsrc%5Etfw">November 3, 2010</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
