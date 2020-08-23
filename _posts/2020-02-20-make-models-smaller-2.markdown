@@ -91,7 +91,7 @@ MobileNets are specifically developed by Google to specifically run on mobile de
 1. Convolve a $k \times k$ for each channel of the input and stack $N_c$ of them, creating an output tensor of size $N_c \times W \times H$. Total number of ops in this layer is $k^2N_cWH$
 2. Convolve with a $1 \times 1$ filter with $N_k$ channels to create the final output. Total number of computations in this stage is $N_cN_kWH$
 
-Total computations in a MobileNet convulation are $k^2N_cWH + N_cN_kWH$. There total reduction in parameters in given by,
+Total computations in a MobileNet convolution are $k^2N_cWH + N_cN_kWH$. There total reduction in parameters in given by,
 \$$\frac{k^2N_cWH + N_cN_kWH}{k^2N_kN_cWH} = \frac{1}{N_k} + \frac{1}{k^2}\$$
 For $k = 3$, $N_k = 16$ we have a **~ 5.76x** reduction in number of parameters for a layer.
 

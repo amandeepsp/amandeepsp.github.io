@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Make your models smaller! (Part 1)"
-description: "TLDR; Huge gains in inference speed and size."
+description: "Create lean and mean models :zap: :muscle:"
 date:   2020-02-18 10:55:06 +0530
 categories: [ML, On-device]
 excerpt_separator: <!--more-->
@@ -9,6 +9,8 @@ permalink: /ml-model-compression-part1/
 ---
 
 Machine Learning models are getting bigger and expensive to compute. Embedded devices have restricted memory, computation power and battery. But we can optimize our model to run smoothly on these devices. By reducing the size of the model we decrease the number of operations that need to be done hence reducing the computation. Smaller models also trivially translate into less memory usage. Smaller models are also more power-efficient. One must think that a reduced number of computations is responsible for less power consumption, but on the contrary, the power draw from memory access is about 1000x more costly than addition or multiplication. <!--more--> Now since there are no free lunches i.e. everything comes at a cost, we lose some accuracy of our models here. Bear in mind these speedups are not for training but inference only.
+
+> [Part 2]({% post_url 2020-02-20-make-models-smaller-2 %}) of the post can be found here.
 
 ## Pruning
 <!--proof-read-->
