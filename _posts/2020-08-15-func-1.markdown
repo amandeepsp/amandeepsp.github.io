@@ -14,7 +14,7 @@ I have a few years of programming experience under my belt and until recently fu
 The first book in the list I started reading was [SICP (Structure and Interpretation of Computer Programs)][sicp] and it was a wild ride, my notions of was can and can't be done were dispelled by the book. I even didn't realize that for the first two chapters no assignments statements were anywhere in the whole code. SICP never tells you, you just get introduced to the functional paradigm of programming and it amazing how naturally it comes together in the book.
 <!--more-->
 
-Functional Programming preaches the idea that your functions should be pure, i.e. they should follow two simple rules. 
+Functional Programming is a programming paradigm that uses functions and composition of those functions to create programs. It make programs declarative. A subset of functional programming is "pure" functional programming, the here idea is that your functions should be pure, i.e. they should follow two simple rules. 
 1. Functions must return the same value for the same arguments passed, regardless of the fact when or where the function was called. i.e. no internal random stuff.
 2. Functions evaluation could not have any side-effects. You might ask what side-effects? :thinking: functions.. side-effects? *Side-effects* is just jargon for the fact that your functions should not make any changes to the things that outside of its scope, e.g. changing a mutable state, performing I/O and calling other functions that have side effects.
 
