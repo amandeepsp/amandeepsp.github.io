@@ -12,21 +12,25 @@ image: /assets/ivory_tower.jpg
 I have a few years of programming experience under my belt and until recently functional programming paradigm was completely unbeknownst to me. I don't have a formal degree in Computer Science, so I was looking to fill sometimes glaring gaps in my knowledge, when I found the amazing [Teach Yourself CS][teach] list of resources to follow.
 
 The first book in the list I started reading was [SICP (Structure and Interpretation of Computer Programs)][sicp] and it was a wild ride, my notions of was can and can't be done were dispelled by the book. I even didn't realize that for the first two chapters no assignments statements were anywhere in the whole code. 
-A major takeaway from the first 3 chapters is a style of programming called functional programming. **Functional Programming** basically distils down to the fact that your functions should be pure, i.e. they could not have any side-effects. You might ask what side-effects? :thinking: functions.. side-effects?
-
+A major takeaway from the first 3 chapters is a style of programming called functional programming.
 <!--more-->
 
-*Side-effects* is just jargon for the fact that a function with the same inputs produces same results. This fact breaks down if a function manipulates a mutable variable, we can't ensure the "no side-effects" rule, because the mutable variable's value could have changed between subsequent function calls. The code here is written in [Haskell][haskell], but the concepts are language agnostic. Different languages choose and implement these concepts differently.
+Functional Programming preaches the idea that your functions should be pure, i.e. they should follow two simple rules. 
+1. Functions must return the same value for the same arguments passed, regardless of the fact when or where the function was called. i.e. no internal random stuff.
+2. Functions evaluation could not have any side-effects. You might ask what side-effects? :thinking: functions.. side-effects? *Side-effects* is just jargon for the fact that your functions should not make any changes to the things that outside of its scope, e.g. changing a mutable state, performing I/O and calling other functions that have side effects.
+
+These facts combined make your functions more composable, enhancing your ability to compose large systems out of very simple components. 
+:warning: **The code here is written in [Haskell][haskell], but the concepts are language agnostic. Different languages choose and implement these concepts differently.**
 
 ## Why Functional?
-You might feel like it is overly restrictive and time-consuming to not have any side effects. You are not alone.
+You might feel like it is overly restrictive and time-consuming to have pure functions. You are not alone. While starting out I thought it was overkill, but now since the benefits are more clearer to me.. it makes sense.
 
 > "The functional programmer sounds rather like a
 medieval monk, denying himself the pleasures of life in the hope that it will
 make him virtuous."
   -- quote from [Hughes et.al. 1990][whyfp]
 
-The benefits might not seem obvious and are hugely language dependent but knowing these concepts is also a win. Other times functional programming's inspirations from [Category Theory][cattheo] is a big turnoff for developers. This is aptly summed up in this video adapted from the movie *Downfall*.
+The benefits might not seem obvious at first and are hugely language dependent but knowing these concepts is also a win. Other times functional programming's inspirations from [Category Theory][cattheo] is a big turnoff for developers. This is aptly summed up in this video adapted from the movie *Downfall*.
 
 <style>
     .embed-container {
@@ -52,7 +56,9 @@ The benefits might not seem obvious and are hugely language dependent but knowin
 I would argue that functional concepts are still worth learning as it disciplines you to think a program from a different perspective than that of imperative or OOP paradigm and makes you write programs which are not necessarily functional but contains elements of FP.
 <!-- The no side-effects rule essentially eliminates the worry of managing the order of execution as nothing now depends on it. This a huge blessing for concurrency as it does away with *shared mutable state*. -->
 
-FP provides *referential transparency* to programs, means that function body can be dropped at the call site, and this operation doesn't change the execution of the program. Also, functions can be run at any time without any consequences and they don't have any external dependency aside from parameters that are passed in. This can result in super easy unit testing of your code as there is no need to mock anything or add dependencies to your tests since there is no outside state that is modified by the function. It is theorized that a person can only hold 7 ± 2 items in their mind a time, an extensive state and dataflow system can easily overwhelm a developer, this is a problem that FP helps with a lot as functions are their own units and don't affect the outside world.
+FP provides *referential transparency* to programs, means that an *expression* can be replaced by its corresponding *value*, and this operation doesn't change the execution of the program. To achieve this your expressions must be *pure*, you cannot guarantee this in presence of a mutable state as the value in now dependent on a state. 
+Also, functions can be run at any time without any consequences and they don't have any external dependency aside from parameters that are passed in. This can result in super easy unit testing of your code as there is no need to mock anything or add dependencies to your tests since there is no outside state that is modified by the function. 
+It is theorized that a person can only hold 7 ± 2 items in their mind a time, an extensive state and dataflow system can easily overwhelm a developer, this is a problem that FP helps with a lot as functions are their own units and don't affect the outside world.
 
 Here is a tweet by "Uncle" Bob Martin about functional programming, that is a little more assuring than all the mumbo-jumbo I dropped above.
 
@@ -66,7 +72,7 @@ But all of them agree that lazy evaluation cannot be easily fit into an imperati
 #### Higher-order functions
 Higher-order functions are functions that receive other functions as their arguments
 
-First some [Haskell][haskell] basics... Here obviously I am going at light speed. If you want to learn Haskell, I would recommend [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/). But the things I like about Haskell is that it reads like pseudocode. Haskell lists can be constructed as pairs with the `:` operator i.e `[1,2,3]` is `1:2:3:[]` which is also same as `1:2:[3]` or `1:[2,3]` etc. We can write functions on lists such as below. Haskell's functions can be defined using pattern matching so rather having if-else we can define functions in a more mathematical piecewise function kinda way. You can see in the functions below, `sum` of `[]` is 0, otherwise, it is `head` of the list plus the sum of the rest of elements.
+First some [Haskell][haskell] basics... Here obviously I am going at light speed. If you want to learn Haskell, I would recommend [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/). Haskell lists can be constructed as pairs with the `:` operator i.e `[1,2,3]` is `1:2:3:[]` which is also same as `1:2:[3]` or `1:[2,3]` etc. We can write functions on lists such as below. Haskell's functions can be defined using pattern matching so rather having if-else we can define functions in a more mathematical piecewise function kinda way. You can see in the functions below, `sum` of `[]` is 0, otherwise, it is `head` of the list plus the sum of the rest of elements.
 
 ~~~haskell
 sum [] = 0
