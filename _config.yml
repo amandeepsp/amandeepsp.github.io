@@ -18,6 +18,8 @@ plugins:
 markdown: kramdown
 highlighter: rouge
 
+permalink: /:year/:month/:day/:title
+
 kramdown:
   math_engine: katex
   input: GFM
@@ -26,7 +28,7 @@ kramdown:
   syntax_highlighter: rouge
   syntax_highlighter_opts:
     css_class: 'highlight'
-      
+
 show_excerpts: true
 google_analytics: UA-112449883-1
 

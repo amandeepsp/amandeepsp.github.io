@@ -20,10 +20,9 @@ group :jekyll_plugins do
   gem "jekyll-twitter-plugin"
   gem 'jekyll-relative-links'
   gem 'jekyll-seo-tag'
+  gem 'jekyll-sitemap'
+  gem 'jemoji'
 end
-
-gem 'jemoji'
-gem 'jekyll-sitemap'
 
 # Windows and JRuby does not include zoneinfo files, so bundle the tzinfo-data gem
 # and associated library.
