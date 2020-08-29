@@ -7,14 +7,25 @@ jobs:
      runs-on: [ubuntu-latest]
 
      steps:
-      - name: checkout master branch
+      - name: checkout gh-pages branch # checkout gh-pages branch
         uses: actions/checkout@v2
         with:
+          ref: gh-pages
+          persist-credentials: false
+
+       - name: remove all files # remove files.
+        run: |
+          rm -rf *
+
+      - name: checkout master branch #checkout master branch into temp folder.
+        uses: actions/checkout@v2
+        with:
+          ref: master
+          path: temp
           persist-credentials: false
 
       - name: run yarn install and build # go to temp folder and run npm build to create files.
         run: |
-          mkdir temp
           cd temp
           yarn install
           yarn build
