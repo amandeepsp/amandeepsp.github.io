@@ -13,7 +13,7 @@ jobs:
           ref: gh-pages
           persist-credentials: false
 
-       - name: remove all files # remove files.
+      - name: remove all files # remove files.
         run: |
           rm -rf *
 
