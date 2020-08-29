@@ -1,27 +1,16 @@
-name: GitHub Pages
+name: Github Pages
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-        PA_TOKEN: ${{ secrets.PA_TOKEN }}
-    - run: yarn
-    - run: |
-        git config --global user.email "amandeepspdhr@gmail.com"
-        git config --global user.name "Amandeep Singh"
-
-    - run: yarn deploy
-      env:
-        PA_TOKEN: ${{ secrets.PA_TOKEN }}
-        GA_TRACKING_ID: ${{ secrets.GA_TRACKING_ID }}
-        DISQUS_SHORTNAME: ${{ secrets.DISQUS_SHORTNAME }}
-        CI: true
+      - uses: actions/checkout@v1
+      - uses: enriikke/gatsby-gh-pages-action@v2.1.1
+        with:
+          access-token: ${{ secrets.PA_TOKEN }}
+          deploy-branch: gh-pages
