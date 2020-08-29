@@ -14,6 +14,7 @@ jobs:
 
       - name: run yarn install and build # go to temp folder and run npm build to create files.
         run: |
+          mkdir temp
           cd temp
           yarn install
           yarn build
