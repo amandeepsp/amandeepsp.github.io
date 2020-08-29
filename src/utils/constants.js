@@ -1,0 +1,1 @@
+export const MOBILE_QUERY_SIZE = 768
