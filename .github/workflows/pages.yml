@@ -13,6 +13,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: '12.x'
+        PA_TOKEN: ${{ secrets.PA_TOKEN }}
     - run: yarn
     - run: |
         git config --global user.email "amandeepspdhr@gmail.com"
