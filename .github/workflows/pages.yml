@@ -1,0 +1,41 @@
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+     runs-on: [ubuntu-latest]
+
+     steps:
+      - name: checkout master branch
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: run yarn install and build # go to temp folder and run npm build to create files.
+        run: |
+          cd temp
+          yarn install
+          yarn build
+
+      - name: move files # move the dist files into root dir and remove others.
+        if: ${{ success() }}
+        run: |
+          mv temp/public/* ./
+          rm -rf temp
+
+      - name: Commit files for change # commit
+        if: ${{ success() }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Add changes"
+      
+      - name: Push changes #push files into master branch
+        if: ${{ success() }}
+        uses: ad-m/github-push-action@master
+        with:
+          BRANCH: gh-pages
+          github_token: ${{ secrets.PA_TOKEN }}
+          force: true
