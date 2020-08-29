@@ -11,7 +11,7 @@
 		"serve": "gatsby serve",
 		"clean": "gatsby clean",
 		"test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1",
-		"deploy": "gatsby build && gh-pages -d public -b gh-pages -r https://amandeepsp:$PA_TOKEN@github.com/amandeepsp/amandeepsp.github.io.git"
+		"deploy": "gatsby build && gh-pages -d public -b gh-pages -r \"https://amandeepsp:$PA_TOKEN@github.com/amandeepsp/amandeepsp.github.io.git\""
 	},
 	"dependencies": {
 		"babel-plugin-styled-components": "^1.11.1",
