@@ -64,7 +64,7 @@ SqueezeNet by [*Iandola et.al.*][iandola] is presumably the first to explore a n
     source="https://arxiv.org/pdf/1602.07360.pdf"
 %} -->
 ![](assets/fire_module.png)
-*Fig 1. Fire module with $s_{1 \times 1} = 3$, $e_{1 \times 1} = 4$ and $e_{3 \times 3} = 4$.*
+*Fig 1. Fire module with $s_{1 \times 1} = 3$, $e_{1 \times 1} = 4$ and $e_{3 \times 3} = 4$. ([Source](https://arxiv.org/pdf/1602.07360.pdf))*
 
 Code for the Fire Module adapted from `torchvision.models`. Here `inchannels` are the number of input channels, `squeeze_planes` are the number of output channels, `expand1x1_planes` and `expand3x3_planes` are the output channel number for the expand layer. They are generally same.
 ~~~python
@@ -114,7 +114,7 @@ For $k = 3$, $N_k = 16$ we have a **~ 5.76x** reduction in number of parameters 
 %} -->
 
 ![](assets/depthwise.svg)
-*Fig 2. Depthwise seperable convolution followed by pointwise convolutions*
+*Fig 2. Depthwise seperable convolution followed by pointwise convolutions ([Source](https://eli.thegreenplace.net/2018/depthwise-separable-convolutions-for-machine-learning/))*
 
 Implementing Depthwise conv. is quite simple. Checkout the code snippet below, `inp` donates the number of input channels and `oup` are the number of output channels.
 ~~~python
@@ -135,11 +135,11 @@ def conv_dw(inp, oup, stride):
     include image.html 
     file="/assets/InvResidualBlock.png" 
     caption="Fig 3. MobileNet v2 primary convolution block."
-    source=" https://machinethink.net/blog/mobilenet-v2/"
+    source="https://machinethink.net/blog/mobilenet-v2/"
 %} -->
 
 ![](assets/InvResidualBlock.png)
-*Fig 3. MobileNet v2 primary convolution block.*
+*Fig 3. MobileNet v2 primary convolution block.([Source](https://machinethink.net/blog/mobilenet-v2))*
 
 The code for the `InvertedResidual` block is adapted from `trochvision.models` package.
 ~~~python
@@ -195,7 +195,7 @@ where $\mathcal{L_{gt}}$ is the loss with ground truth outputs and $\mathcal{L_{
 %} -->
 
 ![](assets/kd.png)
-*Fig 4. Knowledge distillation model configuration.*
+*Fig 4. Knowledge distillation model configuration. ([Source](https://nervanasystems.github.io/distiller/knowledge_distillation.html))*
 
 A major success story of KD is [DistillBERT][distillbert]. [Hugging Face &#x1F917;][huggingface] managed to use KD to reduce the size of the BERT from 110M parameters to 66M parameters, while still retaining 97% of the performance of the original model. DistillBERT uses various additional tricks to achieve this such as using KD loss instead of standard cross-entropy to retain the probability distribution of the teacher model. The code to train a KD model will go like below. This code is adapted from DistilBERT training sequence itself.
 ~~~python
