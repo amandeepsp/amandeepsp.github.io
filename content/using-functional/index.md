@@ -136,8 +136,11 @@ This generates the list of all the primes [^1] and you easily apply operations o
 
 ### More!!
 
-For a more thorough example, we can look into an implementation of the [Newton-Raphson method][newton] for finding square roots, provided in [SICP][sicp]. This boils down to iterating a function mentioned below, which gives you the square root of \$n\$. We also check for the difference in subsequent values and stop if the desired accuracy is reached.
-\$$ x_{i+1} = (x_i + n/x_i)/2\$$
+For a more thorough example, we can look into an implementation of the [Newton-Raphson method][newton] for finding square roots, provided in [SICP][sicp]. This boils down to iterating a function mentioned below, which gives you the square root of $n$. We also check for the difference in subsequent values and stop if the desired accuracy is reached.
+
+$$ 
+x_{i+1} = (x_i + n/x_i)/2
+$$
 
 Here's a C program to do this. Pretty straightforward.
 ~~~ c

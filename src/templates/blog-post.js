@@ -4,14 +4,19 @@ import Layout from "../components/layout"
 import styled from "styled-components"
 import SEO from "../components/seo"
 import { DiscussionEmbed } from "disqus-react"
+import { DISQUS_SHORTNAME } from "../utils/constants"
 
 const BottomNavContainer = styled.div`
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     padding: 1rem 0;
 `
-const NextLink = styled.div`
-    align-self: flex-end;
+const BottomLink = styled.div`
+    padding: 0 0.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    flex-basis:0;
 `
 
 const SubTitle = styled.div`
@@ -26,7 +31,7 @@ export default function Template({ data, pageContext }) {
     const { next, prev } = pageContext;
 
     const disqusConfig = {
-        shortname: process.env.DISQUS_SHORTNAME
+        shortname: DISQUS_SHORTNAME
     }
 
     return (
@@ -39,17 +44,20 @@ export default function Template({ data, pageContext }) {
                 </SubTitle>
                 <div dangerouslySetInnerHTML={{ __html: post.html }} />
                 <BottomNavContainer>
-                    <h3>Read More</h3>
                     {prev &&
-                        <Link className="link prev" to={prev.frontmatter.path}>
-                            {`\u2bc7 ${prev.frontmatter.title}`}
-                        </Link>}
+                        <BottomLink>
+                            <h6>Previous</h6>
+                            <Link to={prev.frontmatter.path}>&larr; {prev.frontmatter.title}</Link>
+                        </BottomLink>
+                    }
                     {next &&
-                        <NextLink>
-                            <Link className="link next" to={next.frontmatter.path}>
-                                {`${next.frontmatter.title} \u2bc8`}
-                            </Link>
-                        </NextLink>}
+                        <BottomLink style={{
+                            alignItems: 'flex-end'
+                        }}>
+                            <h6>Next</h6>
+                            <Link to={next.frontmatter.path}>{next.frontmatter.title} &rarr;</Link>
+                        </BottomLink>
+                    }
                 </BottomNavContainer>
                 <DiscussionEmbed {...disqusConfig} />
             </div>
