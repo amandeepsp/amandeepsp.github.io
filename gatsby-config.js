@@ -36,6 +36,7 @@ module.exports = {
 		"gatsby-plugin-styled-components",
 		"gatsby-plugin-twitter",
 		"gatsby-plugin-sitemap",
+		"gatsby-plugin-meta-redirect",
 		{
 			resolve: "gatsby-source-filesystem",
 			options: {

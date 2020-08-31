@@ -1,6 +1,8 @@
 const path = require("path")
 
-const crateBlogPages = async (createPage, graphql) => {
+const crateBlogPages = async (actions, graphql) => {
+    const { createPage, createRedirect } = actions
+
     const postTemplate = path.resolve(`src/templates/blog-post.js`)
     const result = await graphql(`
         {
@@ -15,6 +17,7 @@ const crateBlogPages = async (createPage, graphql) => {
                             path
                             layout
                             title
+                            redirects
                         }
                     }
                 }
@@ -32,8 +35,24 @@ const crateBlogPages = async (createPage, graphql) => {
     posts.forEach(({ node }, index) => {
         const prev = index === 0 ? null : posts[index - 1].node
         const next = index === posts.length - 1 ? null : posts[index + 1].node
+
+        const {
+            frontmatter: { path, redirects }
+        } = node
+
+        if (redirects) {
+            redirects.forEach(fromPath => {
+                createRedirect({
+                    fromPath,
+                    toPath: path,
+                    redirectInBrowser: true,
+                    isPermanent: true
+                })
+            })
+        }
+
         createPage({
-            path: node.frontmatter.path,
+            path: path,
             component: postTemplate,
             context: {
                 prev, next
@@ -42,7 +61,9 @@ const crateBlogPages = async (createPage, graphql) => {
     })
 }
 
-const createAboutPage = async (createPage, graphql) => {
+const createAboutPage = async (actions, graphql) => {
+    const { createPage } = actions
+
     const aboutTemplate = path.resolve(`src/templates/about.js`)
 
     const result = await graphql(`
@@ -66,7 +87,7 @@ const createAboutPage = async (createPage, graphql) => {
         return
     }
 
-    const { node:pageNode } = result.data.allMarkdownRemark.edges[0]
+    const { node: pageNode } = result.data.allMarkdownRemark.edges[0]
 
     createPage({
         path: pageNode.frontmatter.path,
@@ -77,7 +98,6 @@ const createAboutPage = async (createPage, graphql) => {
 }
 
 exports.createPages = async ({ actions, graphql }) => {
-    const { createPage } = actions
-    await crateBlogPages(createPage, graphql)
-    await createAboutPage(createPage, graphql)
+    await crateBlogPages(actions, graphql)
+    await createAboutPage(actions, graphql)
 }
