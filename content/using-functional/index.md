@@ -6,7 +6,8 @@ date:   2020-08-12 10:55:06 +0530
 categories: [Functional Programming]
 image: /assets/ivory_tower.jpg
 path: /using-functional
-published: false
+redirects: 
+    - /fp-is-awesome/
 ---
 
 <!-- I have a few years of programming experience under my belt and until recently functional programming paradigm was completely unbeknownst to me. I don't have a formal degree in Computer Science, so I was looking to fill sometimes glaring gaps in my knowledge, when I found the amazing [Teach Yourself CS][teach] list of resources to follow.
