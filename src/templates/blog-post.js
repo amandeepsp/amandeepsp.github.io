@@ -5,6 +5,7 @@ import styled from "styled-components"
 import SEO from "../components/seo"
 import { DiscussionEmbed } from "disqus-react"
 import { DISQUS_SHORTNAME } from "../utils/constants"
+import kebabCase from "lodash/kebabCase"
 
 const BottomNavContainer = styled.div`
     display: flex;
@@ -40,7 +41,12 @@ export default function Template({ data, pageContext }) {
             <div>
                 <h1>{post.frontmatter.title}</h1>
                 <SubTitle>
-                    Posted on {post.frontmatter.date} &bull; {post.timeToRead} min read
+                    Posted on {post.frontmatter.date} &bull; {post.timeToRead} min read 
+                    &bull; Tagged with {post.frontmatter.categories.map(tag => {
+                        return(
+                            <Link style={{ padding: "0.2rem"}}to={`/tags/${kebabCase(tag)}/`}>{tag}</Link>
+                        )
+                    })}
                 </SubTitle>
                 <div dangerouslySetInnerHTML={{ __html: post.html }} />
                 <BottomNavContainer>
@@ -74,6 +80,7 @@ export const pageQuery = graphql`
                 path
                 title
                 description
+                categories
             }
             timeToRead
         }

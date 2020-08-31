@@ -1,29 +1,30 @@
 const path = require("path")
+const _ = require("lodash")
 
 const crateBlogPages = async (actions, graphql) => {
-    const { createPage, createRedirect } = actions
+    const { createPage, createRedirect, reporter } = actions
 
     const postTemplate = path.resolve(`src/templates/blog-post.js`)
     const result = await graphql(`
-        {
-            allMarkdownRemark(
-                sort: { order: DESC, fields: [frontmatter___date] }
-                limit: 1000
-                filter: {frontmatter: {layout: {eq: "blog-post"}}}
-            ) {
-                edges {
-                    node {
-                        frontmatter {
-                            path
-                            layout
-                            title
-                            redirects
-                        }
+    {
+        allMarkdownRemark(
+            sort: { order: DESC, fields: [frontmatter___date] }
+            limit: 1000
+            filter: {frontmatter: {layout: {eq: "blog-post"}}}
+        ) {
+            edges {
+                node {
+                    frontmatter {
+                        path
+                        layout
+                        title
+                        categories
+                        redirects
                     }
                 }
             }
         }
-    `)
+    }`)
 
     if (result.errors) {
         reporter.panicOnBuild(`Error while running GraphQL query.`)
@@ -59,10 +60,40 @@ const crateBlogPages = async (actions, graphql) => {
             },
         })
     })
+
+    const tagGroups = await graphql(`
+    {
+        allMarkdownRemark(
+            limit: 2000
+            filter: {frontmatter: {layout: {eq: "blog-post"}}}
+        ) {
+            group(field: frontmatter___categories) {
+                fieldValue
+            }
+        }
+    }`)
+
+    if(tagGroups.errors){
+        reporter.panicOnBuild(`Error while running GraphQL query.`)
+        return
+    }
+
+    const tags = tagGroups.data.allMarkdownRemark.group
+    const tagTemplate = path.resolve(`src/templates/tags.js`)
+
+    tags.forEach(tag => {
+        createPage({
+            path: `/tags/${_.kebabCase(tag.fieldValue)}/`,
+            component: tagTemplate,
+            context: {
+                tag: tag.fieldValue,
+            },
+        })
+    })
 }
 
 const createAboutPage = async (actions, graphql) => {
-    const { createPage } = actions
+    const { createPage, reporter } = actions
 
     const aboutTemplate = path.resolve(`src/templates/about.js`)
 

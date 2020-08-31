@@ -24,6 +24,10 @@ module.exports = {
 				url: "/blog"
 			},
 			{
+				title: "Tags",
+				url: "/tags"
+			},
+			{
 				title: "About",
 				url: "/about"
 			}
