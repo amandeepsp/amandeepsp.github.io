@@ -4,19 +4,24 @@ import Header from "./header"
 import Footer from "./footer"
 
 const Container = styled.div`
-    margin: 3rem auto;
+    margin: 2rem auto;
     padding: 0 1rem;
     max-width: 900px;
-	min-height: 100%;
+    display: flex;
+    min-height: 95vh;
+    flex-direction: column;
+`
 
+const ContentContainer = styled.div`
+    flex: 1;
 `
 
 export default function Layout({ children }) {
-	return (
-		<Container>
-			<Header />
-			{children}
-			<Footer />
-		</Container>
-	)
+    return (
+        <Container>
+            <Header />
+            <ContentContainer>{children}</ContentContainer>
+            <Footer />
+        </Container>
+    )
 }

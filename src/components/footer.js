@@ -1,9 +1,9 @@
-import React from 'react'
+import React from "react"
 import styled from "styled-components"
-import { useSiteMetadata } from '../hooks/use-site-metadata'
+import { useSiteMetadata } from "../hooks/use-site-metadata"
 
 const Container = styled.div`
-    border-top: 1px solid lightblue;
+    border-top: 1px solid gray;
 `
 const SubduedText = styled.p`
     color: gray;
@@ -31,36 +31,45 @@ const SocialSvg = styled.svg`
     vertical-align: text-bottom;
 `
 
+const SmallSiteTitle = styled.h4`
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    color: black;
+`
+
 export default function Footer() {
     const { social, description, title } = useSiteMetadata()
 
     const socialLinks = social.map(({ website, username }) => {
-        return(
+        return (
             <SocialItemContainer key={website}>
                 <SocialSvg>
                     <use xlinkHref={`social-icon.svg#${website}`}></use>
                 </SocialSvg>
-                <a href={resolveProfileLink(website, username)} target="_blank" rel="noreferrer">{username}</a>
+                <a
+                    href={resolveProfileLink(website, username)}
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    {username}
+                </a>
             </SocialItemContainer>
         )
     })
 
     return (
         <Container>
-            <h4>{title}</h4>
+            <SmallSiteTitle>{title}</SmallSiteTitle>
             <SubduedText>{description}</SubduedText>
-            <SocialContainer>
-                {socialLinks}
-            </SocialContainer>
+            <SocialContainer>{socialLinks}</SocialContainer>
         </Container>
     )
 }
 
 const resolveProfileLink = (website, username) => {
-    switch(website){
-        case 'linkedin':
+    switch (website) {
+        case "linkedin":
             return `https://www.linkedin.com/in/${username}`
-        case 'stackoverflow':
+        case "stackoverflow":
             return `https://stackoverflow.com/users/${username}`
         default:
             return `https://www.${website}.com/${username}`

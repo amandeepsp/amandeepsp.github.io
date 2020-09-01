@@ -1,17 +1,18 @@
 import Typography from "typography"
-import githubTheme from 'typography-theme-github'
-import CodePlugin from 'typography-plugin-code'
+import githubTheme from "typography-theme-github"
+import CodePlugin from "typography-plugin-code"
 
-githubTheme.baseFontSize = '16px'
+githubTheme.baseFontSize = "16px"
 githubTheme.overrideThemeStyles = () => ({
-    'h1,h2,h3,h4': {
-        borderBottom: '0px',
+    "h1,h2,h3,h4": {
+        borderBottom: "0px",
     },
+    "h1>a":{
+        color: "black"
+    }
 })
 
-githubTheme.plugins = [
-    new CodePlugin(),
-]
+githubTheme.plugins = [new CodePlugin()]
 
 const typography = new Typography(githubTheme)
 
