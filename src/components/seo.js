@@ -1,10 +1,14 @@
 import React from "react"
 import { Helmet } from "react-helmet"
 import { useSiteMetadata } from "../hooks/use-site-metadata"
-import PropTypes from 'prop-types'
+import PropTypes from "prop-types"
 
 export default function SEO({
-    lang, description, title, meta, image: metaImage
+    lang,
+    description,
+    title,
+    meta,
+    image: metaImage,
 }) {
     const siteMetadata = useSiteMetadata()
 
@@ -51,29 +55,29 @@ export default function SEO({
     ].concat(
         metaImage
             ? [
-                {
-                    property: "og:image",
-                    content: image,
-                },
-                {
-                    property: "og:image:width",
-                    content: metaImage.width,
-                },
-                {
-                    property: "og:image:height",
-                    content: metaImage.height,
-                },
-                {
-                    name: "twitter:card",
-                    content: "summary_large_image",
-                },
-            ]
+                  {
+                      property: "og:image",
+                      content: image,
+                  },
+                  {
+                      property: "og:image:width",
+                      content: metaImage.width,
+                  },
+                  {
+                      property: "og:image:height",
+                      content: metaImage.height,
+                  },
+                  {
+                      name: "twitter:card",
+                      content: "summary_large_image",
+                  },
+              ]
             : [
-                {
-                    name: "twitter:card",
-                    content: "summary",
-                },
-            ]
+                  {
+                      name: "twitter:card",
+                      content: "summary",
+                  },
+              ]
     )
     return (
         <Helmet

@@ -18,7 +18,7 @@ export default function About({ data }) {
 }
 
 export const pageQuery = graphql`
-    query AboutPageQuery{
+    query AboutPageQuery {
         markdownRemark(frontmatter: { path: { eq: "/about" } }) {
             html
             frontmatter {

@@ -7,7 +7,7 @@ const CaptionSubdued = styled.h5`
 `
 
 export default function PostTuple(props) {
-    const { path, title, date } = props.post.frontmatter 
+    const { path, title, date } = props.post.frontmatter
     return (
         <div>
             <h2>

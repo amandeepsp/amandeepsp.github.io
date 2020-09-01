@@ -8,7 +8,7 @@ const Tags = ({ pageContext, data }) => {
     const { edges, totalCount } = data.allMarkdownRemark
     const tagHeader = `${totalCount} post${
         totalCount === 1 ? "" : "s"
-        } tagged with "${tag}"`
+    } tagged with "${tag}"`
 
     const blogList = edges.map(({ node }) => {
         const { title, path } = node.frontmatter
@@ -22,10 +22,10 @@ const Tags = ({ pageContext, data }) => {
     return (
         <Layout>
             <h2>{tagHeader}</h2>
-            <ul>
-                {blogList}
-            </ul>
-            <Link to="/tags"><h4>All tags</h4></Link>
+            <ul>{blogList}</ul>
+            <Link to="/tags">
+                <h4>All tags</h4>
+            </Link>
         </Layout>
     )
 }
@@ -33,21 +33,21 @@ const Tags = ({ pageContext, data }) => {
 export default Tags
 
 export const pageQuery = graphql`
-  query tagQuery($tag: String) {
-    allMarkdownRemark(
-      limit: 2000
-      sort: { fields: [frontmatter___date], order: DESC }
-      filter: { frontmatter: { categories: { in: [$tag] } } }
-    ) {
-      totalCount
-      edges {
-        node {
-          frontmatter {
-            title
-            path
-          }
+    query tagQuery($tag: String) {
+        allMarkdownRemark(
+            limit: 2000
+            sort: { fields: [frontmatter___date], order: DESC }
+            filter: { frontmatter: { categories: { in: [$tag] } } }
+        ) {
+            totalCount
+            edges {
+                node {
+                    frontmatter {
+                        title
+                        path
+                    }
+                }
+            }
         }
-      }
     }
-  }
 `

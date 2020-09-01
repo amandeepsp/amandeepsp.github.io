@@ -9,9 +9,9 @@ const Container = styled.div`
     flex-direction: row;
     @media (max-width: ${MOBILE_QUERY_SIZE}px) {
         flex-direction: column;
-    };
-    align-items:baseline;
-    border-bottom: 1px solid lightblue;
+    }
+    align-items: baseline;
+    border-bottom: 1px solid gray;
 `
 
 const NavContainer = styled.div`
@@ -24,18 +24,17 @@ const SiteTitle = styled.h1`
     font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
 `
 const NavLink = styled.h3`
-    margin: 0 0.5em;
+    margin: 0 0.5rem;
     @media (max-width: ${MOBILE_QUERY_SIZE}px) {
         margin: 0 0.75rem 0.5rem 0;
     }
 `
 
 export default function Header() {
-
     const { title, headerNav } = useSiteMetadata()
 
     const navItems = headerNav.map(({ title, url }) => {
-        return(
+        return (
             <NavLink>
                 <Link to={url}>{title}</Link>
             </NavLink>
@@ -47,9 +46,7 @@ export default function Header() {
             <SiteTitle>
                 <Link to={"/"}>{title}</Link>
             </SiteTitle>
-            <NavContainer>
-                {navItems}
-            </NavContainer>
+            <NavContainer>{navItems}</NavContainer>
         </Container>
     )
 }
