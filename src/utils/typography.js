@@ -7,9 +7,9 @@ githubTheme.overrideThemeStyles = () => ({
     "h1,h2,h3,h4": {
         borderBottom: "0px",
     },
-    "h1>a":{
-        color: "black"
-    }
+    "h1>a": {
+        color: "black",
+    },
 })
 
 githubTheme.plugins = [new CodePlugin()]

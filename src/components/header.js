@@ -35,7 +35,7 @@ export default function Header() {
 
     const navItems = headerNav.map(({ title, url }) => {
         return (
-            <NavLink>
+            <NavLink key={url}>
                 <Link to={url}>{title}</Link>
             </NavLink>
         )

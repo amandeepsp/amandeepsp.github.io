@@ -45,7 +45,7 @@ const crateBlogPages = async (actions, graphql) => {
         } = node
 
         if (redirects) {
-            redirects.forEach(fromPath => {
+            redirects.forEach((fromPath) => {
                 createRedirect({
                     fromPath,
                     toPath: path,
@@ -86,7 +86,7 @@ const crateBlogPages = async (actions, graphql) => {
     const tags = tagGroups.data.allMarkdownRemark.group
     const tagTemplate = path.resolve(`src/templates/tags.js`)
 
-    tags.forEach(tag => {
+    tags.forEach((tag) => {
         createPage({
             path: `/tags/${_.kebabCase(tag.fieldValue)}/`,
             component: tagTemplate,
