@@ -3,8 +3,6 @@ import { graphql, Link } from "gatsby"
 import Layout from "../components/layout"
 import styled from "styled-components"
 import SEO from "../components/seo"
-import { DiscussionEmbed } from "disqus-react"
-import { DISQUS_SHORTNAME } from "../utils/constants"
 import kebabCase from "lodash/kebabCase"
 
 const BottomNavContainer = styled.div`
@@ -31,10 +29,6 @@ export default function Template({ data, pageContext }) {
     const { markdownRemark: post } = data
     const { next, prev } = pageContext
 
-    const disqusConfig = {
-        shortname: DISQUS_SHORTNAME,
-    }
-
     return (
         <Layout>
             <SEO title={post.frontmatter.title} />
@@ -43,9 +37,10 @@ export default function Template({ data, pageContext }) {
                 <SubTitle>
                     Posted on {post.frontmatter.date} &bull; {post.timeToRead}{" "}
                     min read &bull; Tagged with{" "}
-                    {post.frontmatter.categories.map(tag => {
+                    {post.frontmatter.categories.map((tag) => {
                         return (
                             <Link
+                                key={tag}
                                 style={{ padding: "0.2rem" }}
                                 to={`/tags/${kebabCase(tag)}/`}
                             >
@@ -77,7 +72,6 @@ export default function Template({ data, pageContext }) {
                         </BottomLink>
                     )}
                 </BottomNavContainer>
-                <DiscussionEmbed {...disqusConfig} />
             </div>
         </Layout>
     )

@@ -71,7 +71,7 @@ SqueezeNet by [_Iandola et.al._][iandola] is presumably the first to explore a n
 %} -->
 
 ![](assets/fire_module.png)
-_Fig 1. Fire module with \$s_{1 \times 1} = 3$, $e*{1 \times 1} = 4$ and $e*{3 \times 3} = 4\$. ([Source](https://arxiv.org/pdf/1602.07360.pdf))\_
+Fig 1. Fire module with $s_{1 \times 1} = 3$, $e*{1 \times 1} = 4$ and $e*{3 \times 3} = 4$. ([Source](https://arxiv.org/pdf/1602.07360.pdf))
 
 Code for the Fire Module adapted from `torchvision.models`. Here `inchannels` are the number of input channels, `squeeze_planes` are the number of output channels, `expand1x1_planes` and `expand3x3_planes` are the output channel number for the expand layer. They are generally same.
 

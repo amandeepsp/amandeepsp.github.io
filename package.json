@@ -15,7 +15,6 @@
 	},
 	"dependencies": {
 		"babel-plugin-styled-components": "^1.11.1",
-		"disqus-react": "^1.0.9",
 		"gatsby": "^2.24.50",
 		"gatsby-plugin-catch-links": "^2.3.11",
 		"gatsby-plugin-gtag": "^1.0.13",
@@ -46,6 +45,8 @@
 		"typography-theme-github": "^0.16.19"
 	},
 	"devDependencies": {
+		"eslint": "^7.8.0",
+		"eslint-plugin-react": "^7.20.6",
 		"prettier": "2.1.0"
 	},
 	"repository": {

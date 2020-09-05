@@ -8,7 +8,7 @@ export default function Blog({ data }) {
     const { edges: posts } = data.allMarkdownRemark
 
     const postsToRender = posts
-        .filter(post => post.node.frontmatter.title.length > 0)
+        .filter((post) => post.node.frontmatter.title.length > 0)
         .map(({ node: post }) => <PostTuple post={post} key={post.id} />)
 
     return (
