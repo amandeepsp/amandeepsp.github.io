@@ -50,7 +50,7 @@ const filter = (predicate, arr) =>
 const summatrix = (matrix) => sum(map(sum, matrix))
 ```
 
-Same thing applies when we pass a comparison function to `sort`. `sort` doesn't make assumptions of what kind of an array are we passing in, unless we tell it how to compare it. Had higher order functions not been at our disposal we would have to write separate `sort` for every type of array passed in.[^1]
+Same thing applies when we pass a comparison function to `sort`. `sort` doesn't make assumptions of what kind of an array are we passing in, unless we tell it how to compare it. Had higher order functions not been at our disposal we would have to write separate `sort` for every type of array passed in.
 
 You might think that yeah, these are nice to have when we have to deal with lists, be we can conform these functions to many other applications.
 A more real-world example of this would be [Redux's][redux] reducers which are pure functions that essentially take a `state` object and an `action` object and returns a new `state` object that represents the state after applying the `action`. If you think actions as a stream you can see how reducers are very much the same thing as `reduce`. Which is also why these functions are called _reducers_.
@@ -143,13 +143,20 @@ Also, functions can be run at any time without any consequences and they don't h
 - Functions can be easily memoized by input arguments, since return values are always the same.
 - Things are now easier to test as there is no external dependency to mock. We can just given inputs and asserts outputs.
 - Pure functions provide _referential transparency_ to programs, means that an _expression_ can be replaced by its corresponding _value_, and this operation doesn't change the execution of the program. Being able to do this replacement, we can easily figure out how our code works.
-- Code gets highly paralleizable as we have eliminated the pesky _shared mutable state_.
+- Code gets highly parallelized as we have eliminated the pesky _shared mutable state_.
 
 ### Composition
+Composition is a more abstract idea of combining smaller things to make bigger and complex things.
+The most basic idea here is function composition. In mathematics, given functions $f: X \to Y$ and $g: Y \to Z$, then function composition $ (g \circ f)(x) = g(f(x))$. In programming, 
+```js 
+const compose2 = (g, f) => x => g(f(x))
+```
+`compose2` composes two _compatible_ functions into one. A more generalized version takes in multiple functions
+```js
+const compose = (...fns) => x => fns.reduceRight((acc, fn) => fn(acc), x)
+```
+Composing functions create a new function which can be used as its own standalone thing.
 
-In mathematics, given functions $f: X \to Y$ and $g: Y \to Z$, then function composition $ (g \circ f)(x) = g(f(x))$
-
-[^1]: Not entirely true. Java uses `Comparable` interface to define how to compare values but this restricts our `sort` function to only accept `Comparable` objects.
 
 [redux]: https://redux.js.org/
 [lodash]: https://lodash.com/docs/#curry
