@@ -39,7 +39,6 @@ module.exports = {
         "gatsby-plugin-react-helmet",
         "gatsby-plugin-sharp",
         "gatsby-plugin-styled-components",
-        "gatsby-plugin-twitter",
         "gatsby-plugin-sitemap",
         "gatsby-plugin-meta-redirect",
         "gatsby-plugin-catch-links",
@@ -55,10 +54,14 @@ module.exports = {
             options: {
                 plugins: [
                     "gatsby-remark-images",
-                    "gatsby-remark-prismjs",
                     "gatsby-remark-katex",
                     "gatsby-remark-copy-linked-files",
-                    "gatsby-remark-embedder",
+                    {
+                        resolve: "gatsby-remark-prismjs",
+                        options: {
+                            inlineCodeMarker: ">",
+                        },
+                    },
                 ],
             },
         },
