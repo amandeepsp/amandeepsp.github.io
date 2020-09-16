@@ -120,8 +120,8 @@ works best.
     source="https://arxiv.org/pdf/1602.07360.pdf"
 %} -->
 
-![](assets/fire_module.png) Fig 1. Fire module with $s_{1 \times 1} = 3$,
-$e*{1 \times 1} = 4$ and $e*{3 \times 3} = 4$.
+![fire_module](assets/fire_module.png) Fig 1. Fire module with
+$s_{1 \times 1} = 3$, $e*{1 \times 1} = 4$ and $e*{3 \times 3} = 4$.
 ([Source](https://arxiv.org/pdf/1602.07360.pdf))
 
 Code for the Fire Module adapted from `torchvision.models`. Here `inchannels`
@@ -194,8 +194,8 @@ for a layer.
     source="https://eli.thegreenplace.net/2018/depthwise-separable-convolutions-for-machine-learning/"
 %} -->
 
-![](assets/depthwise.svg) _Fig 2. Depthwise seperable convolution followed by
-pointwise convolutions
+![depthwise](assets/depthwise.svg) _Fig 2. Depthwise seperable convolution
+followed by pointwise convolutions
 ([Source](https://eli.thegreenplace.net/2018/depthwise-separable-convolutions-for-machine-learning/))_
 
 Implementing Depthwise conv. is quite simple. Checkout the code snippet below,
@@ -243,8 +243,8 @@ compared to `64` for MobileNet v1.
     source="https://machinethink.net/blog/mobilenet-v2/"
 %} -->
 
-![](assets/InvResidualBlock.png) _Fig 3. MobileNet v2 primary convolution
-block.([Source](https://machinethink.net/blog/mobilenet-v2))_
+![InvResidualBlock](assets/InvResidualBlock.png) _Fig 3. MobileNet v2 primary
+convolution block.([Source](https://machinethink.net/blog/mobilenet-v2))_
 
 The code for the `InvertedResidual` block is adapted from `trochvision.models`
 package.
@@ -317,7 +317,12 @@ tunable hyperparameters. The loss configuration is as in the image below.
     source=" https://nervanasystems.github.io/distiller/knowledge_distillation.html"
 %} -->
 
-![](assets/kd.png) _Fig 4. Knowledge distillation model configuration.([Source](https://nervanasystems.github.io/distiller/knowledge_distillation.html))_
+<!-- prettier-ignore-start -->
+
+![KD](assets/kd.png) *Fig 4. Knowledge distillation model configuration.
+([Source](https://nervanasystems.github.io/distiller/knowledge_distillation.html))*
+
+<!-- prettier-ignore-end -->
 
 A major success story of KD is [DistillBERT][distillbert]. [Hugging Face
 &#x1F917;][huggingface] managed to use KD to reduce the size of the BERT from

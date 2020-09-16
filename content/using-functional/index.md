@@ -12,9 +12,9 @@ redirects:
 
 Functional Programming is, putting it plainly, a programming paradigm that uses
 functions and composition of those functions to create programs. Thought leaders
-and proponents claim that it makes programs more declarative, have fewer bugs and
-easier to debug and test. This paradigm when taken to the extreme is called _pure
-functional programming_ where all the functions are "pure". Functional
+and proponents claim that it makes programs more declarative, have fewer bugs
+and easier to debug and test. This paradigm when taken to the extreme is called
+_pure functional programming_ where all the functions are "pure". Functional
 programming hasn't achieved much of traction as OOP (Object Oriented
 Programming) has, but almost all popular languages are incorporating constructs
 to enable a functional style of programming. Let's dabble into a few core
@@ -32,8 +32,8 @@ Higher-Order functions can enable us to build nifty abstractions. In JavaScript
 consider the `map`, `reduce` and `filter` functions which are just abstractions
 for looping structures. The `sum` function implemented below is nothing special
 we can replace the starting value of `acc` to 1, replace + with \* and we can
-get a function for the product. This idea when extended gives the `reduce` function.
-We have separated the process of reducing from how data is reduced.
+get a function for the product. This idea when extended gives the `reduce`
+function. We have separated the process of reducing from how data is reduced.
 
 ```js
 function sum(arr) {
@@ -61,10 +61,10 @@ const filter = (predicate, arr) =>
 const summatrix = (matrix) => sum(map(sum, matrix))
 ```
 
-The same thing applies when we pass a comparison function to `sort`. `sort` doesn't
-make assumptions of what kind of an array are we passing in, unless we tell it
-how to compare it. Had higher-order functions not been at our disposal we would
-have to write separate `sort` for every type of array passed in.
+The same thing applies when we pass a comparison function to `sort`. `sort`
+doesn't make assumptions of what kind of an array are we passing in, unless we
+tell it how to compare it. Had higher-order functions not been at our disposal
+we would have to write separate `sort` for every type of array passed in.
 
 You might think that yeah, these are nice to have when we have to deal with
 lists, be we can conform these functions to many other applications. A more
@@ -107,12 +107,12 @@ logPageEvent("C_CLICKED")
 
 Here `logWithPage` is an example of a function that returns a function.
 `logWithPage` returns a function that can access `pageName` argument due to
-closure. This technique has a name... _Partial application_ when we return a
-new function by providing some of the arguments of the function. Functions
-returning functions are very common in the React ecosystem. An example of this
-would be the `connect` function from [Redux][redux]. `connect` takes in arguments
-that tell in how data should be mapped and returns a function that takes in the
-React component that needs connection.
+closure. This technique has a name... _Partial application_ when we return a new
+function by providing some of the arguments of the function. Functions returning
+functions are very common in the React ecosystem. An example of this would be
+the `connect` function from [Redux][redux]. `connect` takes in arguments that
+tell in how data should be mapped and returns a function that takes in the React
+component that needs connection.
 
 #### Currying and Partial application
 
@@ -163,9 +163,9 @@ Pure functions follow two rules.
 
 Take the case of `slice` and `splice`, an example from [Mostly Adequate Guide to
 FP][mostly]. `slice` gives you a new array without changing the original but
-`splice` changes the original array. Both have the same effect i.e select a range,
-but `splice` is impure as it removes the selected elements from the original
-array, thus performing a side-effect.
+`splice` changes the original array. Both have the same effect i.e select a
+range, but `splice` is impure as it removes the selected elements from the
+original array, thus performing a side-effect.
 
 ```js
 const xs = [1, 2, 3, 4, 5]
@@ -222,17 +222,17 @@ version of compose takes in multiple functions
 const compose = (...fns) => (x) => fns.reduceRight((acc, fn) => fn(acc), x)
 ```
 
-Composing functions create a new function that can be used as its own
-standalone thing. Here, the catch is we can compose functions with only one
-argument, except the first one, we can have multiple arguments in the first
-function in compose sequence. We can easily solve this by partially applying the
+Composing functions create a new function that can be used as its own standalone
+thing. Here, the catch is we can compose functions with only one argument,
+except the first one, we can have multiple arguments for the first function in
+the compose sequence. We can easily solve this by partially applying the
 functions with more arguments. Let's go through an example, here we read a file
 to extract `HOST` variable in it as `HOST=www.abc.xyz`. We could do this by
 reading a file[^2], finding the line with `HOST` and splitting it to get the
 hostname. Take a look at the `get_host` function, it is constructed using nested
 function calls.
 
-```js {21}
+```js {21,22}
 const fs = require("fs");
 import * as R from "rambda"
 
@@ -253,11 +253,12 @@ function cut = curry(({ delimiter, fields }, str) => {
   return str.split(delimiter)[fields - 1];
 })
 
-const get_host = (filepath) => cut({ delimiter: "=", fields: 2 }, grep("^HOST=", cat(filepath)))
+const get_host = (filepath) => 
+    cut({ delimiter: "=", fields: 2 }, grep("^HOST=", cat(filepath)))
 ```
 
 Using `compose` this can be simplified into a pipeline on functions which is
-much easier to understand what is going on. But to ordering is a bit awkward,
+much easier to understand what is going on. But the ordering is a bit awkward,
 data flows from right to left.
 
 ```js
@@ -271,10 +272,15 @@ const get_host = compose(
 There's a cousin to `compose` called `pipe` which just reverses the direction of
 data flow which is much natural to look at.
 
+<!-- prettier-ignore -->
 ```js
 const { pipe } = R
 
-const get_host = pipe(cat, grep("^HOST="), cut({ delimiter: "=", fields: 2 }))
+const get_host = pipe(
+    cat,
+    grep("^HOST="),
+    cut({ delimiter: "=", fields: 2 })
+)
 ```
 
 Composition helps a lot in improving the readability and ease of understanding
@@ -286,10 +292,10 @@ kinda agree with this.
 
 Functional programming is a very different style, which is not how most
 programmers are taught programming. It offers many advantages to an imperative
-style. But imperative programming has its place in the programming as eventually
-we need to cause side-effects. DB queries, DOM renders, API calls all are side
-effects, but we can learn from functional principles and incorporated them to
-make our code more declarative.
+style. But imperative programming has its place in the programming as
+eventually, we need to cause side-effects. DB queries, DOM renders, API calls
+all are side effects, but we can learn from functional principles and
+incorporated them to make our code more declarative.
 
 [^1]:
     George A. Miller,

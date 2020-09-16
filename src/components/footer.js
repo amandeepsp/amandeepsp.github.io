@@ -43,7 +43,7 @@ export default function Footer() {
         return (
             <SocialItemContainer key={website}>
                 <SocialSvg>
-                    <use xlinkHref={`social-icon.svg#${website}`}></use>
+                    <use xlinkHref={`/social-icon.svg#${website}`}></use>
                 </SocialSvg>
                 <a
                     href={resolveProfileLink(website, username)}
