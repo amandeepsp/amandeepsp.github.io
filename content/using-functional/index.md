@@ -129,13 +129,14 @@ Let's add another argument to our `logEvent` function.
 
 We can now curry the function like this
 
+<!-- prettier-ignore -->
 ```js
 const cLogEvent = (pageName) => (referrer) => (eventName) =>
     logEvent(pageName, referrer, eventName)
 
-const logWithPageAndReferrer = cLogEvent("THE_PAGE")("OTHER_PAGE")[
-    ("EVENT_1", "EVENT_2", "EVENT_3")
-].forEach(logWithPageAndReferrer)
+const logWithPageAndReferrer = cLogEvent("THE_PAGE")("OTHER_PAGE")
+
+["EVENT_1", "EVENT_2", "EVENT_3"].forEach(logWithPageAndReferrer)
 ```
 
 Here `cLogEvent` is a function that takes in `pageName` and returns a function
