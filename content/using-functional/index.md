@@ -8,6 +8,7 @@ image: /assets/ivory_tower.jpg
 path: /using-functional
 redirects:
     - /fp-is-awesome/
+art_type: circle_packing
 ---
 
 Functional Programming is, putting it plainly, a programming paradigm that uses
@@ -19,7 +20,10 @@ programming hasn't achieved much of traction as OOP (Object Oriented
 Programming) has, but almost all popular languages are incorporating constructs
 to enable a functional style of programming. Let's dabble into a few core
 concepts of functional programming that may help to understand what the fuss is
-all about.
+all about. At the end of the article you might feel like the guy in the meme.
+
+![WOW](assets/wow.png) Image source
+[@impurepics](https://impurepics.com/posts/2020-06-21-fp-is-wow.html)
 
 ## Core concepts
 
@@ -254,7 +258,7 @@ function cut = curry(({ delimiter, fields }, str) => {
   return str.split(delimiter)[fields - 1];
 })
 
-const get_host = (filepath) => 
+const get_host = (filepath) =>
     cut({ delimiter: "=", fields: 2 }, grep("^HOST=", cat(filepath)))
 ```
 
