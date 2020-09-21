@@ -15,9 +15,7 @@ export default function Index({ data }) {
         <Layout>
             <SEO title={"Home"} />
             <h2>Latest Posts</h2>
-            <div>
-                {postsToRender}
-            </div>
+            <div>{postsToRender}</div>
         </Layout>
     )
 }

@@ -28,11 +28,10 @@ const TupleImage = styled.div`
             height: 100% !important;
         }
     }
-    
 `
 const artTypes = {
     tiled_lines: tiledLines,
-    circle_packing: circlePacking
+    circle_packing: circlePacking,
 }
 
 export default function PostTuple({
@@ -41,7 +40,9 @@ export default function PostTuple({
         excerpt,
     },
 }) {
-    const sketch = art_type ? artTypes[art_type] : _.sample([tiledLines, circlePacking])
+    const sketch = art_type
+        ? artTypes[art_type]
+        : _.sample([tiledLines, circlePacking])
     const [setRef] = useP5(sketch)
     return (
         <TupleContainer>

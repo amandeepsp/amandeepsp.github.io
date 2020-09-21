@@ -9,7 +9,7 @@ export const tiledLines = (sketch) => {
         sketch.background(pallette.background)
         sketch.strokeCap(sketch.ROUND)
         sketch.strokeWeight(5)
-        
+
         for (let x = 0; x < sketch.width; x += step) {
             for (let y = 0; y < sketch.height; y += step) {
                 sketch.stroke(sketch.random(pallette.colors))
