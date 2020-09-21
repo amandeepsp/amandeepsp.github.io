@@ -7,6 +7,7 @@ categories: [ML, On-device]
 path: /making-models-smaller-1
 redirects:
     - /ml-model-compression-part1/
+art_type: tiled_lines
 ---
 
 Machine Learning models are getting bigger and expensive to compute. Embedded

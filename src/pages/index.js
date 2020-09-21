@@ -15,7 +15,9 @@ export default function Index({ data }) {
         <Layout>
             <SEO title={"Home"} />
             <h2>Latest Posts</h2>
-            {postsToRender}
+            <div>
+                {postsToRender}
+            </div>
         </Layout>
     )
 }
@@ -35,6 +37,7 @@ export const pageQuery = graphql`
                         title
                         date(formatString: "MMMM DD, YYYY")
                         path
+                        art_type
                     }
                 }
             }
