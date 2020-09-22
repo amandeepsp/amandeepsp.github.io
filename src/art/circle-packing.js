@@ -1,10 +1,9 @@
-import * as tome from "chromotome"
+import { pallette } from "../utils/constants"
 
 const minRadius = 2
 const maxRadius = 50
 const totalCircles = 250
 const createCircleAttempts = 500
-const pallette = tome.get("cc245")
 
 export const circlePacking = (sketch) => {
     let circles = []
