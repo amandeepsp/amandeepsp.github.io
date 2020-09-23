@@ -35,8 +35,8 @@ export default function Template({ data, pageContext }) {
             <div>
                 <h1>{post.frontmatter.title}</h1>
                 <SubTitle>
-                    Posted on {post.frontmatter.date} &bull; {post.timeToRead}{" "}
-                    min read &bull; Tagged with{" "}
+                    Posted on {post.frontmatter.date} &bull; {post.timeToRead} min read &bull;
+                    Tagged with{" "}
                     {post.frontmatter.categories.map((tag) => {
                         return (
                             <Link
@@ -54,9 +54,7 @@ export default function Template({ data, pageContext }) {
                     {prev && (
                         <BottomLink>
                             <h6>Previous</h6>
-                            <Link to={prev.frontmatter.path}>
-                                &larr; {prev.frontmatter.title}
-                            </Link>
+                            <Link to={prev.frontmatter.path}>&larr; {prev.frontmatter.title}</Link>
                         </BottomLink>
                     )}
                     {next && (
@@ -66,9 +64,7 @@ export default function Template({ data, pageContext }) {
                             }}
                         >
                             <h6>Next</h6>
-                            <Link to={next.frontmatter.path}>
-                                {next.frontmatter.title} &rarr;
-                            </Link>
+                            <Link to={next.frontmatter.path}>{next.frontmatter.title} &rarr;</Link>
                         </BottomLink>
                     )}
                 </BottomNavContainer>

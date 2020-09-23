@@ -6,14 +6,10 @@ import { Link, graphql } from "gatsby"
 const Tags = ({ pageContext, data }) => {
     const { tag } = pageContext
     const { nodes, totalCount } = data.allMarkdownRemark
-    const tagHeader = `${totalCount} post${
-        totalCount === 1 ? "" : "s"
-    } tagged with "${tag}"`
+    const tagHeader = `${totalCount} post${totalCount === 1 ? "" : "s"} tagged with "${tag}"`
 
-    const blogList = nodes.map(post => {
-        return (
-            <PostTuple post={post} key={post.id} />
-        )
+    const blogList = nodes.map((post) => {
+        return <PostTuple post={post} key={post.id} />
     })
 
     return (

@@ -3,21 +3,12 @@ import { Helmet } from "react-helmet"
 import { useSiteMetadata } from "../hooks/use-site-metadata"
 import PropTypes from "prop-types"
 
-export default function SEO({
-    lang,
-    description,
-    title,
-    meta,
-    image: metaImage,
-}) {
+export default function SEO({ lang, description, title, meta, image: metaImage }) {
     const siteMetadata = useSiteMetadata()
 
     const metaDescription = description || siteMetadata.description
 
-    const image =
-        metaImage && metaImage.src
-            ? `${siteMetadata.siteUrl}${metaImage.src}`
-            : null
+    const image = metaImage && metaImage.src ? `${siteMetadata.siteUrl}${metaImage.src}` : null
 
     const customMeta = [
         {

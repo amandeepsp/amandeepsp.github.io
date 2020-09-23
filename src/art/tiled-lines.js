@@ -6,7 +6,7 @@ export const tiledLines = (sketch) => {
     sketch.setup = function () {
         sketch.createCanvas(200, 200)
         sketch.background(pallette.background)
-        /sketch.strokeCap(sketch.PROJECT)
+        sketch.strokeCap(sketch.PROJECT)
         sketch.strokeWeight(5)
 
         for (let x = 0; x < sketch.width; x += step) {

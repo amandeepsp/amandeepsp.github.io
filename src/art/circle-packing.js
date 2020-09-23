@@ -65,17 +65,11 @@ export const circlePacking = (sketch) => {
             }
         }
 
-        if (
-            circle.x + circle.radius >= sketch.width ||
-            circle.x - circle.radius <= 0
-        ) {
+        if (circle.x + circle.radius >= sketch.width || circle.x - circle.radius <= 0) {
             return true
         }
 
-        if (
-            circle.y + circle.radius >= sketch.height ||
-            circle.y - circle.radius <= 0
-        ) {
+        if (circle.y + circle.radius >= sketch.height || circle.y - circle.radius <= 0) {
             return true
         }
 

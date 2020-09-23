@@ -7,7 +7,7 @@ export const joyDivision = (sketch) => {
         sketch.createCanvas(200, 200)
         sketch.background(pallette.background)
         sketch.fill(pallette.background)
-        for (let y = 50; y < sketch.height; y += 2*step) {
+        for (let y = 50; y < sketch.height; y += 2 * step) {
             sketch.fill(sketch.random(pallette.colors))
             sketch.beginShape()
             for (let x = 0; x < sketch.width; x += step) {
