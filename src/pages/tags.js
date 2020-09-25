@@ -12,15 +12,13 @@ const TagsPage = ({
 }) => (
     <Layout>
         <h2>Tags</h2>
-        <ul>
+        <div style={{ display: "flex", flexDirection: "column" }}>
             {group.map((tag) => (
-                <li key={tag.fieldValue}>
-                    <Link to={`/tags/${kebabCase(tag.fieldValue)}/`}>
-                        {tag.fieldValue} ({tag.totalCount})
-                    </Link>
-                </li>
+                <Link key={tag.fieldValue} to={`/tags/${kebabCase(tag.fieldValue)}/`}>
+                    {tag.fieldValue} ({tag.totalCount})
+                </Link>
             ))}
-        </ul>
+        </div>
     </Layout>
 )
 

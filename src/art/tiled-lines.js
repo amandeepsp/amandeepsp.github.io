@@ -1,13 +1,12 @@
-import * as tome from "chromotome"
+import { pallette } from "../utils/constants"
 
 const step = 20
-const pallette = tome.get("cc245")
 
 export const tiledLines = (sketch) => {
     sketch.setup = function () {
         sketch.createCanvas(200, 200)
         sketch.background(pallette.background)
-        sketch.strokeCap(sketch.ROUND)
+        sketch.strokeCap(sketch.PROJECT)
         sketch.strokeWeight(5)
 
         for (let x = 0; x < sketch.width; x += step) {

@@ -104,9 +104,7 @@ const createAboutPage = async (actions, graphql) => {
 
     const result = await graphql(`
         {
-            allMarkdownRemark(
-                filter: { frontmatter: { layout: { eq: "about" } } }
-            ) {
+            allMarkdownRemark(filter: { frontmatter: { layout: { eq: "about" } } }) {
                 edges {
                     node {
                         frontmatter {

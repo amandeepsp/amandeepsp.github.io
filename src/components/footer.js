@@ -32,7 +32,8 @@ const SocialSvg = styled.svg`
 `
 
 const SmallSiteTitle = styled.h4`
-    font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    font-family: Montserrat, sans-serif;
+    font-weight: 900;
     color: black;
 `
 
@@ -48,7 +49,7 @@ export default function Footer() {
                 <a
                     href={resolveProfileLink(website, username)}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                 >
                     {username}
                 </a>
