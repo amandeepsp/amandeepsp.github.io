@@ -14129,18 +14129,25 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
+typeface-karla@^0.0.72:
+  version "0.0.72"
+  resolved "https://registry.yarnpkg.com/typeface-karla/-/typeface-karla-0.0.72.tgz#b0eec7f2f13e638d274c0bac6bd0c82379c958e9"
+  integrity sha512-PKqhkf7MxnRMCdWfLXYsY2eGY3R9aGO630P5CCXnndvmfTlEGgXtb6J6kx1UDcCgzNh115Cd0IP5AnFU8cCpKw==
+
+typeface-montserrat@^0.0.75:
+  version "0.0.75"
+  resolved "https://registry.yarnpkg.com/typeface-montserrat/-/typeface-montserrat-0.0.75.tgz#b796d9c767ab8ed1343271985beb1e44b382b7b3"
+  integrity sha512-8ski20t3hdwu2T85pVfjK4jsDbwW8yWzd+LAKxYEmu+JVLVlB7G2yfmdKZz06pUwYCLVFvHvup+NYYulHDpE+w==
+
+typeface-rubik@^0.0.72:
+  version "0.0.72"
+  resolved "https://registry.yarnpkg.com/typeface-rubik/-/typeface-rubik-0.0.72.tgz#85d028dc66e8388a941f8c7ce194fad963d1824e"
+  integrity sha512-dRJrtCEHfY3e39zq/U4JpFPVVbEogpDKCGnS70sXur253gnrwunjai26KCZbwdF3NEdMAYMTBu4CIn3hJp4xSA==
+
 typography-normalize@^0.16.19:
   version "0.16.19"
   resolved "https://registry.yarnpkg.com/typography-normalize/-/typography-normalize-0.16.19.tgz#58e0cf12466870c5b27006daa051fe7307780660"
   integrity sha512-vtnSv/uGBZVbd4e/ZhZB9HKBgKKlWQUXw74+ADIHHxzKp27CEf8PSR8TX1zF2qSyQ9/qMdqLwXYz8yRQFq9JLQ==
-
-typography-plugin-code@^0.16.19:
-  version "0.16.19"
-  resolved "https://registry.yarnpkg.com/typography-plugin-code/-/typography-plugin-code-0.16.19.tgz#e65e9527b7fb096f9c73a69b714013eeab07af4c"
-  integrity sha512-iIERwepUUdNPODL/nBnGuTCkA0TnflowsdZNMhhG50NNaZ2jNAhK2TWUEdSUZB+Iig1UMHtRSSXFuMt+9mWYig==
-  dependencies:
-    gray-percentage "^2.0.0"
-    lodash "^4.13.1"
 
 typography-theme-github@^0.16.19:
   version "0.16.19"

@@ -247,8 +247,13 @@ const get_host = (filepath) =>
 Using `compose` this can be simplified into a pipeline on functions which is much easier to
 understand what is going on. But the ordering is a bit awkward, data flows from right to left.
 
+<!-- prettier-ignore -->
 ```js
-const get_host = compose(cut({ delimiter: "=", fields: 2 }), grep("^HOST="), cat)
+const get_host = compose(
+    cut({ delimiter: "=", fields: 2 }), 
+    grep("^HOST="), 
+    cat
+)
 ```
 
 There's a cousin to `compose` called `pipe` which just reverses the direction of data flow which is

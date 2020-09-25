@@ -1,4 +1,3 @@
-import { format } from "prettier"
 import { pallette } from "../utils/constants"
 
 export const cubicDisarray = function (sketch) {
