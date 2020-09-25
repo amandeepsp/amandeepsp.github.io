@@ -25,6 +25,12 @@ const SubTitle = styled.div`
     font-weight: 600;
 `
 
+const ContactContainer = styled.div`
+    background-color: #e5e5e5;
+    padding: 1rem;
+    border-radius: 4px;
+`
+
 export default function Template({ data, pageContext }) {
     const { markdownRemark: post } = data
     const { next, prev } = pageContext
@@ -50,6 +56,24 @@ export default function Template({ data, pageContext }) {
                     })}
                 </SubTitle>
                 <div dangerouslySetInnerHTML={{ __html: post.html }} />
+                <ContactContainer>
+                    {"Found a bug, error or typo? Contact me via "}
+                    <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={"mailto:amandeepspdhr@gmail.com"}
+                    >
+                        email
+                    </a>
+                    {" or DM me via "}
+                    <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={"https://twitter.com/messages/compose?recipient_id=2274665138"}
+                    >
+                        twitter
+                    </a>
+                </ContactContainer>
                 <BottomNavContainer>
                     {prev && (
                         <BottomLink>

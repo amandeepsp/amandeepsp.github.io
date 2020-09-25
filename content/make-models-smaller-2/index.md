@@ -339,9 +339,9 @@ def kd_step(teacher: nn.Module,
     optimizer.zero_grad()
 ```
 
-This concludes the series on ML model compression 👐. There are many more methods to
-make ML models smaller which I cannot cover as the posts would become too long. More and more
-research is being done on this, to follow the research be sure to check to
+This concludes the series on ML model compression 👐. There are many more methods to make ML models
+smaller which I cannot cover as the posts would become too long. More and more research is being
+done on this, to follow the research be sure to check to
 [arixv-sanity](https://www.arxiv-sanity.com/). Will try to introduce a further reading section in
 future.
 

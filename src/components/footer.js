@@ -46,7 +46,11 @@ export default function Footer() {
                 <SocialSvg>
                     <use xlinkHref={`/social-icon.svg#${website}`}></use>
                 </SocialSvg>
-                <a href={resolveProfileLink(website, username)} target="_blank" rel="noreferrer">
+                <a
+                    href={resolveProfileLink(website, username)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
                     {username}
                 </a>
             </SocialItemContainer>
