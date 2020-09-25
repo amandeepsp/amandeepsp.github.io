@@ -1,7 +1,7 @@
 import React from "react"
 import styled from "styled-components"
 import { Link } from "gatsby"
-import { circlePacking, tiledLines, joyDivision, cubicDisarray } from "../art"
+import { circlePacking, tiledLines, cubicDisarray } from "../art"
 import { useP5 } from "../hooks/use-p5"
 import _ from "lodash"
 
@@ -32,7 +32,6 @@ const TupleImage = styled.div`
 const artTypes = {
     tiled_lines: tiledLines,
     circle_packing: circlePacking,
-    joy_division: joyDivision,
     cubic_disarray: cubicDisarray,
 }
 
@@ -44,7 +43,7 @@ export default function PostTuple({
 }) {
     const sketch = art_type
         ? artTypes[art_type]
-        : _.sample([tiledLines, circlePacking, joyDivision, cubicDisarray])
+        : _.sample([tiledLines, circlePacking, cubicDisarray])
     const [setRef] = useP5(sketch)
     return (
         <TupleContainer>

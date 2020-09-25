@@ -1,9 +1,14 @@
 import React from "react"
-
-import kebabCase from "lodash/kebabCase"
-
-import { Link, graphql } from "gatsby"
+import { graphql } from "gatsby"
 import Layout from "../components/layout"
+import TagTuple from "../components/tag-tuple"
+import styled from "styled-components"
+
+const TagsDiv = styled.div`
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+`
 
 const TagsPage = ({
     data: {
@@ -12,13 +17,11 @@ const TagsPage = ({
 }) => (
     <Layout>
         <h2>Tags</h2>
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <TagsDiv>
             {group.map((tag) => (
-                <Link key={tag.fieldValue} to={`/tags/${kebabCase(tag.fieldValue)}/`}>
-                    {tag.fieldValue} ({tag.totalCount})
-                </Link>
+                <TagTuple key={tag.fieldValue} tag={tag} />
             ))}
-        </div>
+        </TagsDiv>
     </Layout>
 )
 
