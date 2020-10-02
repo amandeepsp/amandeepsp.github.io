@@ -104,15 +104,8 @@ in the squeeze layers and expand layers are hyper-parameters. If $e_{3 \times 3}
 are the number of filters in expand layer and $s_{1 \times 1}$ is the number of filters in the
 squeeze layer. When using Fire module $s_{1 \times 1} < e_{3 \times 3} + e_{1 \times 1}$ works best.
 
-<!-- {%
-    include image.html
-    file="/assets/fire_module.png"
-    caption="Fig 1. Fire module with $s_{1 \times 1} = 3$, $e_{1 \times 1} = 4$ and $e_{3 \times 3} = 4$."
-    source="https://arxiv.org/pdf/1602.07360.pdf"
-%} -->
-
-![fire_module](assets/fire_module.png) Fig 1. Fire module with $s_{1 \times 1} = 3$,
-$e*{1 \times 1} = 4$ and $e*{3 \times 3} = 4$. ([Source](https://arxiv.org/pdf/1602.07360.pdf))
+![fire_module](assets/fire_module.png "Fig 1. Fire module with $s_{1 \\times 1} = 3$,
+$e*{1 \times 1} = 4$ and $e*{3 \times 3} = 4$. ([Source](https://arxiv.org/pdf/1602.07360.pdf))")
 
 Code for the Fire Module adapted from `torchvision.models`. Here `inchannels` are the number of
 input channels, `squeeze_planes` are the number of output channels, `expand1x1_planes` and
@@ -171,17 +164,9 @@ $$
 
 For $k = 3$, $N_k = 16$ we have a **~ 5.76x** reduction in number of parameters for a layer.
 
-<!-- {%
-    include image.html
-    file="/assets/depthwise.svg"
-    caption="Fig 2. Depthwise seperable convolution followed by pointwise convolution"
-    max-width="400"
-    source="https://eli.thegreenplace.net/2018/depthwise-separable-convolutions-for-machine-learning/"
-%} -->
-
-![depthwise](assets/depthwise.svg) _Fig 2. Depthwise seperable convolution followed by pointwise
+![depthwise](assets/depthwise.png "Fig 2. Depthwise seperable convolution followed by pointwise
 convolutions
-([Source](https://eli.thegreenplace.net/2018/depthwise-separable-convolutions-for-machine-learning/))_
+([Source](https://eli.thegreenplace.net/2018/depthwise-separable-convolutions-for-machine-learning/))")
 
 Implementing Depthwise conv. is quite simple. Checkout the code snippet below, `inp` donates the
 number of input channels and `oup` are the number of output channels.
@@ -215,16 +200,8 @@ have a computational advantage because due to the nature of the block we can now
 and output dimensions e.g. a layer with dimensions `112x112` can have only `16` channels and
 retaining the accuracy as compared to `64` for MobileNet v1.
 
-<!--
-{%
-    include image.html
-    file="/assets/InvResidualBlock.png"
-    caption="Fig 3. MobileNet v2 primary convolution block."
-    source="https://machinethink.net/blog/mobilenet-v2/"
-%} -->
-
-![InvResidualBlock](assets/InvResidualBlock.png) _Fig 3. MobileNet v2 primary convolution
-block.([Source](https://machinethink.net/blog/mobilenet-v2))_
+![InvResidualBlock](assets/InvResidualBlock.png "Fig 3. MobileNet v2 primary convolution
+block.([Source](https://machinethink.net/blog/mobilenet-v2))")
 
 The code for the `InvertedResidual` block is adapted from `trochvision.models` package.
 
@@ -286,19 +263,8 @@ where $\mathcal{L_{gt}}$ is the loss with ground truth outputs and $\mathcal{L_{
 softmax temperature loss. Both $\lambda$ and $T$ are tunable hyperparameters. The loss configuration
 is as in the image below.
 
-<!-- {%
-    include image.html
-    file="/assets/kd.png"
-    caption="Fig 4. Knowledge distillation model configuration."
-    source=" https://nervanasystems.github.io/distiller/knowledge_distillation.html"
-%} -->
-
-<!-- prettier-ignore-start -->
-
-![KD](assets/kd.png) *Fig 4. Knowledge distillation model configuration.
-([Source](https://nervanasystems.github.io/distiller/knowledge_distillation.html))*
-
-<!-- prettier-ignore-end -->
+![KD](assets/kd.png "Fig 4. Knowledge distillation model configuration.
+([Source](https://nervanasystems.github.io/distiller/knowledge_distillation.html))")
 
 A major success story of KD is [DistillBERT][distillbert]. [Hugging Face &#x1F917;][huggingface]
 managed to use KD to reduce the size of the BERT from 110M parameters to 66M parameters, while still

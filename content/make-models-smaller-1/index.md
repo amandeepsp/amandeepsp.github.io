@@ -37,7 +37,7 @@ which also use ranking use the mean activation of neurons, the number of times a
 is zero on a validation set and many other creative methods. This approach is pioneered by [Han
 et.al.][han] in their 2015 paper.
 
-![](assets/pruning.png) _Fig 1. Pruning in neural networks from [Han et. al.][han]_
+![Pruning](assets/pruning.png "Fig 1. Pruning in neural networks from [Han et. al.](https://arxiv.org/abs/1506.02626)")
 
 Even more recently in 2019, the [Frankle et.al.][frankle] paper titled _The Lottery Ticket
 Hypothesis_ the authors found out that within every deep neural network there exists a subset of it
@@ -97,8 +97,7 @@ do not have to use large ranges, say ~ $-3.4\times10^{38}$ to $3.4\times10^{38}$
 floating -point. For example, in the image below the weight values in MobileNet are all very close
 to zero.
 
-![](assets/mobilenet1-weight-distribution.svg) _Fig 2. Weight distribution of 10 layers of
-MobileNetV1._
+![MobileNet Weight Distribution](assets/mobilenet1-weight-distribution.png "Fig 2. Weight distribution of 10 layers of MobileNetV1.")
 
 A Quantization scheme is how we transform our real weights to quantized one, a very rudimentary form
 of the scheme is linear scaling. Say we want to transform values in range $[ r_{min}, r_{max} ]$ to
@@ -117,9 +116,7 @@ method to achieve this is generating distributions of weights and activations an
 original. A more elegant way to do this is using _Fake Quantization_ i.e. introduce quantization
 aware layers into the network during training. This idea is proposed by [_Jacob et. al._][jacob].
 
-![](assets/fake_quant.png) _Fig 3. (a) Normal conv layer, (b) Conv layer with fake quantization
-units added, (c) Comparison of quantized network's latency and accuracy. Image from_ [_Jacob et.
-al._][jacob]
+![Fake Quantization](assets/fake_quant.png "Fig 3. (a) Normal conv layer, (b) Conv layer with fake quantization units added, (c) Comparison of quantized network's latency and accuracy. Image from [Jacob et.al.](https://arxiv.org/abs/1712.05877)")
 
 While training the _Fake quantization_ node calculates the ranges for the weights and activations
 and store their moving average. After training, we quantize the network with this range to get
