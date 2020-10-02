@@ -6,7 +6,7 @@
 	"scripts": {
 		"build": "gatsby build",
 		"develop": "gatsby develop",
-		"format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+		"format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,css}\"",
 		"start": "npm run develop",
 		"serve": "gatsby serve",
 		"clean": "gatsby clean",

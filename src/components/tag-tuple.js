@@ -11,13 +11,12 @@ const TupleContainer = styled.div`
     width: 200px;
 `
 
-
 export default function TagTuple({ tag }) {
     const sketch = sample([tiledLines, circlePacking, cubicDisarray])
     const [setRef] = useP5(sketch)
     return (
         <TupleContainer>
-            <div ref={setRef}/>
+            <div ref={setRef} />
             <Link key={tag.fieldValue} to={`/tags/${kebabCase(tag.fieldValue)}/`}>
                 {tag.fieldValue} ({tag.totalCount})
             </Link>

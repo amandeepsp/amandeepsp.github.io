@@ -21,8 +21,7 @@ programming. Let's dabble into a few core concepts of functional programming tha
 understand what the fuss is all about. At the end of the article you might feel like the guy in the
 meme.
 
-![WOW](assets/wow.png) Image source
-[@impurepics](https://impurepics.com/posts/2020-06-21-fp-is-wow.html)
+![WOW]
 
 ## Core concepts
 
@@ -295,3 +294,6 @@ make our code more declarative.
 [lodash]: https://lodash.com/docs/#curry
 [rambda]: https://ramdajs.com/docs/#curry
 [mostly]: https://mostly-adequate.gitbooks.io/mostly-adequate-guide/content/ch03.html
+[wow]:
+    assets/wow.png
+    "Image source[@impurepics](https://impurepics.com/posts/2020-06-21-fp-is-wow.html)"
