@@ -23,7 +23,6 @@ const SiteTitle = styled.h1`
     flex-grow: 1;
     font-family: Montserrat, sans-serif;
     font-weight: 900;
-    font-size: 2.75rem;
 `
 const NavLink = styled.h3`
     margin: 0 0.5rem;
