@@ -1,3 +1,5 @@
+name: Deploy to Github Pages
+
 on:
   push:
     branches: [master]

@@ -281,6 +281,14 @@ place in the programming as eventually, we need to cause side-effects. DB querie
 calls all are side effects, but we can learn from functional principles and incorporated them to
 make our code more declarative.
 
+I have covered just a taste of FP to get you started, if you want to learn more about how to do
+effects in FP and some more stuff like Functors, Applicatives and the _M word_ (Monads) to more
+advanced stuff, here's a list of resources I recommend
+
+-   [Mostly Adequate Guide to Functional Programming](https://mostly-adequate.gitbooks.io/)
+-   [Composing software](https://leanpub.com/composingsoftware) by Eric Elliot
+-   [Functional Christmas](https://functional.christmas/)
+
 [^1]:
     George A. Miller,
     [The Magical Number Seven, Plus or Minus Two: Some Limits on our Capacity for Processing Information](https://web.archive.org/web/20100619202020/http://psychclassics.asu.edu/Miller/)
