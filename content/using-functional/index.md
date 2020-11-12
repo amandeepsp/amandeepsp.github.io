@@ -8,7 +8,6 @@ image: /assets/ivory_tower.jpg
 path: /using-functional
 redirects:
     - /fp-is-awesome/
-art_type: circle_packing
 ---
 
 Functional Programming is, putting it plainly, a programming paradigm that uses functions and

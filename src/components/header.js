@@ -21,7 +21,7 @@ const NavContainer = styled.div`
 
 const SiteTitle = styled.h1`
     flex-grow: 1;
-    font-family: Montserrat, sans-serif;
+    font-family: "noto serif", sans-serif;
     font-weight: 900;
 `
 const NavLink = styled.h3`

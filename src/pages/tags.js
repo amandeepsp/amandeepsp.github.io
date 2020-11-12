@@ -1,14 +1,9 @@
 import React from "react"
 import { graphql } from "gatsby"
 import Layout from "../components/layout"
-import TagTuple from "../components/tag-tuple"
-import styled from "styled-components"
-
-const TagsDiv = styled.div`
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-`
+import kebabCase from "lodash/kebabCase"
+import { Link } from "gatsby"
+import { SecondaryHeader } from "../components/styled"
 
 const TagsPage = ({
     data: {
@@ -16,12 +11,16 @@ const TagsPage = ({
     },
 }) => (
     <Layout>
-        <h2>Tags</h2>
-        <TagsDiv>
+        <SecondaryHeader>Tags</SecondaryHeader>
+        <ul style={{ marginTop: "1em" }}>
             {group.map((tag) => (
-                <TagTuple key={tag.fieldValue} tag={tag} />
+                <li key={tag.fieldValue}>
+                    <Link key={tag.fieldValue} to={`/tags/${kebabCase(tag.fieldValue)}/`}>
+                        {tag.fieldValue} ({tag.totalCount})
+                    </Link>
+                </li>
             ))}
-        </TagsDiv>
+        </ul>
     </Layout>
 )
 

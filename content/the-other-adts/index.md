@@ -6,7 +6,6 @@ date: 2020-09-15 10:55:06 +0530
 categories: [Functional Programming, Haskell, Kotlin]
 image: assets/addmul.png
 path: /other-adts
-art_type: cubic_disarray
 ---
 
 ![](assets/addmul.png)

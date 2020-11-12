@@ -3,6 +3,7 @@ import { graphql } from "gatsby"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 import PostTuple from "../components/post-tuple"
+import { SecondaryHeader } from "../components/styled"
 
 export default function Blog({ data }) {
     const { edges: posts } = data.allMarkdownRemark
@@ -14,7 +15,7 @@ export default function Blog({ data }) {
     return (
         <Layout>
             <SEO title={"Blog"} />
-            <h2>All Posts</h2>
+            <SecondaryHeader>All Posts</SecondaryHeader>
             {postsToRender}
         </Layout>
     )
@@ -34,7 +35,6 @@ export const pageQuery = graphql`
                         title
                         date(formatString: "MMMM DD, YYYY")
                         path
-                        art_type
                     }
                 }
             }

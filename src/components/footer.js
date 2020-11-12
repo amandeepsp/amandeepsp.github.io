@@ -32,7 +32,7 @@ const SocialSvg = styled.svg`
 `
 
 const SmallSiteTitle = styled.h4`
-    font-family: Montserrat, sans-serif;
+    font-family: "noto serif", sans-serif;
     font-weight: 900;
     color: black;
 `

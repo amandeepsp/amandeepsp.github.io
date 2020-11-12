@@ -38,7 +38,7 @@ export default function Template({ data, pageContext }) {
     return (
         <Layout>
             <SEO title={post.frontmatter.title} />
-            <div>
+            <article>
                 <h1>{post.frontmatter.title}</h1>
                 <SubTitle>
                     Posted on {post.frontmatter.date} &bull; {post.timeToRead} min read &bull;
@@ -92,7 +92,7 @@ export default function Template({ data, pageContext }) {
                         </BottomLink>
                     )}
                 </BottomNavContainer>
-            </div>
+            </article>
         </Layout>
     )
 }
