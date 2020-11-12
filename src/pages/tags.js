@@ -12,7 +12,7 @@ const TagsPage = ({
 }) => (
     <Layout>
         <SecondaryHeader>Tags</SecondaryHeader>
-        <ul style={{marginTop: "1em"}}>
+        <ul style={{ marginTop: "1em" }}>
             {group.map((tag) => (
                 <li key={tag.fieldValue}>
                     <Link key={tag.fieldValue} to={`/tags/${kebabCase(tag.fieldValue)}/`}>
