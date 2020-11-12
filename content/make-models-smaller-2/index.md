@@ -8,7 +8,6 @@ image: /assets/InvResidualBlock.png
 path: /making-models-smaller-2
 redirects:
     - /ml-model-compression-part2/
-art_type: tiled_lines
 ---
 
 This post is a direct continuation of [Part 1]({% post_url 2020-01-01-make-models-smaller %}),

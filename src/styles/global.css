@@ -1,28 +1,6 @@
 @import "fonts.css";
 
-/* Poor man's dark mode */
-@media (prefers-color-scheme: dark) {
-    body {
-        filter: invert(1) hue-rotate(180deg);
-        background-color: #121212;
-    }
-
-    body,
-    picture,
-    video,
-    canvas {
-        filter: invert(1) hue-rotate(180deg);
-    }
-
-    img {
-        filter: invert(1) hue-rotate(180deg) brightness(0.8) !important;
-    }
-}
-
-h1,
-h2,
-h3,
-h4 {
+h1 {
     border-bottom: 0;
 }
 
