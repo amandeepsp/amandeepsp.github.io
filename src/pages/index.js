@@ -3,7 +3,6 @@ import { graphql } from "gatsby"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 import PostTuple from "../components/post-tuple"
-import { SecondaryHeader } from "../components/styled"
 
 export default function Index({ data }) {
     const { edges: posts } = data.allMarkdownRemark
@@ -15,7 +14,6 @@ export default function Index({ data }) {
     return (
         <Layout>
             <SEO title={"Home"} />
-            <SecondaryHeader>Latest Posts</SecondaryHeader>
             <div>{postsToRender}</div>
         </Layout>
     )
@@ -25,7 +23,6 @@ export const pageQuery = graphql`
     query IndexQuery {
         allMarkdownRemark(
             sort: { order: DESC, fields: [frontmatter___date] }
-            limit: 4
             filter: { frontmatter: { layout: { eq: "blog-post" } } }
         ) {
             edges {

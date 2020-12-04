@@ -21,10 +21,6 @@ module.exports = {
         ],
         headerNav: [
             {
-                title: "Blog",
-                url: "/blog",
-            },
-            {
                 title: "Tags",
                 url: "/tags",
             },
