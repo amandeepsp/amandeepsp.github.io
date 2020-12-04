@@ -19,12 +19,12 @@ const NavContainer = styled.div`
     flex-direction: row;
 `
 
-const SiteTitle = styled.h1`
+const SiteTitle = styled.h3`
     flex-grow: 1;
     font-family: "noto serif", sans-serif;
     font-weight: 900;
 `
-const NavLink = styled.h3`
+const NavLink = styled.h4`
     margin: 0 0.5rem;
     @media (max-width: ${MOBILE_QUERY_SIZE}px) {
         margin: 0 0.75rem 0.5rem 0;

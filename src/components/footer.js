@@ -62,6 +62,20 @@ export default function Footer() {
             <SmallSiteTitle>{title}</SmallSiteTitle>
             <SubduedText>{description}</SubduedText>
             <SocialContainer>{socialLinks}</SocialContainer>
+            <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+                <img
+                    alt="Creative Commons Licence"
+                    style={{ borderWidth: 0, marginTop: "1rem" }}
+                    src="https://i.creativecommons.org/l/by/4.0/88x31.png"
+                />
+            </a>
+            <p style={{ fontSize: "0.75rem" }}>
+                This work is licensed under a{" "}
+                <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">
+                    Creative Commons Attribution 4.0 International License
+                </a>
+                .
+            </p>
         </Container>
     )
 }

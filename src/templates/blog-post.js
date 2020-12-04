@@ -47,10 +47,15 @@ export default function Template({ data, pageContext }) {
                         return (
                             <Link
                                 key={tag}
-                                style={{ padding: "0.2rem" }}
+                                style={{
+                                    padding: "0.2rem",
+                                    margin: "0.2rem",
+                                    borderRadius: "4px",
+                                    backgroundColor: "#fdf6e3",
+                                }}
                                 to={`/tags/${kebabCase(tag)}/`}
                             >
-                                {tag}
+                                {`#${tag}`}
                             </Link>
                         )
                     })}
