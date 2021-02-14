@@ -2,7 +2,7 @@ import React from "react"
 import styled from "styled-components"
 import { useSiteMetadata } from "../hooks/use-site-metadata"
 
-const Container = styled.div`
+const Container = styled.footer`
     border-top: 1px solid gray;
 `
 const SubduedText = styled.p`

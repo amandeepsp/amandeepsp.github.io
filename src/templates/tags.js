@@ -2,6 +2,7 @@ import React from "react"
 import PostTuple from "../components/post-tuple"
 import Layout from "../components/layout"
 import { Link, graphql } from "gatsby"
+import { SecondaryHeader } from "../components/styled"
 
 const Tags = ({ pageContext, data }) => {
     const { tag } = pageContext
@@ -14,7 +15,7 @@ const Tags = ({ pageContext, data }) => {
 
     return (
         <Layout>
-            <h2>{tagHeader}</h2>
+            <SecondaryHeader>{tagHeader}</SecondaryHeader>
             {blogList}
             <Link to="/tags">
                 <h4>All tags</h4>

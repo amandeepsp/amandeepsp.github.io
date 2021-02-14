@@ -4,25 +4,35 @@ import Layout from "../components/layout"
 import kebabCase from "lodash/kebabCase"
 import { Link } from "gatsby"
 import { SecondaryHeader } from "../components/styled"
+import styled from "styled-components"
+
+const TagsContainer = styled.div`
+    margin-top: 1em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+`
 
 const TagsPage = ({
     data: {
         allMarkdownRemark: { group },
     },
 }) => (
-    <Layout>
-        <SecondaryHeader>Tags</SecondaryHeader>
-        <ul style={{ marginTop: "1em" }}>
-            {group.map((tag) => (
-                <li key={tag.fieldValue}>
-                    <Link key={tag.fieldValue} to={`/tags/${kebabCase(tag.fieldValue)}/`}>
+        <Layout>
+            <SecondaryHeader>Tags</SecondaryHeader>
+            <TagsContainer>
+                {group.map((tag) => (
+                    <Link style={{ fontSize: `${tag.totalCount}em`, marginRight: "0.5em" }}
+                        key={tag.fieldValue}
+                        to={`/tags/${kebabCase(tag.fieldValue)}/`}
+                    >
                         {tag.fieldValue} ({tag.totalCount})
                     </Link>
-                </li>
-            ))}
-        </ul>
-    </Layout>
-)
+                ))}
+            </TagsContainer>
+        </Layout>
+    )
 
 export default TagsPage
 

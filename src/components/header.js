@@ -4,7 +4,7 @@ import { Link } from "gatsby"
 import { useSiteMetadata } from "../hooks/use-site-metadata"
 import { MOBILE_QUERY_SIZE } from "../utils/constants"
 
-const Container = styled.div`
+const Container = styled.header`
     display: flex;
     flex-direction: row;
     @media (max-width: ${MOBILE_QUERY_SIZE}px) {
@@ -14,7 +14,7 @@ const Container = styled.div`
     border-bottom: 1px solid gray;
 `
 
-const NavContainer = styled.div`
+const NavContainer = styled.nav`
     display: flex;
     flex-direction: row;
 `
