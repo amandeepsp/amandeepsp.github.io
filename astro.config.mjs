@@ -5,17 +5,20 @@ import tailwind from '@astrojs/tailwind';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
+import partytown from '@astrojs/partytown';
+
 export default defineConfig({
     site: 'https://amandeepsp.github.io.',
-    integrations: [
-        mdx(),
-        sitemap(),
-        tailwind({
-            applyBaseStyles: false
-        })
-    ],
+    integrations: [mdx(), sitemap(), tailwind(), partytown()],
     markdown: {
         remarkPlugins: [remarkMath],
-        rehypePlugins: [rehypeKatex]
+        rehypePlugins: [rehypeKatex],
+        syntaxHighlight: 'shiki',
+        shikiConfig: {
+            themes: {
+                light: 'kanagawa-lotus',
+                dark: 'kanagawa-dragon',
+            }
+        }
     }
 });
