@@ -9,7 +9,16 @@ import partytown from '@astrojs/partytown';
 
 export default defineConfig({
     site: 'https://amandeepsp.github.io.',
-    integrations: [mdx(), sitemap(), tailwind(), partytown()],
+    integrations: [
+        mdx(),
+        sitemap(),
+        tailwind(),
+        partytown({
+            config: {
+                forward: ['dataLayer.push']
+            }
+        })
+    ],
     markdown: {
         remarkPlugins: [remarkMath],
         rehypePlugins: [rehypeKatex],
@@ -17,7 +26,7 @@ export default defineConfig({
         shikiConfig: {
             themes: {
                 light: 'kanagawa-lotus',
-                dark: 'kanagawa-dragon',
+                dark: 'kanagawa-dragon'
             }
         }
     }
