@@ -9,32 +9,21 @@ export type Link = {
     href: string;
 };
 
-export type Hero = {
-    title?: string;
-    text?: string;
-};
-
 export type SiteConfig = {
     logo?: Image;
     title: string;
     subtitle?: string;
     description: string;
-    image?: Image;
     headerNavLinks?: Link[];
     socialLinks?: Link[];
-    hero?: Hero;
     postsPerPage?: number;
     projectsPerPage?: number;
 };
 
 const siteConfig: SiteConfig = {
     title: 'Down the Rabbit Hole',
-    subtitle: 'A Blog about software engineering',
-    description: 'A blog about software engineering, AI, and the future',
-    image: {
-        src: '',
-        alt: 'Down the Rabbit Hole - A blog about software engineering, AI, and the future'
-    },
+    subtitle: 'A blog about any and all things engineering',
+    description: 'A blog about any and all things engineering',
     headerNavLinks: [
         {
             text: 'Home',
@@ -59,12 +48,8 @@ const siteConfig: SiteConfig = {
             href: 'https://x.com/theamndeepsingh'
         }
     ],
-    hero: {
-        title: 'Hi There & Welcome to My Corner of the Web!',
-        text: "I'm **Amandeep**, a software engineer."
-    },
-    postsPerPage: 8,
-    projectsPerPage: 8
+    postsPerPage: 10,
+    projectsPerPage: 10
 };
 
 export default siteConfig;
