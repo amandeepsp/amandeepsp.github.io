@@ -20,7 +20,7 @@ module.exports = {
                 main: 'rgb(var(--color-border-main) / <alpha-value>)'
             },
             typography: (theme) => ({
-                dante: {
+                blog: {
                     css: {
                         '--tw-prose-body': theme('textColor.main / 100%'),
                         '--tw-prose-headings': theme('textColor.main / 100%'),

@@ -9,7 +9,7 @@ const hero = siteConfig.hero;
     (hero?.title || hero?.text) && (
         <section class="w-full flex flex-col gap-8 mb-16 sm:mb-24">
             {hero.title && <h1 class="text-2xl leading-tight font-serif font-medium sm:text-3xl sm:leading-tight">{hero.title}</h1>}
-            {hero.text && <div class="max-w-none prose prose-dante sm:prose-lg" set:html={marked.parse(hero.text)} />}
+            {hero.text && <div class="max-w-none prose prose-blog sm:prose-lg" set:html={marked.parse(hero.text)} />}
         </section>
     )
 }
