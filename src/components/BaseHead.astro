@@ -70,3 +70,15 @@ function formatCanonicalURL(url: string | URL) {
 <meta property="twitter:description" content={description} />
 {resolvedImage?.src && <meta property="twitter:image" content={resolvedImage.src} />}
 {resolvedImage?.alt && <meta name="twitter:image:alt" content={resolvedImage?.alt} />}
+
+<!-- Google tag (gtag.js) -->
+<script is:inline type="text/partytown" src="https://www.googletagmanager.com/gtag/js?id=G-LVRYYR0DZN"></script>
+<script type="text/partytown">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'G-LVRYYR0DZN');
+</script>

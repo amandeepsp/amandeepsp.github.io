@@ -3,14 +3,9 @@ title: Making Machine Learning models smaller
 excerpt: Machine Learning models are getting bigger and expensive to compute. Embedded devices have restricted memory, computation power and battery. But we can optimize our model to run smoothly on these devices. By reducing the size of the model we decrease the number of operations that need to be done hence reducing the computation.
 publishDate: 'Mar 10 2020'
 tags:
-  - ML
-  - AI
-  - Optimizing
+  - Machine Learning
+  - Optimization
 isFeatured: true
-seo:
-    image:
-        src: pruning.png
-        alt: pruning
 ---
 
 Machine Learning models are getting bigger and expensive to compute. Embedded devices have restricted memory, computation power and battery. But we can optimize our model to run smoothly on these devices. By reducing the size of the model we decrease the number of operations that need to be done hence reducing the computation. Smaller models also trivially translate into less memory usage. Smaller models are also more power-efficient. One must think that a reduced number of computations is responsible for less power consumption, but on the contrary, the power draw from memory access is about 1000x more costly than addition or multiplication. Now since there are no free lunches i.e. everything comes at a cost, we lose some accuracy of our models here. Bear in mind these speedups are not for training but inference only.
@@ -21,7 +16,7 @@ Pruning is removing excess network connections that do not hugely contribute to 
 
 ![Pruning](assets/pruning.png)
 
-_Fig 1. Pruning in neural networks from [Han et. al.](https://web.archive.org/web/20210120192800/https://arxiv.org/abs/1506.02626)_
+_Fig 1. Pruning in neural networks from [Han et. al.](https://arxiv.org/abs/1506.02626)_
 
 Even more recently in 2019, the [Frankle et.al.](https://arxiv.org/abs/1803.03635) paper titled *The Lottery Ticket Hypothesis* the authors found out that within every deep neural network there exists a subset of it which gives the same accuracy for an equal amount of training. These results hold for unstructured pruning which prunes the whole network which gives us a sparse network. Sparse networks are inefficient on GPUs since there is no structure to their computation. To remedy this, structured pruning is done, which prunes a part of the network e.g. a layer or a channel. The Lottery Ticket discussed earlier is found no to work here by [Liu et.al.](https://arxiv.org/abs/1810.05270) They instead discovered that it was better to retrain a network after pruning instead of fine-tuning. Aside from performance is there any other use of sparse networks? Yes, sparse networks are more robust to noise input as shown in a paper by [Ahmed et.al.](https://arxiv.org/abs/1903.11257) Pruning is supported in both TF (`tensorflow_model_optimization` package) and PyTorch (`torch.nn.utils.prune`).
 
@@ -53,7 +48,7 @@ Quantization is to restrict the number of possible values a weight can take, thi
 
 This works because neural nets are pretty robust to small perturbations to their weights and we can easily round off them without having much effect on the accuracy of the network. Moreover, weights are not contained in very large ranges due to regularization techniques used in training, hence we do not have to use large ranges, say ~ $−3.4×10^{38}$ to $3.4×10^{38}$ for a 32-bit floating -point. For example, in the image below the weight values in MobileNet are all very close to zero.
 
-[![](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/63656833e6750152cc59a168144f99c0/07484/mobilenet1-weight-distribution.png)](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/63656833e6750152cc59a168144f99c0/07484/mobilenet1-weight-distribution.png)
+![MobileNet1 Weight Distribution](assets/mobilenet1-weight-distribution.png)
 
 _Fig 2. Weight distribution of 10 layers of MobileNetV1._
 
@@ -63,7 +58,7 @@ $$r = \frac {r_{max} - r_{min}} {I_{max} - 0} {(q - z)} = s(q -z) $$
 
 where *r* is the original value of the weight, 𝑠 is the scale, 𝑞*q* is the quantized value and 𝑧 is the value that maps to `0.0f`. This is also known as an *affine mapping*. Since 𝑞 is integer results are rounded off. Now the problem arises how we choose $ r*{min}$ and$ r*{max}$. A simple method to achieve this is generating distributions of weights and activations and then taking their *[KL divergences](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence)* with quantized distributions and use the one with min divergence from the original. A more elegant way to do this is using *Fake Quantization* i.e. introduce quantization aware layers into the network during training. This idea is proposed by *[Jacob et. al.](https://arxiv.org/abs/1712.05877)*.
 
-[![](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/8f84ecb013f45f8ae7328bfeefcd558a/07484/fake_quant.png)](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/8f84ecb013f45f8ae7328bfeefcd558a/07484/fake_quant.png)
+![Fake Quantization](assets/fake_quant.png)
 
 *Fig 3. (a) Normal conv layer, (b) Conv layer with fake quantization units added, (c) Comparison of quantized network's latency and accuracy. Image from* *[Jacob et.al.](https://arxiv.org/abs/1712.05877)*
 
@@ -105,7 +100,7 @@ More drastic bit-width also explored in papers on XOR nets by *[Rastegari et.al
 
 Post-training quantization in PyTorch currently only support operations on CPU.
 
-For detailed code examples visit the PyTorch documentation *[here](https://web.archive.org/web/20210120192800/https://pytorch.org/tutorials/advanced/dynamic_quantization_tutorial.html)*. On Tensorflow side of things quantization can be done using TFLite's `tf.lite.TFLiteConverter` API by setting the `optimizations` parameter to `tf.lite.Optimize.OPTIMIZE_FOR_SIZE`. Fake quantization is enabled by `tf.contrib.quantize` package.
+For detailed code examples visit the PyTorch documentation *[here](https://pytorch.org/tutorials/advanced/dynamic_quantization_tutorial.html)*. On Tensorflow side of things quantization can be done using TFLite's `tf.lite.TFLiteConverter` API by setting the `optimizations` parameter to `tf.lite.Optimize.OPTIMIZE_FOR_SIZE`. Fake quantization is enabled by `tf.contrib.quantize` package.
 
 ## **Low Rank Transforms**
 
@@ -159,7 +154,7 @@ Rather than applying size reducing techniques to existing architectures, we try 
 
 SqueezeNet by *[Iandola et.al.](https://arxiv.org/pdf/1602.07360.pdf)* is presumably the first to explore a new architecture for smaller CNNs. At the core of SqueezeNet are **Fire Modules**. Fire modules use `1x1` filters rather than `3x3` filters as they have 9x lesser parameters and have a lesser number of channels than normal, which is called a *squeeze* layer. The lesser number of channels are recovered in the expand layer which consists of several zero-padded `1x1` filters and `3x3` filters. The number of filters in the squeeze layers and expand layers are hyper-parameters. If $ 𝑒*{3×3}+𝑒*{1×1}$ are the number of filters in expand layer and $s*{1×1}$ is the number of filters in the squeeze layer. When using Fire module $s*{1×1} < e*{3×3}+e*{1×1}$ works best.
 
-[![](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/0737d9a8a4401aadff31b200284c9d72/9ff85/fire_module.png)](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/0737d9a8a4401aadff31b200284c9d72/9ff85/fire_module.png)
+![Fire Module](assets/fire_module.png)
 
 *Fig 4. Fire module with* $s_{1×1}=3, e_{1×1}=4$ _and_ $e_{3×3}=4$. _([Source](https://arxiv.org/pdf/1602.07360.pdf))_
 
@@ -204,7 +199,7 @@ $$\frac {k^2 N_c W H + N_c N_k WH} {k^2 N_k N_c WH} = \frac {1} {N_k} + \frac {1
 
 For $k=3$, $ 𝑁_k=16$ we have a **~ 5.76x** reduction in number of parameters for a layer.
 
-[![](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/58ff44ef91de88b69c3da0c5009378f3/07484/depthwise.png)](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/58ff44ef91de88b69c3da0c5009378f3/07484/depthwise.png)
+![Depthwise network](assets/depthwise.png)
 
 _Fig 5. Depthwise seperable convolution followed by pointwise convolutions (**[Source](https://eli.thegreenplace.net/2018/depthwise-separable-convolutions-for-machine-learning/)**)_
 
@@ -225,7 +220,7 @@ def conv_dw(inp, oup, stride):
 
 **MobileNet v2** uses as an inverted residual block as its main convolutional layer. A Residual block taken from the *[ResNets](https://arxiv.org/abs/1512.03385)* includes bottleneck layers that decrease the number of channels followed by an expansion layer that restores the number of channels for the residual concat operation. The inverted block layer does the reverse of that it first expands the number of channels then reduce them. The last layer in the block is a bottleneck layer as it decreases the channels of the output. This layer has to non-linearity attached to it. This because authors found out that a linear bottleneck does not lose information when a feature-map is embedded into a lower dimension space i.e. reduced to a tensor with less number of channels. This is found to increase the accuracy of these networks. To calculate the number of parameters, presume $N_{in}$ is the number of input channels, $N_{out}$ the number of output channels and $𝑡$ is the expansion ratio, the ratio between the size of the intermediate layer to the input layer. The number of computations and parameters are $WHN_{in}t(N_{in}+k^2+N_{out})$. But there is an extra `1x1` convolution component, still, we have a computational advantage because due to the nature of the block we can now decrease the input and output dimensions e.g. a layer with dimensions `112x112` can have only `16` channels and retaining the accuracy as compared to `64` for MobileNet v1.
 
-[![](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/55209c0d7f0c23a227909165ffad43cf/16caa/InvResidualBlock.png)](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/55209c0d7f0c23a227909165ffad43cf/16caa/InvResidualBlock.png)
+![Inverse residual block](assets/InvResidualBlock.png)
 
 _Fig 6. MobileNet v2 primary convolution block.(**[Source](https://machinethink.net/blog/mobilenet-v2)**)_
 
@@ -274,7 +269,7 @@ $$\mathcal{L} = \lambda \mathcal{L}_{gt} + (1 - \lambda) \mathcal{L}_{temp}$$
 
 where $\mathcal{L}_{gt}$ is the loss with ground truth outputs and $\mathcal{L}_{temp}$ is the softmax temperature loss. Both $\lambda $and $𝑇$are tunable hyperparameters. The loss configuration is as in the image below.
 
-[![](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/5b11621f75c3635fb6f2d6f28b80460c/07484/kd.png)](https://web.archive.org/web/20210120192800im_/https://amandeepsp.github.io/static/5b11621f75c3635fb6f2d6f28b80460c/07484/kd.png)
+![KD](assets/kd.png)
 
 _Fig 7. Knowledge distillation model configuration. (**[Source](https://nervanasystems.github.io/distiller/knowledge_distillation.html)**)_
 
