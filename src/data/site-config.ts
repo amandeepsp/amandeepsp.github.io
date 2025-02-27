@@ -31,6 +31,9 @@ const siteConfig: SiteConfig = {
     title: 'Down the Rabbit Hole',
     subtitle: 'A blog about any and all things engineering',
     description: 'A blog about any and all things engineering',
+    logo: {
+        src: '/alembic_2697-fe0f.png'
+    },
     headerNavLinks: [
         {
             text: 'Home',
@@ -50,7 +53,7 @@ const siteConfig: SiteConfig = {
         text: `I have been a software developer for almost 8 years,
         starting out as an android app developer, then branching out to both frontend and backend.
         This blog is where I explore the inner workings of software, hardware, and whatever else catches my curiosity.
-        If you like peeling back the layers of how things work, stick around — there’s plenty to dig into.
+        If you like peeling back the layers of how things work, stick around — there's plenty to dig into.
         \nTo get in touch, my social media handles are at the bottom of the page.`
     },
     socialLinks: [
