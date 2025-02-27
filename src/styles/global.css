@@ -21,6 +21,7 @@
         --color-border-main: 242 241 236; /* #F2F1EC */
     }
 
+    /* Dark Mode fixes */
     html.dark .astro-code,
     html.dark .astro-code span {
         color: var(--shiki-dark) !important;
@@ -31,7 +32,7 @@
         text-decoration: var(--shiki-dark-text-decoration) !important;
     }
 
-    img {
+    html.dark article img {
         background: white;
     }
 }
