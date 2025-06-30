@@ -28,7 +28,7 @@ export type SiteConfig = {
 };
 
 const siteConfig: SiteConfig = {
-    title: 'Down the Rabbit Hole',
+    title: "Aman's Blog",
     subtitle: 'A blog about any and all things engineering',
     description: 'A blog about any and all things engineering',
     logo: {
@@ -51,7 +51,7 @@ const siteConfig: SiteConfig = {
     hero: {
         title: 'Hi! I am Amandeep',
         text: `I have been a software developer for almost 8 years,
-        starting out as an android app developer, then branching out to both frontend and backend.
+        starting out in mobile world, then branching out learn and build almost all kind of software.
         This blog is where I explore the inner workings of software, hardware, and whatever else catches my curiosity.
         If you like peeling back the layers of how things work, stick around — there's plenty to dig into.
         \nTo get in touch, my social media handles are at the bottom of the page.`
