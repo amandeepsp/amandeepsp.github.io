@@ -29,5 +29,8 @@ export default defineConfig({
                 dark: 'kanagawa-dragon'
             }
         }
+    },
+    redirects: {
+        '/making-models-smaller-1': '/blog/making-ml-models-smaller'
     }
 });
