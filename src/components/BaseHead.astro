@@ -1,18 +1,18 @@
 ---
-import interWoff2 from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
-import newsreaderWoff2 from '@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2?url';
-import siteConfig from '../data/site-config';
-import '../styles/global.css';
+import interWoff2 from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import newsreaderWoff2 from "@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2?url";
+import siteConfig from "../data/site-config";
+import "../styles/global.css";
 
 export type Props = {
     title?: string;
     description?: string;
     image?: { src: string; alt?: string };
-    pageType?: 'website' | 'article';
+    pageType?: "website" | "article";
 };
 
-const { description = '', image = siteConfig.image, pageType = 'website' } = Astro.props;
-const title = [Astro.props.title, siteConfig.title].filter(Boolean).join(' | ');
+const { description = "", image = siteConfig.image, pageType = "website" } = Astro.props;
+const title = [Astro.props.title, siteConfig.title].filter(Boolean).join(" | ");
 const resolvedImage = image?.src
     ? {
           src: new URL(image.src, Astro.site).toString(),
@@ -26,13 +26,13 @@ const canonicalURL = new URL(Astro.request.url, Astro.site);
  */
 function formatCanonicalURL(url: string | URL) {
     const path = url.toString();
-    const hasQueryParams = path.includes('?');
+    const hasQueryParams = path.includes("?");
     // If there are query params, make sure the URL has no trailing slash
     if (hasQueryParams) {
-        path.replace(/\/?$/, '');
+        path.replace(/\/?$/, "");
     }
     // otherwise, canonical URL always has a trailing slash
-    return path.replace(/\/?$/, hasQueryParams ? '' : '/');
+    return path.replace(/\/?$/, hasQueryParams ? "" : "/");
 }
 ---
 
@@ -73,11 +73,11 @@ function formatCanonicalURL(url: string | URL) {
 
 <!-- Google tag (gtag.js) -->
 <script is:inline type="text/partytown" src="https://www.googletagmanager.com/gtag/js?id=G-LVRYYR0DZN"></script>
-<script type="text/partytown">
+<script is:inline type="text/partytown">
     window.dataLayer = window.dataLayer || [];
     function gtag() {
         dataLayer.push(arguments);
     }
-    gtag('js', new Date());
-    gtag('config', 'G-LVRYYR0DZN');
+    gtag("js", new Date());
+    gtag("config", "G-LVRYYR0DZN");
 </script>

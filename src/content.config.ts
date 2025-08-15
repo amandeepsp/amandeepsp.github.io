@@ -1,5 +1,5 @@
-import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { defineCollection, z } from "astro:content";
+import { glob } from "astro/loaders";
 
 const seoSchema = z.object({
     title: z.string().min(5).max(120).optional(),
@@ -10,24 +10,26 @@ const seoSchema = z.object({
             alt: z.string().optional()
         })
         .optional(),
-    pageType: z.enum(['website', 'article']).default('website')
+    pageType: z.enum(["website", "article"]).default("website")
 });
 
 const blog = defineCollection({
-    loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/blog' }),
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/blog" }),
     schema: z.object({
         title: z.string(),
+        subTitle: z.string().optional(),
         excerpt: z.string().optional(),
         publishDate: z.coerce.date(),
         updatedDate: z.coerce.date().optional(),
-        isFeatured: z.boolean().default(false),
+        featured: z.boolean().default(false),
+        draft: z.boolean().default(false),
         tags: z.array(z.string()).default([]),
         seo: seoSchema.optional()
     })
 });
 
 const pages = defineCollection({
-    loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/pages' }),
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/pages" }),
     schema: z.object({
         title: z.string(),
         seo: seoSchema.optional()
@@ -35,12 +37,12 @@ const pages = defineCollection({
 });
 
 const projects = defineCollection({
-    loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/projects' }),
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
     schema: z.object({
         title: z.string(),
         description: z.string().optional(),
         publishDate: z.coerce.date(),
-        isFeatured: z.boolean().default(false),
+        featured: z.boolean().default(false),
         seo: seoSchema.optional()
     })
 });

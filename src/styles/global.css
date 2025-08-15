@@ -1,7 +1,7 @@
-@import '@fontsource-variable/inter';
-@import '@fontsource-variable/newsreader';
-@import '@fontsource-variable/newsreader/wght-italic.css';
-@import url('https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css');
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/newsreader";
+@import "@fontsource-variable/newsreader/wght-italic.css";
+@import url("https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css");
 
 @tailwind base;
 @tailwind components;
