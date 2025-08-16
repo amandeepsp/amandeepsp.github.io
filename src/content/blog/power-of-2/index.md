@@ -1,6 +1,6 @@
 ---
-title: "Intuition and Maths: Power of 2 Load balancing"
-publishDate: "18 Aug 2025"
+title: "Intuition behind Power of 2 Load balancing"
+publishDate: "17 Aug 2025"
 tags:
   - load balancing
 draft: true
@@ -21,8 +21,6 @@ slow by a factor of $ \ln n $. But it is not obvious intuitively, since we are s
 Here is a visualization of how the Power of 2 choices approch perform better, as you can see in the gif the load appears
 more uniform as the number of requests increase.
 
-## Intuition
-
 Say in our servers, $t$ servers are already at max load out of total $n$ server, say max load is $k$.
 The probability that the max load grows is just $t/n$ since we can only choose one target. But when we get to choose
 two targets, what is the probability that the max load grows? What would take it to make $k+1$?
@@ -35,7 +33,3 @@ with max load would have fallen even more, call it $t'$, the probability will be
 moving from $k$ to $k+1$. This is why the tail of max load in case of 2 choices fall very rapidly since with
 every iteration the probability of increasing the max falls faster than the single choice method.
 
-## Maths
-
-This is of course not a rigorous proof, think of this as an extension of the Intuition section but with some direction
-of how we reached at the $ln n$ things.
