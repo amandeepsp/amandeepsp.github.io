@@ -36,17 +36,5 @@ const pages = defineCollection({
         title: z.string(),
         seo: seoSchema.optional()
     })
-});
-
-const projects = defineCollection({
-    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
-    schema: z.object({
-        title: z.string(),
-        description: z.string().optional(),
-        publishDate: z.coerce.date(),
-        featured: z.boolean().default(false),
-        seo: seoSchema.optional()
-    })
-});
-
-export const collections = { blog, pages, projects };
+});     
+export const collections = { blog, pages };

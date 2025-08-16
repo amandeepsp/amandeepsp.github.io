@@ -20,8 +20,8 @@ export function filterDrafts(posts: CollectionEntry<"blog">[]): CollectionEntry<
 }
 
 export function sortItemsByDateDesc(
-    itemA: CollectionEntry<"blog" | "projects">,
-    itemB: CollectionEntry<"blog" | "projects">
+    itemA: CollectionEntry<"blog">,
+    itemB: CollectionEntry<"blog">
 ) {
     return new Date(itemB.data.publishDate).getTime() - new Date(itemA.data.publishDate).getTime();
 }

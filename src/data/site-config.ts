@@ -17,7 +17,6 @@ export type SiteConfig = {
     headerNavLinks?: Link[];
     socialLinks?: Link[];
     postsPerPage?: number;
-    projectsPerPage?: number;
     author: {
         name: string;
         email: string;
@@ -74,8 +73,7 @@ const siteConfig: SiteConfig = {
             href: "/rss.xml"
         }
     ],
-    postsPerPage: 10,
-    projectsPerPage: 10
+    postsPerPage: 10
 };
 
 export default siteConfig;
