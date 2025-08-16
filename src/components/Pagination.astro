@@ -1,12 +1,12 @@
 ---
-import ArrowLeft from '../icons/ArrowLeft.astro';
-import ArrowRight from '../icons/ArrowRight.astro';
-import IconButton from './IconButton.astro';
+import ArrowLeft from "../icons/ArrowLeft.astro";
+import ArrowRight from "../icons/ArrowRight.astro";
+import IconButton from "./IconButton.astro";
 
 const { page, class: className } = Astro.props;
 ---
 
-<nav aria-label="Pagination" class:list={['px-12 py-2 relative text-center', className]}>
+<nav aria-label="Pagination" class:list={["px-12 py-2 relative text-center", className]}>
     {
         page.url.prev && (
             <IconButton

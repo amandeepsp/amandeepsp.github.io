@@ -1,6 +1,7 @@
 ---
 title: Contact Me
 ---
+
 You can reach me through any of the following channels, in order of preference;
 
 - [Email](mailto:amandeepsp@gmail.com)

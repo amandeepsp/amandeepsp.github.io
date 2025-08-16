@@ -18,10 +18,22 @@ export type SiteConfig = {
     socialLinks?: Link[];
     postsPerPage?: number;
     projectsPerPage?: number;
+    author: {
+        name: string;
+        email: string;
+    };
+    lang: string;
+    locale: string;
 };
 
 const siteConfig: SiteConfig = {
     title: "Amandeep Singh",
+    author: {
+        name: "Amandeep Singh",
+        email: "amandeepsp@gmail.com"
+    },
+    lang: "en",
+    locale: "en_US",
     headerNavLinks: [
         {
             text: "Home",
