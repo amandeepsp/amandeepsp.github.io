@@ -4,14 +4,47 @@ import newsreaderWoff2 from "@fontsource-variable/newsreader/files/newsreader-la
 import siteConfig from "../data/site-config";
 import "../styles/global.css";
 
-export type Props = {
-    title?: string;
+// Base props shared across all page types
+type BaseProps = {
+    title: string;
     description?: string;
     image?: { src: string; alt?: string };
-    pageType?: "website" | "article";
+    canonical?: string;
+    noindex: boolean;
+    keywords?: string[];
 };
 
-const { description = "", image = siteConfig.image, pageType = "website" } = Astro.props;
+// Article-specific props (blog posts)
+type ArticleProps = BaseProps & {
+    pageType: "article";
+    publishDate: Date;
+    updatedDate?: Date;
+    tags: string[];
+    readingTime: string;
+};
+
+// Website page props (homepage, contact, etc.)
+type WebsiteProps = BaseProps & {
+    pageType: "website";
+    publishDate?: never;
+    updatedDate?: never;
+    tags?: never;
+    readingTime?: never;
+};
+
+export type Props = ArticleProps | WebsiteProps;
+
+const {
+    description = "",
+    image = siteConfig.image,
+    pageType,
+    publishDate,
+    updatedDate,
+    tags,
+    noindex,
+    keywords,
+    canonical
+} = Astro.props;
 const title = [Astro.props.title, siteConfig.title].filter(Boolean).join(" | ");
 const resolvedImage = image?.src
     ? {
@@ -19,17 +52,17 @@ const resolvedImage = image?.src
           alt: image.alt
       }
     : undefined;
-const canonicalURL = new URL(Astro.request.url, Astro.site);
+const canonicalURL = canonical ? new URL(canonical, Astro.site) : new URL(Astro.request.url, Astro.site);
 
 /**
  * Enforce some standard canonical URL formatting across the site.
  */
 function formatCanonicalURL(url: string | URL) {
-    const path = url.toString();
+    let path = url.toString();
     const hasQueryParams = path.includes("?");
     // If there are query params, make sure the URL has no trailing slash
     if (hasQueryParams) {
-        path.replace(/\/?$/, "");
+        path = path.replace(/\/?$/, "");
     }
     // otherwise, canonical URL always has a trailing slash
     return path.replace(/\/?$/, hasQueryParams ? "" : "/");
@@ -41,6 +74,9 @@ function formatCanonicalURL(url: string | URL) {
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>{title}</title>
 <meta name="generator" content={Astro.generator} />
+{siteConfig.author?.name && <meta name="author" content={siteConfig.author.name} />}
+{pageType === "article" && (keywords || tags) && <meta name="keywords" content={(keywords || tags)?.join(", ")} />}
+<meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
 
 <!-- Fonts -->
 <link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin="anonymous" />
@@ -60,8 +96,24 @@ function formatCanonicalURL(url: string | URL) {
 <meta property="og:url" content={formatCanonicalURL(canonicalURL)} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
+<meta property="og:site_name" content={siteConfig.title} />
+<meta property="og:locale" content={siteConfig.locale ?? "en_US"} />
 {resolvedImage?.src && <meta property="og:image" content={resolvedImage.src} />}
 {resolvedImage?.alt && <meta property="og:image:alt" content={resolvedImage.alt} />}
+{resolvedImage?.src && <meta property="og:image:width" content="1200" />}
+{resolvedImage?.src && <meta property="og:image:height" content="630" />}
+{
+    pageType === "article" && publishDate && (
+        <meta property="article:published_time" content={publishDate.toISOString()} />
+    )
+}
+{pageType === "article" && updatedDate && <meta property="article:modified_time" content={updatedDate.toISOString()} />}
+{
+    pageType === "article" && siteConfig.author?.name && (
+        <meta property="article:author" content={siteConfig.author.name} />
+    )
+}
+{pageType === "article" && tags && tags.map((tag: string) => <meta property="article:tag" content={tag} />)}
 
 <!-- X/Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
@@ -70,6 +122,8 @@ function formatCanonicalURL(url: string | URL) {
 <meta property="twitter:description" content={description} />
 {resolvedImage?.src && <meta property="twitter:image" content={resolvedImage.src} />}
 {resolvedImage?.alt && <meta name="twitter:image:alt" content={resolvedImage?.alt} />}
+<meta name="twitter:creator" content="@theamndeepsingh" />
+<meta name="twitter:site" content="@theamndeepsingh" />
 
 <!-- Google tag (gtag.js) -->
 <script is:inline type="text/partytown" src="https://www.googletagmanager.com/gtag/js?id=G-LVRYYR0DZN"></script>

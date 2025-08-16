@@ -1,7 +1,7 @@
 ---
-import NavLink from './NavLink.astro';
-import ThemeToggle from './ThemeToggle.astro';
-import siteConfig from '../data/site-config';
+import NavLink from "./NavLink.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+import siteConfig from "../data/site-config";
 
 const navLinks = siteConfig.headerNavLinks || [];
 ---
@@ -58,7 +58,7 @@ const navLinks = siteConfig.headerNavLinks || [];
         .menu-toggle-icon:before,
         .menu-toggle-icon:after {
             @apply w-6 h-px absolute left-1/2 top-0 origin-center -translate-x-1/2 bg-current;
-            content: '';
+            content: "";
             transition:
                 transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
                 margin 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
@@ -87,16 +87,16 @@ const navLinks = siteConfig.headerNavLinks || [];
 
 <script>
     function menuToggle() {
-        const menu = document.querySelector('.menu');
-        const menuToggleBtn = document.querySelector('.menu-toggle');
-        menuToggleBtn?.addEventListener('click', () => {
-            const isMenuExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
-            menuToggleBtn.classList.toggle('is-active');
-            menuToggleBtn.setAttribute('aria-expanded', isMenuExpanded ? 'false' : 'true');
-            menuToggleBtn.setAttribute('aria-label', isMenuExpanded ? 'Open Menu' : 'Close Menu');
-            menu?.classList.toggle('is-visible');
+        const menu = document.querySelector(".menu");
+        const menuToggleBtn = document.querySelector(".menu-toggle");
+        menuToggleBtn?.addEventListener("click", () => {
+            const isMenuExpanded = menuToggleBtn.getAttribute("aria-expanded") === "true";
+            menuToggleBtn.classList.toggle("is-active");
+            menuToggleBtn.setAttribute("aria-expanded", isMenuExpanded ? "false" : "true");
+            menuToggleBtn.setAttribute("aria-label", isMenuExpanded ? "Open Menu" : "Close Menu");
+            menu?.classList.toggle("is-visible");
         });
     }
     menuToggle();
-    document.addEventListener('astro:after-swap', menuToggle);
+    document.addEventListener("astro:after-swap", menuToggle);
 </script>

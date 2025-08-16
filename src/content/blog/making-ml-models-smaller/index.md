@@ -5,6 +5,33 @@ publishDate: "Mar 10 2020"
 tags:
   - ml
 featured: true
+seo:
+  keywords:
+    - machine learning model compression
+    - neural network optimization
+    - model pruning techniques
+    - quantization deep learning
+    - mobile machine learning
+    - embedded AI models
+    - pytorch model optimization
+    - tensorflow lite optimization
+    - knowledge distillation
+    - depthwise separable convolutions
+    - mobilenet architecture
+    - squeezenet model compression
+    - efficient neural networks
+    - model size reduction
+    - inference optimization
+    - edge computing AI
+    - low rank approximation
+    - fake quantization
+    - lottery ticket hypothesis
+    - distillbert compression
+    - svd neural networks
+    - memory efficient models
+    - battery efficient AI
+    - mobile deep learning
+    - neural network acceleration
 ---
 
 > [!WARNING]

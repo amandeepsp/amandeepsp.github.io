@@ -10,7 +10,9 @@ const seoSchema = z.object({
             alt: z.string().optional()
         })
         .optional(),
-    pageType: z.enum(["website", "article"]).default("website")
+    pageType: z.enum(["website", "article"]).default("website"),
+    keywords: z.array(z.string()).optional(),
+    noindex: z.boolean().default(false)
 });
 
 const blog = defineCollection({

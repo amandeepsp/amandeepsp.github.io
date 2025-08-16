@@ -14,7 +14,7 @@ const projects = (await getCollection("projects")).sort(sortItemsByDateDesc);
 const featuredProjects = projects.filter(({ data }) => data.featured);
 ---
 
-<BaseLayout description={siteConfig.description}>
+<BaseLayout title={siteConfig.title} description={siteConfig.description} pageType="website" noindex={false}>
     {
         featuredPosts?.length > 0 && (
             <div class="mb-16 sm:mb-24">

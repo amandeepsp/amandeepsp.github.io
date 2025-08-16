@@ -1,18 +1,12 @@
 ---
-import { Image } from 'astro:assets';
-import siteConfig from '../data/site-config';
+import siteConfig from "../data/site-config";
 ---
 
 <header class="w-full max-w-3xl mx-auto mb-12 sm:mb-16">
-<div class="flex flex-row gap-4 items-end">
-    {siteConfig.logo && siteConfig.logo?.src && (
-        <a href="/">
-            <Image height={48} width={48} src={siteConfig.logo.src} loading="eager" alt={siteConfig.logo.alt || ''}/>
+    <div class="flex flex-row gap-4 items-end">
+        <a class="font-serif text-2xl leading-tight font-medium text-theme-foreground sm:text-4xl" href="/">
+            {siteConfig.title}
         </a>
-    )}
-    <a class="font-serif text-2xl leading-tight font-medium text-theme-foreground sm:text-4xl" href="/">
-        {siteConfig.title}
-    </a>
     </div>
     {siteConfig.subtitle && <p class="text-sm leading-tight mt-1 ml-16">{siteConfig.subtitle}</p>}
 </header>

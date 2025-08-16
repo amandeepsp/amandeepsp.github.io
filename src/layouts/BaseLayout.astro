@@ -1,11 +1,13 @@
 ---
-import { ClientRouter } from 'astro:transitions';
-import BaseHead, { type Props as HeadProps } from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import Nav from '../components/Nav.astro';
+import { ClientRouter } from "astro:transitions";
+import BaseHead, { type Props as HeadProps } from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import Nav from "../components/Nav.astro";
 
-export type Props = HeadProps & { showHeader?: boolean };
+export type Props = HeadProps & {
+    showHeader?: boolean;
+};
 
 const { showHeader = true, ...head } = Astro.props;
 ---
@@ -15,8 +17,8 @@ const { showHeader = true, ...head } = Astro.props;
     <head>
         <BaseHead {...head} />
         <script>
-            if (localStorage.theme === 'dark') {
-                document.documentElement.classList.add('dark');
+            if (localStorage.theme === "dark") {
+                document.documentElement.classList.add("dark");
             }
         </script>
         <ClientRouter />

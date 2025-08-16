@@ -28,6 +28,8 @@ const { post, prevPost, nextPost } = Astro.props;
 const { title, subTitle, publishDate, updatedDate, excerpt, tags = [], seo } = post.data;
 const { Content } = await render(post);
 
+const postKeywords = seo?.keywords?.length ? seo.keywords : tags;
+
 // Calculate reading time from the post content
 const readingTime = calculateReadingTime(post.body);
 ---
@@ -37,6 +39,12 @@ const readingTime = calculateReadingTime(post.body);
     description={seo?.description ?? excerpt}
     image={seo?.image}
     pageType="article"
+    publishDate={publishDate}
+    updatedDate={updatedDate}
+    tags={tags}
+    keywords={postKeywords}
+    readingTime={readingTime}
+    noindex={seo?.noindex ?? false}
     showHeader={false}
 >
     <article class="mb-16 sm:mb-24">

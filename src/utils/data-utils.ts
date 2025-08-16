@@ -8,12 +8,12 @@ import { slugify } from "./common-utils";
  */
 export function filterDrafts(posts: CollectionEntry<"blog">[]): CollectionEntry<"blog">[] {
     const isDev = import.meta.env.DEV;
-    const showDrafts = import.meta.env.SHOW_DRAFTS === 'true';
+    const showDrafts = import.meta.env.SHOW_DRAFTS === "true";
 
     // In production, always filter out drafts
     // In development, show drafts only if SHOW_DRAFTS=true
     if (!isDev || !showDrafts) {
-        return posts.filter(post => !post.data.draft);
+        return posts.filter((post) => !post.data.draft);
     }
 
     return posts;
