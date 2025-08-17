@@ -6,6 +6,7 @@ import rehypeKatex from "rehype-katex";
 import partytown from "@astrojs/partytown";
 import { remarkAlert } from "remark-github-blockquote-alert";
 import rehypeSlug from "rehype-slug";
+import remarkGfm from "remark-gfm";
 
 /**
  * TODO: Nice to have features:
@@ -25,7 +26,7 @@ export default defineConfig({
         })
     ],
     markdown: {
-        remarkPlugins: [remarkMath, remarkAlert],
+        remarkPlugins: [remarkMath, remarkAlert, remarkGfm],
         rehypePlugins: [rehypeSlug, rehypeKatex],
         syntaxHighlight: "shiki",
         shikiConfig: {
