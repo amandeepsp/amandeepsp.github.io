@@ -1,7 +1,7 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/newsreader";
 @import "@fontsource-variable/newsreader/wght-italic.css";
-@import url("https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css");
+@import "katex/dist/katex.min.css";
 
 @tailwind base;
 @tailwind components;
@@ -30,13 +30,13 @@
         font-style: var(--shiki-dark-font-style) !important;
         font-weight: var(--shiki-dark-font-weight) !important;
         text-decoration: var(--shiki-dark-text-decoration) !important;
-        line-height: 1.2 !important;
+        line-height: 1.25 !important;
     }
 
     /* Light mode code blocks */
     .astro-code,
     .astro-code span {
-        line-height: 1.2 !important;
+        line-height: 1.25 !important;
     }
 
     html.dark article img {
