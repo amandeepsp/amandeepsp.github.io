@@ -19,6 +19,7 @@
         "@fontsource-variable/inter": "^5.1.1",
         "@fontsource-variable/newsreader": "^5.1.1",
         "astro": "^5.10.1",
+        "katex": "^0.16.22",
         "rehype-katex": "^7.0.1",
         "rehype-slug": "^6.0.0",
         "remark-gfm": "^4.0.1",
