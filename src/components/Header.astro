@@ -2,11 +2,11 @@
 import siteConfig from "../data/site-config";
 ---
 
-<header class="w-full max-w-3xl mx-auto mb-12 sm:mb-16">
-    <div class="flex flex-row gap-4 items-end">
-        <a class="font-serif text-2xl leading-tight font-medium text-theme-foreground sm:text-4xl" href="/">
+<header class="mx-auto mb-12 w-full max-w-3xl sm:mb-16">
+    <div class="flex flex-row items-end gap-4">
+        <a class="text-theme-foreground font-serif text-2xl font-medium leading-tight sm:text-4xl" href="/">
             {siteConfig.title}
         </a>
     </div>
-    {siteConfig.subtitle && <p class="text-sm leading-tight mt-1 ml-16">{siteConfig.subtitle}</p>}
+    {siteConfig.subtitle && <p class="ml-16 mt-1 text-sm leading-tight">{siteConfig.subtitle}</p>}
 </header>
