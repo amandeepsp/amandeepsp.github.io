@@ -30,13 +30,13 @@
         font-style: var(--shiki-dark-font-style) !important;
         font-weight: var(--shiki-dark-font-weight) !important;
         text-decoration: var(--shiki-dark-text-decoration) !important;
-        line-height: 1.25 !important;
+        line-height: 1.5 !important;
     }
 
     /* Light mode code blocks */
     .astro-code,
     .astro-code span {
-        line-height: 1.25 !important;
+        line-height: 1.5 !important;
     }
 
     html.dark article img {

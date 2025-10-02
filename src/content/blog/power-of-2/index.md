@@ -2,7 +2,8 @@
 title: "Intuition behind Power of 2 Choices Load balancing"
 publishDate: "17 Aug 2025"
 tags:
-  - load balancing
+  - load-balancing
+  - distributed-systems
 seo:
   image:
     src: "power-of-2-seo.png"
@@ -28,7 +29,7 @@ We have to check all the targets; this is expensive. Also, the process of checki
 which in turn causes request herding.
 What if we assign a request to a random target? This works surprisingly well but causes hotspots, which is not ideal.
 A variant of this is where we select 2 targets at random and then assign the request to the one with less load, which works even better. This
-is called the *Power of 2 Choices* balancing.
+is called the _Power of 2 Choices_ balancing.
 
 This has been studied in Maths as the [Balls & Bins problem](http://www.eecs.harvard.edu/~michaelm/postscripts/handbook2001.pdf).
 Where we place balls into bins, where a bin can house any number of balls.
@@ -61,6 +62,7 @@ moving from $k$ to $k+1$. This is why the tail of max load in case of 2 choices 
 every iteration the probability of increasing the max falls faster than the single choice method.
 
 Let's go through with an example
+
 - Say we have $n/4$ targets with a max of $4$ requests each, the probability of selecting two of these is $1/16$.
 - Now we should expect only $n/16$ targets to have the max $5$ requests, and then only $n/256 = n/(2^{2^3})$ targets with max $6$ requests
 - This amounts to $\frac{n}{2^{2^{k-3}}}$ for a max of $k$ requests.

@@ -129,6 +129,7 @@ static bool is_monitored_dir(struct dentry *dentry, __u64 target_ino) {
   return result;
 }
 ```
+
 Note the [kernel RCU (Read, Copy, Update)](https://www.kernel.org/doc/html/latest/RCU/whatisRCU.html) locks are needed since the `dentry` tree
 can change while we are traversing it. The RCU mechanism lets the readers safely traverse without blocking the writers.
 
@@ -143,7 +144,6 @@ They can reduce the number of events you need to filter and eliminate some of th
 However, these hooks were not available in the kernel I was working with. With LSM hooks, we have access to the `path` struct with which we can resolve
 the name into a buffer using [`bpf_path_d_path`](https://docs.ebpf.io/linux/kfuncs/bpf_path_d_path/). Then we can do a substring search to see if the
 path is monitored or not. I will be sure to try this out after our next infra update.
-
 
 ## Wrapping Up
 

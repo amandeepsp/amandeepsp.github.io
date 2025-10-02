@@ -36,5 +36,5 @@ const pages = defineCollection({
         title: z.string(),
         seo: seoSchema.optional()
     })
-});     
+});
 export const collections = { blog, pages };

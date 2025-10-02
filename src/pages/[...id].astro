@@ -29,9 +29,9 @@ const { Content } = await render(page);
 >
     <article class="mb-16 sm:mb-24">
         <header class="mb-8">
-            <h1 class="text-3xl leading-tight font-serif font-medium sm:text-5xl sm:leading-tight">{title}</h1>
+            <h1 class="font-serif text-3xl font-medium leading-tight sm:text-5xl sm:leading-tight">{title}</h1>
         </header>
-        <div class="max-w-none prose prose-blog sm:prose-lg">
+        <div class="prose prose-blog max-w-none sm:prose-lg">
             <Content />
         </div>
     </article>

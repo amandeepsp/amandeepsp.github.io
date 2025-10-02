@@ -67,7 +67,7 @@ prune.ln_structured(module=conv_1, name='weight', amount=5, n=2, dim=1)
 
 This replaces the parameter `weight` with the pruned result and adds a parameter `weight_orig` that stores the unpruned version of the input. The pruning mask is stored as `weight_mask` and saved as a module buffer. These can be checked by the `module.named_parameters()` and `module.named_buffers()`. To enable iterative pruning we can use just apply the pruning method for the next iteration and it just works, due to `PruningContainer` as it handles computation of final mask taking into account previous prunings using the `compute_mask` method.
 
-## **Quantization**
+## Quantization
 
 Quantization is to restrict the number of possible values a weight can take, this will reduce the memory a weight can reduce and in turn reduce the model size. One way of doing this is changing the bit-width of the floating-point number used for storing the weights. A number stored as a 32-bit floating-point or FP32 to an FP16 or an 8-bit fixed-point number and more increasingly an 8-bit integer. Bit width reductions have many advantages as below.
 
@@ -131,7 +131,7 @@ Post-training quantization in PyTorch currently only support operations on CPU.
 
 For detailed code examples visit the PyTorch documentation *[here](https://pytorch.org/tutorials/advanced/dynamic_quantization_tutorial.html)*. On Tensorflow side of things quantization can be done using TFLite's `tf.lite.TFLiteConverter` API by setting the `optimizations` parameter to `tf.lite.Optimize.OPTIMIZE_FOR_SIZE`. Fake quantization is enabled by `tf.contrib.quantize` package.
 
-## **Low Rank Transforms**
+## Low Rank Transforms
 
 Low-rank transform means representing a matrix or tensor as a product of some lower rank components. These components often only approximate the original matrix but benefit hugely in space and computational efficiency. For example, fully connected layers can be compressed using plain old [Truncated SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition#Truncated_SVD) as a fully connected layer can be represented as a matrix. In truncated SVD matrix *M* of size 𝑛×𝑚 is approximated by $\tilde{M} = U\Sigma V^T$, where $U$ is  $n×t$, Σ is a diagonal matrix of size $𝑡×𝑡$ and $V$ is $t×m$ in size. A fully connected layer can be represented as $Wx+b$, where $W$ is the weight matrix and $b$ are the biases. We now represent the FC layer as
 
@@ -175,11 +175,11 @@ This works so well works because the
 
 majority of the weights in a VGG16 are in Fully Connected layers. For much newer network e.g. ResNets majority of the weights lie in the Conv layers, therefore it makes more sense to apply Low rank transforms to Conv layers. Since conv layers are 4D tensors i.e `(batch, channels, width, height)`, SVD and its cousins will not work here. We need to apply specialized tensor decomposition techniques such as CP decomposition (*[Lebedev et.al.](https://arxiv.org/pdf/1412.6553.pdf)* in 2015) and Tucker Decomposition (*[Kim et. al.](https://arxiv.org/pdf/1511.06530.pdf)* in 2016). Not covering these papers in more detail because these techniques are now superseded by efficient architectures like SqueezeNet and MobileNet which are discussed in the next section.
 
-## **Efficient network architectures**
+## Efficient network architectures
 
 Rather than applying size reducing techniques to existing architectures, we try to create novel architectures that decrease the model size and try to preserve the accuracy of the network over the time there have been many such architectures, prominent of them being SqueezeNet, MobileNet V1 and MobileNet V2.
 
-### **SqueezeNet**
+### SqueezeNet
 
 SqueezeNet by *[Iandola et.al.](https://arxiv.org/pdf/1602.07360.pdf)* is presumably the first to explore a new architecture for smaller CNNs. At the core of SqueezeNet are **Fire Modules**. Fire modules use `1x1` filters rather than `3x3` filters as they have 9x lesser parameters and have a lesser number of channels than normal, which is called a *squeeze* layer. The lesser number of channels are recovered in the expand layer which consists of several zero-padded `1x1` filters and `3x3` filters. The number of filters in the squeeze layers and expand layers are hyper-parameters. If $ 𝑒*{3×3}+𝑒*{1×1}$ are the number of filters in expand layer and $s*{1×1}$ is the number of filters in the squeeze layer. When using Fire module $s*{1×1} < e*{3×3}+e*{1×1}$ works best.
 
@@ -215,7 +215,7 @@ class Fire(nn.Module):
 
 SqueezeNet also uses delayed-sampling to create larger activation maps towards the *end* layers, which in turn leads to greater accuracy. The full architecture can be visualized *[here](https://dgschwend.github.io/netscope/#/preset/squeezenet)*.
 
-### **MobileNets**
+### MobileNets
 
 MobileNets are specifically developed by Google to specifically run on mobile devices. MobileNets were first introduced in a paper by *[Howard et.al.](https://arxiv.org/pdf/1704.04861.pdf)* in 2017, subsequently, in 2018 an improved version was introduced called MobileNet v2 in *[Sandler et. al.](https://arxiv.org/pdf/1801.04381.pdf)*. The gist of optimization in MobileNet v1 lies in a special kind of convolution layer called **Depthwise separable convolutions**. For a simple convolution layer if 𝑘 is the dimension of the kernel, $𝑁𝑘 $is the number of kernels, and the input is of size $𝑁_c×𝑊×𝐻$, where $𝑁_𝑐$ are the number of input channels. The total number of parameters and computations are $k^2N_kN_cWH$. MobileNet Convolutions work in two stages
 
@@ -286,7 +286,7 @@ class InvertedResidual(nn.Module):
             return self.conv(x)
 ```
 
-## **Knowledge Distillation**
+## Knowledge Distillation
 
 Knowledge Distillation (KD) is a model compression technique by which the behaviour of a smaller (student) model is trained to replicate the behaviour of a larger (teacher) model. The term was first coined by none other than Geoffrey Hinton in his [2015 paper](https://arxiv.org/pdf/1503.02531.pdf). KD involves training a smaller network on the weighted average of soft target output of the larger model and the ground truth. Soft target output can be obtained by calculating the softmax on the logits of the larger model, but this creates large divides between the probabilities of the correct label and the wrong label, thus not creating much information other than the ground truth. To remedy this problem Hinton introduces *softmax with temperature* given by
 
