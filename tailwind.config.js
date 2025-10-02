@@ -10,7 +10,8 @@ module.exports = {
         },
         extend: {
             textColor: {
-                main: "rgb(var(--color-text-main) / <alpha-value>)"
+                main: "rgb(var(--color-text-main) / <alpha-value>)",
+                muted: "rgb(var(--color-text-muted) / <alpha-value>)"
             },
             backgroundColor: {
                 main: "rgb(var(--color-bg-main) / <alpha-value>)",
@@ -57,7 +58,13 @@ module.exports = {
                         },
                         "h1,h2,h3,h4,h5,h6": {
                             fontFamily: theme("fontFamily.serif").join(","),
-                            fontWeight: 500
+                            fontWeight: 500,
+                            "a.anchor-link": {
+                                textDecoration: "none",
+                                color: theme("textColor.muted / 100%"),
+                                fontSize: "0.75em",
+                                paddingLeft: "0.375rem"
+                            }
                         },
                         blockquote: {
                             border: 0,
