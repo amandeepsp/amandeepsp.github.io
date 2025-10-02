@@ -5,8 +5,9 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import partytown from "@astrojs/partytown";
 import { remarkAlert } from "remark-github-blockquote-alert";
-import rehypeSlug from "rehype-slug";
+import { rehypeHeadingIds } from "@astrojs/markdown-remark";
 import remarkGfm from "remark-gfm";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 /**
  * TODO: Nice to have features:
@@ -27,7 +28,26 @@ export default defineConfig({
     ],
     markdown: {
         remarkPlugins: [remarkMath, remarkAlert, remarkGfm],
-        rehypePlugins: [rehypeSlug, rehypeKatex],
+        rehypePlugins: [
+            rehypeHeadingIds,
+            rehypeKatex,
+            [
+                rehypeAutolinkHeadings,
+                {
+                    behavior: "append",
+                    content: {
+                        type: "text",
+                        value: "#"
+                    },
+                    headingProperties: {
+                        className: ["anchor"]
+                    },
+                    properties: {
+                        className: ["anchor-link"]
+                    }
+                }
+            ]
+        ],
         syntaxHighlight: "shiki",
         shikiConfig: {
             themes: {
