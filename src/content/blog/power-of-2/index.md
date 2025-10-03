@@ -5,9 +5,6 @@ tags:
   - load-balancing
   - distributed-systems
 seo:
-  image:
-    src: "power-of-2-seo.png"
-    alt: Intuition behind Power of 2 Choices Load balancing
   description: >
     Discover how power of two load balancing reduces hotspots, achieves O(log log n) max load,
     and connects to cuckoo hashing for efficiency.

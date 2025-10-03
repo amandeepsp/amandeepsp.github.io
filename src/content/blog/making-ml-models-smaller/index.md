@@ -1,6 +1,5 @@
 ---
 title: Making Machine Learning models smaller
-excerpt: Machine Learning models are getting bigger and expensive to compute. Embedded devices have restricted memory, computation power and battery. But we can optimize our model to run smoothly on these devices. By reducing the size of the model we decrease the number of operations that need to be done hence reducing the computation.
 publishDate: "Mar 10 2020"
 tags:
   - ml

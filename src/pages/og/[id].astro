@@ -1,0 +1,59 @@
+---
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import FormattedDate from "../../components/FormattedDate.astro";
+import { calculateReadingTime, filterDrafts } from "../../utils/data-utils";
+import interWoff2 from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import newsreaderWoff2 from "@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2?url";
+import "../../styles/global.css";
+
+type Props = { post: CollectionEntry<"blog"> };
+
+export async function getStaticPaths() {
+    const posts = filterDrafts(await getCollection("blog"));
+    return posts.map((post) => ({
+        params: { id: post.id },
+        props: {
+            post
+        }
+    }));
+}
+
+const { post } = Astro.props;
+const { title, subTitle, publishDate } = post.data;
+
+// Calculate reading time from the post content
+const readingTime = calculateReadingTime(post.body);
+---
+
+<html>
+    <head>
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin="anonymous" />
+        <link rel="preload" as="font" type="font/woff2" href={newsreaderWoff2} crossorigin="anonymous" />
+        <style>
+            #og-card {
+                width: 1200px;
+                height: 630px;
+            }
+        </style>
+    </head>
+    <body class="bg-main">
+        <header id="og-card" class="flex flex-col justify-center bg-main p-16 align-middle">
+            <h1 class="font-serif text-8xl font-bold leading-tight sm:text-5xl sm:leading-tight">
+                {title}
+            </h1>
+            {subTitle && <p class="font-serif text-xl text-gray-600 dark:text-gray-300">{subTitle}</p>}
+            <div class="flex flex-col">
+                <div class="text-l mt-4 flex flex-wrap items-center gap-4 text-gray-600 dark:text-gray-300">
+                    <div class="flex items-center gap-1">
+                        <span class="mr-1 font-medium">Published</span>
+                        <FormattedDate date={publishDate} />
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span>{readingTime}</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+    </body>
+</html>

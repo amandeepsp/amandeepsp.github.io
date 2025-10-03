@@ -1,5 +1,5 @@
 ---
-title: The Rabbit Hole of Building a Filesystem Watcher
+title: How Hard Could Building a Filesystem Watcher Be?
 publishDate: "Sep 23 2025"
 tags:
   - ebpf
@@ -8,9 +8,6 @@ tags:
   - systems-programming
 featured: true
 seo:
-  image:
-    src: fs-watcher.png
-    alt: The Rabbit Hole of Building a Filesystem Watcher
   description: |
     A deep dive into building a Linux filesystem watcher. We compare fanotify vs. a powerful eBPF solution to solve in-kernel monitoring challenges.
   keywords:

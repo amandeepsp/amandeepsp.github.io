@@ -9,7 +9,8 @@
         "preview": "astro preview",
         "astro": "astro",
         "format": "prettier --write .",
-        "format:check": "prettier --check ."
+        "format:check": "prettier --check .",
+        "og": "node scripts/og-generate.ts"
     },
     "dependencies": {
         "@astrojs/partytown": "^2.1.4",
@@ -30,6 +31,7 @@
     "devDependencies": {
         "@astrojs/check": "^0.9.4",
         "@tailwindcss/typography": "^0.5.15",
+        "playwright": "^1.55.1",
         "prettier": "^3.4.2",
         "prettier-plugin-astro": "^0.14.1",
         "prettier-plugin-tailwindcss": "^0.6.9",
