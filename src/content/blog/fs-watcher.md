@@ -1,5 +1,5 @@
 ---
-title: How Hard Could Building a Filesystem Watcher Be?
+title: How hard could building a Filesystem Watcher be?
 publishDate: "Sep 23 2025"
 tags:
   - ebpf
