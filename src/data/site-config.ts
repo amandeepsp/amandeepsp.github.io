@@ -26,7 +26,7 @@ export type SiteConfig = {
 };
 
 const siteConfig: SiteConfig = {
-    title: "Amandeep Singh",
+    title: "amandeep singh",
     author: {
         name: "Amandeep Singh",
         email: "amandeepsp@gmail.com"
