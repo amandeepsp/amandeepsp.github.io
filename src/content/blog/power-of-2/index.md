@@ -2,7 +2,6 @@
 title: "Intuition behind Power of 2 Choices Load balancing"
 publishDate: "17 Aug 2025"
 tags:
-  - load-balancing
   - distributed-systems
 seo:
   description: >
