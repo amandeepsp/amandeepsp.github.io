@@ -2,9 +2,7 @@
 title: The Rabbit Hole of Building a Filesystem Watcher
 publishDate: "Sep 23 2025"
 tags:
-  - ebpf
-  - linux
-  - kernel
+  - linux-kernel
   - systems-programming
 featured: true
 seo:
