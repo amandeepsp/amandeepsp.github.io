@@ -2,8 +2,6 @@
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import FormattedDate from "../../components/FormattedDate.astro";
 import { calculateReadingTime, filterDrafts } from "../../utils/data-utils";
-import interWoff2 from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
-import newsreaderWoff2 from "@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2?url";
 import "../../styles/global.css";
 
 type Props = { post: CollectionEntry<"blog"> };
@@ -28,8 +26,6 @@ const readingTime = calculateReadingTime(post.body);
 <html>
     <head>
         <meta name="robots" content="noindex, nofollow" />
-        <link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin="anonymous" />
-        <link rel="preload" as="font" type="font/woff2" href={newsreaderWoff2} crossorigin="anonymous" />
         <style>
             #og-card {
                 width: 1200px;
@@ -38,15 +34,15 @@ const readingTime = calculateReadingTime(post.body);
         </style>
     </head>
     <body class="bg-main">
-        <header id="og-card" class="flex flex-col justify-center bg-main p-16 align-middle">
-            <h1 class="font-serif text-9xl font-bold leading-tight sm:text-5xl sm:leading-tight">
+        <header id="og-card" class="bg-main flex flex-col justify-center p-16 align-middle">
+            <h1 class="font-serif text-8xl font-bold leading-tight">
                 {title}
             </h1>
-            {subTitle && <p class="font-serif text-3xl text-gray-600 dark:text-gray-300">{subTitle}</p>}
+            {subTitle && <p class="font-serif text-5xl text-gray-600 dark:text-gray-300">{subTitle}</p>}
             <div class="flex flex-col">
-                <div class="text-l mt-4 flex flex-wrap items-center gap-4 text-gray-600 dark:text-gray-300">
+                <div class="mt-4 flex flex-wrap items-center gap-4 text-xl">
                     <div class="flex items-center gap-1">
-                        <span class="mr-1 font-medium">Published</span>
+                        <span class="mr-1 font-medium">Published on</span>
                         <FormattedDate date={publishDate} />
                     </div>
                     <div class="flex items-center gap-1">
