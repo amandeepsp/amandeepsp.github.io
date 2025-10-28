@@ -1,9 +1,45 @@
-@import "@fontsource/source-serif-4";
-@import "@fontsource/source-sans-3";
 @import "katex/dist/katex.min.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Local Source Sans 3 Variable fonts */
+@font-face {
+    font-family: "source-sans-3-variable";
+    src: url("/fonts/source-sans-3-variable.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 200 900;
+    font-stretch: normal;
+}
+
+@font-face {
+    font-family: "source-sans-3-variable";
+    src: url("/fonts/source-sans-3-variable-italic.woff2") format("woff2");
+    font-display: swap;
+    font-style: italic;
+    font-weight: 200 900;
+    font-stretch: normal;
+}
+
+/* Local Source Serif 4 Variable fonts */
+@font-face {
+    font-family: "source-serif-4-variable";
+    src: url("/fonts/source-serif-4-variable.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 200 900;
+    font-stretch: normal;
+}
+
+@font-face {
+    font-family: "source-serif-4-variable";
+    src: url("/fonts/source-serif-4-variable-italic.woff2") format("woff2");
+    font-display: swap;
+    font-style: italic;
+    font-weight: 200 900;
+    font-stretch: normal;
+}
 
 @layer base {
     :root {
@@ -12,8 +48,8 @@
         --color-bg-main: 242 241 236; /* #F2F1EC */
         --color-bg-muted: 234 233 225; /* #EAE9E1 */
         --color-border-main: 23 23 23; /* #171717 */
-        --font-sans: "Source Sans 3", ui-sans-serif, system-ui;
-        --font-serif: "Source Serif 4", ui-serif, serif;
+        --font-sans: source-sans-3-variable, ui-sans-serif, system-ui;
+        --font-serif: source-serif-4-variable, ui-serif, serif;
     }
     html.dark {
         --color-text-main: 242 241 236; /* #F2F1EC */
@@ -64,6 +100,13 @@
     }
     .border-main {
         border-color: rgb(var(--color-border-main) / 1);
+    }
+
+    .font-sans {
+        font-family: var(--font-sans);
+    }
+    .font-serif {
+        font-family: var(--font-serif);
     }
 }
 
