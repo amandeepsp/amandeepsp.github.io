@@ -8,8 +8,8 @@
         "@astrojs/rss": "^4.0.12",
         "@astrojs/sitemap": "^3.4.1",
         "@astrojs/tailwind": "^6.0.2",
-        "@fontsource-variable/inter": "^5.1.1",
-        "@fontsource-variable/newsreader": "^5.1.1",
+        "@fontsource/source-sans-3": "^5.2.9",
+        "@fontsource/source-serif-4": "^5.2.9",
         "astro": "^5.10.1",
         "katex": "^0.16.22",
         "rehype-autolink-headings": "^7.1.0",
@@ -135,9 +135,9 @@
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.25.9", "", { "os": "win32", "cpu": "x64" }, "sha512-PPOl1mi6lpLNQxnGoyAfschAodRFYXJ+9fs6WHXz7CSWKbOqiMZsubC+BQsVKuul+3vKLuwTHsS2c2y9EoKwxQ=="],
 
-    "@fontsource-variable/inter": ["@fontsource-variable/inter@5.2.6", "", {}, "sha512-jks/bficUPQ9nn7GvXvHtlQIPudW7Wx8CrlZoY8bhxgeobNxlQan8DclUJuYF2loYRrGpfrhCIZZspXYysiVGg=="],
+    "@fontsource/source-sans-3": ["@fontsource/source-sans-3@5.2.9", "", {}, "sha512-u3ymIq4rfmCCyB9MEw/sFR5lPVJ1yTNXmIMbUz+9kVCFIHvNtfzXOEBuvkg3Tk0zhmioPeJ28ZK5smZ7TurezQ=="],
 
-    "@fontsource-variable/newsreader": ["@fontsource-variable/newsreader@5.2.8", "", {}, "sha512-Ivo7tZPqQZ/erBbjx3mc+PvI0w+TuUhy93zlvIu3dupq2AlSF328sbkAjYyhwE91v8qpiJ88ogQB684hdiPtmw=="],
+    "@fontsource/source-serif-4": ["@fontsource/source-serif-4@5.2.9", "", {}, "sha512-er/Pym9emsEVJNf947umJ4kXarXfsiN6CN7kTYinefKRaHLwiquiiHOZvKvxWgkV8JMCf3pV3g0NcsPFpVCH9w=="],
 
     "@img/sharp-darwin-arm64": ["@img/sharp-darwin-arm64@0.33.5", "", { "optionalDependencies": { "@img/sharp-libvips-darwin-arm64": "1.0.4" }, "os": "darwin", "cpu": "arm64" }, "sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ=="],
 

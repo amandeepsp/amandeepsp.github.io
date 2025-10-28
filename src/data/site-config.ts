@@ -46,10 +46,6 @@ const siteConfig: SiteConfig = {
             text: "Tags",
             href: "/tags"
         },
-        {
-            text: "Contact Me",
-            href: "/contact-me"
-        }
     ],
     socialLinks: [
         {

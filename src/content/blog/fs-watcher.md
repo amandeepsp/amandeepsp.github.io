@@ -83,7 +83,7 @@ This method again has its own slew of annoyances.
    and see if some dir matches our monitored dir. Aside from the complexity of writing this,
    each eBPF program is statically verified. It must not contain unbounded loops, and we have a limited stack size (typically 512 bytes).
 
-### Walking the Tree in eBPF
+### Walking up the file tree in eBPF
 
 With the generous help of [Andrii Nakryiko's excellent BPF CO-RE reference guide](https://nakryiko.com/posts/bpf-core-reference-guide/),
 I was able to come up with a good enough solution. We can use the `dentry` struct to walk up the tree. But since we can't

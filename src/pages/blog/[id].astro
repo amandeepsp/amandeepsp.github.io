@@ -45,13 +45,12 @@ const readingTime = calculateReadingTime(post.body);
     keywords={postKeywords}
     readingTime={readingTime}
     noindex={seo?.noindex ?? false}
-    showHeader={false}
 >
     <article class="mb-16 sm:mb-24">
         <header class="mb-8">
             <h1 class="font-serif text-3xl font-medium leading-tight sm:text-5xl sm:leading-tight">{title}</h1>
             {subTitle && <p class="font-serif text-xl text-gray-600 dark:text-gray-300">{subTitle}</p>}
-            <div class="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+            <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300">
                 <div class="flex items-center gap-1">
                     <span class="font-medium">Published:</span>
                     <FormattedDate date={publishDate} />
@@ -68,23 +67,26 @@ const readingTime = calculateReadingTime(post.body);
                     <span class="font-medium">Reading time:</span>
                     <span>{readingTime}</span>
                 </div>
+                <div class="flex items-center gap-1">
+                    <span class="font-medium">Tags:</span>
+                    {
+                        tags.length > 0 && (
+                            <div class="flex flex-wrap gap-x-1 gap-y-1 text-sm">
+                                {tags.map((tag) => (
+                                    <a class="text-main hover:underline" href={`/tags/${slugify(tag)}`}>
+                                        #{tag}
+                                    </a>
+                                ))}
+                            </div>
+                        )
+                    }
+                </div>
             </div>
         </header>
-        <div class="prose prose-blog max-w-none leading-snug sm:prose-lg">
+        <div class="prose-blog prose max-w-none leading-snug sm:prose-lg">
             <Content />
         </div>
-        <div class="mt-8 flex flex-wrap items-center justify-between gap-6 text-sm sm:mt-12 sm:text-base">
-            {
-                tags.length > 0 && (
-                    <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm">
-                        {tags.map((tag) => (
-                            <a class="text-main hover:underline" href={`/tags/${slugify(tag)}`}>
-                                #{tag}
-                            </a>
-                        ))}
-                    </div>
-                )
-            }
+        <div class="mt-8 text-sm sm:mt-12 sm:text-base">
             <Button
                 class="copy-url-button"
                 aria-label="Copy link"
