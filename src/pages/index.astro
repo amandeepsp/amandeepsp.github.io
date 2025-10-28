@@ -14,7 +14,7 @@ const featuredPosts = posts.filter(({ data }) => data.featured);
     {
         featuredPosts?.length > 0 && (
             <div class="mb-16 sm:mb-24">
-                <h2 class="font-serif text-2xl italic sm:text-2xl sm:mb-8 ">Selected Writings</h2>
+                <h2 class="mb-8 font-serif text-2xl italic sm:mb-8 sm:text-2xl">Selected Writings</h2>
                 {featuredPosts.map((post) => (
                     <PostPreview post={post} class="mb-6 sm:mb-8" headingLevel="h3" />
                 ))}
