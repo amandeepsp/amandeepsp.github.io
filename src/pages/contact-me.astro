@@ -1,0 +1,33 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import siteConfig from "../data/site-config";
+---
+
+<BaseLayout title="Contact Me" description="Get in touch with me" pageType="website">
+    <div class="mb-16 sm:mb-24">
+        <h1 class="mb-8 font-serif text-3xl italic sm:text-4xl">Contact Me</h1>
+        <p class="mb-8 text-lg">
+            I'd love to hear from you! Feel free to reach out through any of the following channels:
+        </p>
+        <ul class="space-y-4">
+            <li>
+                <strong>Email:</strong>
+                <a href={`mailto:${siteConfig.author.email}`} class="underline hover:no-underline">
+                    {siteConfig.author.email}
+                </a>
+            </li>
+            {
+                siteConfig.socialLinks
+                    ?.filter((link) => link.text !== "Email" && link.text !== "RSS" && link.text !== "Github")
+                    .map((link) => (
+                        <li>
+                            <strong>{link.text}:</strong>
+                            <a href={link.href} target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">
+                                {link.href}
+                            </a>
+                        </li>
+                    ))
+            }
+        </ul>
+    </div>
+</BaseLayout>
