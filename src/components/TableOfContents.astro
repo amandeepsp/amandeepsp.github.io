@@ -1,0 +1,92 @@
+---
+interface Heading {
+    depth: number;
+    slug: string;
+    text: string;
+}
+
+interface Props {
+    headings: Heading[];
+}
+
+const { headings } = Astro.props;
+
+// Filter to only h2 and h3
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+    tocHeadings.length > 0 && (
+        <nav class="toc hidden xl:col-start-1 xl:block xl:sticky xl:top-8 xl:self-start" aria-label="Table of contents">
+            <div>
+                <h2 class="mb-3 text-sm font-medium text-muted">On this page</h2>
+                <ul class="space-y-2 text-sm">
+                    {tocHeadings.map((heading) => (
+                        <li class={heading.depth === 3 ? "ml-3" : ""}>
+                            <a
+                                href={`#${heading.slug}`}
+                                class="toc-link block text-muted transition-colors hover:text-main"
+                                data-slug={heading.slug}
+                            >
+                                {heading.text}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </nav>
+    )
+}
+
+<script>
+    function initToc() {
+        const tocLinks = document.querySelectorAll(".toc-link");
+        if (tocLinks.length === 0) return;
+
+        const headingElements = Array.from(tocLinks).map((link) => {
+            const slug = link.getAttribute("data-slug");
+            return document.getElementById(slug!);
+        }).filter(Boolean) as HTMLElement[];
+
+        if (headingElements.length === 0) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const slug = entry.target.id;
+                    const link = document.querySelector(`.toc-link[data-slug="${slug}"]`);
+                    if (link) {
+                        if (entry.isIntersecting) {
+                            tocLinks.forEach((l) => l.classList.remove("toc-active"));
+                            link.classList.add("toc-active");
+                        }
+                    }
+                });
+            },
+            {
+                rootMargin: "-80px 0px -80% 0px",
+                threshold: 0
+            }
+        );
+
+        headingElements.forEach((el) => observer.observe(el));
+
+        // Cleanup on page change
+        document.addEventListener(
+            "astro:before-swap",
+            () => {
+                observer.disconnect();
+            },
+            { once: true }
+        );
+    }
+
+    document.addEventListener("astro:page-load", initToc);
+</script>
+
+<style>
+    .toc-link.toc-active {
+        color: rgb(var(--color-text-main));
+        font-weight: 500;
+    }
+</style>

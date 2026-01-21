@@ -1,6 +1,7 @@
 ---
 title: Making Machine Learning models smaller
 publishDate: "Mar 10 2020"
+toc: true
 tags:
   - ml
 featured: true

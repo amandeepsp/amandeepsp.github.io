@@ -1,6 +1,7 @@
 ---
 title: Exploring Clojure for Advent of Code
 publishDate: "Jan 05 2022"
+toc: true
 tags:
   - programming-languages
   - clojure
