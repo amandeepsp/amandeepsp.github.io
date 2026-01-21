@@ -1,0 +1,87 @@
+---
+// Sidenotes component - transforms footnotes into sidenotes on large screens
+// This component should be included in blog post pages
+---
+
+<script>
+    function initSidenotes() {
+        const isLargeScreen = window.matchMedia("(min-width: 1280px)").matches;
+
+        // Clean up any existing sidenotes from previous page loads
+        document.querySelectorAll(".sidenote").forEach((el) => el.remove());
+
+        // Get the footnotes section
+        const footnotesSection = document.querySelector(".footnotes");
+        if (!footnotesSection) return;
+
+        // Get all footnote references (the [^1] links in the text)
+        const footnoteRefs = document.querySelectorAll("a[data-footnote-ref]");
+        if (footnoteRefs.length === 0) return;
+
+        // Get the article content container for positioning context
+        const articleContent = document.querySelector(".prose-blog");
+        if (!articleContent) return;
+
+        if (isLargeScreen) {
+            // Create sidenotes for each footnote reference
+            footnoteRefs.forEach((ref) => {
+                const href = ref.getAttribute("href");
+                if (!href) return;
+
+                const footnoteId = href.replace("#", "");
+                const footnoteItem = document.getElementById(footnoteId);
+                if (!footnoteItem) return;
+
+                // Get the footnote content (excluding the back link)
+                const footnoteContent = footnoteItem.cloneNode(true) as HTMLElement;
+                const backLink = footnoteContent.querySelector("a[data-footnote-backref]");
+                backLink?.remove();
+
+                // Extract footnote number from the reference text
+                const footnoteNum = ref.textContent || "";
+
+                // Create sidenote element with Tailwind classes
+                const sidenote = document.createElement("span");
+                sidenote.className = "sidenote absolute right-[-236px] w-[200px] text-sm leading-snug text-muted font-serif";
+                sidenote.innerHTML = `<span class="font-semibold">${footnoteNum}.</span> ${footnoteContent.innerHTML}`;
+
+                // Find the parent paragraph or block element to position relative to
+                const parentBlock = ref.closest("p, li, blockquote") as HTMLElement;
+                if (parentBlock) {
+                    parentBlock.style.position = "relative";
+                    parentBlock.appendChild(sidenote);
+                }
+            });
+
+            // Hide the footnotes section on large screens
+            footnotesSection.classList.add("hidden");
+        } else {
+            // Ensure footnotes are visible on smaller screens
+            footnotesSection.classList.remove("hidden");
+        }
+
+        // Handle resize events
+        const resizeHandler = () => {
+            const wasLarge = document.querySelector(".sidenote") !== null;
+            const isNowLarge = window.matchMedia("(min-width: 1280px)").matches;
+
+            if (wasLarge !== isNowLarge) {
+                // Reinitialize on breakpoint change
+                initSidenotes();
+            }
+        };
+
+        window.addEventListener("resize", resizeHandler);
+
+        // Cleanup on page change
+        document.addEventListener(
+            "astro:before-swap",
+            () => {
+                window.removeEventListener("resize", resizeHandler);
+            },
+            { once: true }
+        );
+    }
+
+    document.addEventListener("astro:page-load", initSidenotes);
+</script>
