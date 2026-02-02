@@ -1,0 +1,36 @@
+---
+interface Props {
+    src: string;
+    alt: string;
+    caption?: string;
+    autoplay?: boolean;
+    loop?: boolean;
+    poster?: boolean;
+}
+
+const { src, alt, caption, autoplay = true, loop = true, poster = true } = Astro.props;
+const baseName = src.split('/').pop();
+const posterSrc = poster ? `${src.replace(baseName!, `poster-${baseName}`).replace(/\/$/, '')}.png` : undefined;
+---
+
+<figure class="my-8">
+    <video
+        class="w-full rounded"
+        controls
+        autoplay={autoplay}
+        loop={loop}
+        muted
+        playsinline
+        aria-label={alt}
+        poster={posterSrc}
+    >
+        <source src={`${src}.webm`} type="video/webm" />
+        <source src={`${src}.mp4`} type="video/mp4" />
+        Your browser does not support the video tag.
+    </video>
+    {caption && (
+        <figcaption class="mt-2 text-center text-sm text-muted">
+            {caption}
+        </figcaption>
+    )}
+</figure>

@@ -1,0 +1,29 @@
+---
+title: Hierarchical Navigable Small Worlds (HNSW)
+publishDate: "Jan 26 2026"
+tags: [ml, algorithms, optimization]
+draft: true
+featured: true
+---
+
+You might have heard of this algorithm during the RAG-mania of late. But not a lot of sources on the web haven't gone into details about the inner workings and intuition building, which I would like to cover here.
+
+HNSW is a top-performing and popular nearest neighbor search algorithm. To find the nearest neighbor given a bunch of vectors, we need of find a vector that is the closest to a query vector.
+
+The trivial but brute force way to do this is just iterate through all the vectors, find a minimum by distatance. This is not scalable since the amount of vectors can be in billions. Another aspect of this is the number of vector dimensions which can be as large as 1024 in latest state of the art [embedding models](). We would also want to eliminate any extra distance calculations, since the time spent in these will not be small.
+
+## Act 1 - Proximity Graphs
+
+A common approach when wanting to optimize for multiple queries, is to look for a data structure we can build on top of current data so we can pay up some compute and memory to lower the per query cost exponentially. What if we could store a "region" around every vector, such that all points in that region are the closest to the vector. A query point $q$ if it falls into $p$'s region, $p$ by defination is the nearest neighbor of $q$.
+
+These regions are called **Voronoi Cells** and if we draw the region boundaries, this becomes a **Voronoi Diagram**. Here is a small visualization.
+
+But checking which cel
+
+### Interlude 1 - Small World Networks
+
+## Act 2 - Navigable Small World
+
+### Interlude 2 - Skip Lists
+
+## Act 3 - Hierarchical Navigable Small Worlds
