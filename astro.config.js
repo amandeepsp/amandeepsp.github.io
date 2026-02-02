@@ -8,18 +8,14 @@ import { remarkAlert } from "remark-github-blockquote-alert";
 import { rehypeHeadingIds } from "@astrojs/markdown-remark";
 import remarkGfm from "remark-gfm";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-
-/**
- * TODO: Nice to have features:
- * 1. Heading Links
- * 2. Better styling for remarkAlert
- */
+import mdx from "@astrojs/mdx";
 
 export default defineConfig({
     site: "https://amandeepsp.github.io",
     integrations: [
         sitemap(),
         tailwind(),
+        mdx(),
         partytown({
             config: {
                 forward: ["dataLayer.push"]

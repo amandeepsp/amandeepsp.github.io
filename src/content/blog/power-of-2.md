@@ -39,7 +39,7 @@ work so well: having two random choices dramatically reduces collisions and spre
 Here is a visualisation of how the Power of 2 choices approach perform better, as you can see in the gif, the load appears
 more uniform as the number of requests increases.
 
-![Simulation for Random vs Power of 2](/power-of-2-heatmap.gif)
+![Simulation for Random vs Power of 2](/blog/power-of-2/heatmap.gif)
 
 If you want to go deeper into the practical side of these tradeoffs, Tyler McCullen’s talk
 ["Load Balancing is Impossible"](https://www.youtube.com/watch?v=kpvbOzHUakA) and [Mark Booker's Blog Post](https://brooker.co.za/blog/2012/01/17/two-random.html) are excellent resources.
