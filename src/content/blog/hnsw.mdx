@@ -1,8 +1,9 @@
 ---
 title: Hierarchical Navigable Small Worlds (HNSW)
 publishDate: "Jan 26 2026"
-tags: [ml, algorithms, optimization]
+tags: [ml, algorithms]
 draft: true
+toc: true
 featured: true
 ---
 
@@ -12,18 +13,31 @@ HNSW is a top-performing and popular nearest neighbor search algorithm. To find 
 
 The trivial but brute force way to do this is just iterate through all the vectors, find a minimum by distatance. This is not scalable since the amount of vectors can be in billions. Another aspect of this is the number of vector dimensions which can be as large as 1024 in latest state of the art [embedding models](). We would also want to eliminate any extra distance calculations, since the time spent in these will not be small.
 
-## Act 1 - Proximity Graphs
+## Act 1 - Delaunay Triangulation
 
 A common approach when wanting to optimize for multiple queries, is to look for a data structure we can build on top of current data so we can pay up some compute and memory to lower the per query cost exponentially. What if we could store a "region" around every vector, such that all points in that region are the closest to the vector. A query point $q$ if it falls into $p$'s region, $p$ by defination is the nearest neighbor of $q$.
 
 These regions are called **Voronoi Cells** and if we draw the region boundaries, this becomes a **Voronoi Diagram**. Here is a small visualization.
 
-But checking which cel
+TODO: add visualization
 
-### Interlude 1 - Small World Networks
+We can also represent each Voronoi cell as a node in graph and the each adjacent cell as neighbors to the node, this is a mathematically equivalent representaion of the Voronoi Diagram and is called **Delaunay triangulation**. This way for each point in the graph, finding the nearest neighbor is trivial, we just need to get the nearest out of the neighbors of the current node.
 
-## Act 2 - Navigable Small World
+TODO: add visualization
 
-### Interlude 2 - Skip Lists
+But our problem statement is for point $q$ outside the given set of points, how do we use the Delaunay triangulation to answer this question? Imagine we are at a point $p$, such that the point $q$ is *not* in the Voronoi cell of $p$. What is a good decision I can make given the local information I have about my neighbors? I can find a neighbor $r$ such that $dist(r, q) < dist(p, q)$. But will this work? Lets say we move to $r$ and repeat the this process. We can see the we strictly decrease the $dist(r', q)$ until we reach a point wher we can no such $r'$ such that $dist(r', q) < dist(p', q)$, which means $p'$ _is_ the nearest neighbor of $q$.
+
+You might have noticed that we selected any closer neighbor and not the _closest_ neighbor in the _Delaunay Walk_, since the process converges to produce the correct answer anyways, picking the _closest_ adds extra computation for a reduction in number of steps the algorithm takes to converge.
+
+The big problem with this is the _curse of dimensionality_, the amount of space needed to store the graph is $\mathcal{O}(n^{\lceil{d/2}\rceil})$, this is fine for 2-d case but for large $d$ this grows in a superlinear manner. Discussion about search times would be irrelevant here. Lets say we have a million vectors with 1000 dims, the vectors themselves stored in `f32` would be 4GB. The graph would take $4\text{e+}3000$ bytes of space, which is just absurd.
+
+## Act 2 - Small Worlds and their Navigation
+
+You might have heard about the _six degrees of seperation_ experiment in which social psychologist Stanley Milgram asked people to send a letter to a _target_ individual, but a person can only forward the letter to a single acquaintance that they know on a first name basis. About a third of the letters reached the target persons with a median of 6 steps. This and further such experiments are serve as the basic evidence of existence of short paths in the global friendship network, linking all (or almost all) of us together in society.
+
+This kind of small world phenomena is also present in a lot of places outsied society, e.g. the internet itself, power grids, the fully mapped biological neural network of the worm C. elegans and many more.
+
+The key property of such networks is that thay have lengths on the order of $\mathcal{O}(\log n)$
+
 
 ## Act 3 - Hierarchical Navigable Small Worlds
