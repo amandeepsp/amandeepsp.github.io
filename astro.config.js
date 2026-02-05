@@ -9,8 +9,12 @@ import { rehypeHeadingIds } from "@astrojs/markdown-remark";
 import remarkGfm from "remark-gfm";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdx from "@astrojs/mdx";
+import assetsPlugin from "./scripts/vite-plugin-assets.js";
 
 export default defineConfig({
+    vite: {
+        plugins: [assetsPlugin()],
+    },
     site: "https://amandeepsp.github.io",
     integrations: [
         sitemap(),

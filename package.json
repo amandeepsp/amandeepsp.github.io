@@ -10,7 +10,9 @@
         "astro": "astro",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
-        "og": "node scripts/og-generate.ts"
+        "og": "node scripts/og-generate.ts",
+        "assets": "uv run python scripts/assets/build.py",
+        "assets:force": "uv run python scripts/assets/build.py --force"
     },
     "dependencies": {
         "@astrojs/mdx": "^4.3.13",

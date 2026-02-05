@@ -1,17 +1,15 @@
 """Delaunay triangulation graph visualization for HNSW blog post."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay, Voronoi
 
+# Import voronoi_diagram first - it sets up sys.path for _common imports
+from voronoi_diagram import voronoi_finite_polygons_2d
+
 from _common.paths import output_path
 from _common.matplotlib import save_figure
-from voronoi_diagram import voronoi_finite_polygons_2d
+from _common.colors import Colors
 
 SEED = 2026
 N_POINTS = 10
@@ -24,7 +22,7 @@ def main():
     tri = Delaunay(points)
     vor = Voronoi(points)
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(8, 5))
 
     edges = set()
     for simplex in tri.simplices:
@@ -37,7 +35,7 @@ def main():
             [points[i, 0], points[j, 0]],
             [points[i, 1], points[j, 1]],
             "-",
-            color="#6b7280",
+            color=Colors.GRAY_500,
             linewidth=2,
             zorder=1,
         )
@@ -45,9 +43,9 @@ def main():
     regions, vertices = voronoi_finite_polygons_2d(vor)
     for region in regions:
         polygon = vertices[region]
-        ax.fill(*zip(*polygon), alpha=0.2)
+        ax.fill(*zip(*polygon), alpha=Colors.REGION_FILL_ALPHA, color=Colors.REGION_FILL)
 
-    ax.plot(points[:, 0], points[:, 1], "ko")
+    ax.plot(points[:, 0], points[:, 1], "o", color=Colors.NODE, markersize=8)
     ax.set_xlim(vor.min_bound[0] - 0.1, vor.max_bound[0] + 0.1)
     ax.set_ylim(vor.min_bound[1] - 0.1, vor.max_bound[1] + 0.1)
     ax.set_aspect("equal")

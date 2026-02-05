@@ -25,7 +25,7 @@ These regions are called **Voronoi Cells** and if we draw the region boundaries,
   src="/blog/hnsw/voronoi_diagram.svg"
   alt="Voronoi diagram showing points with colored regions representing their Voronoi cells. A query point q is shown."
   caption="Voronoi diagram: each colored region contains all points closest to its center"
-  width="100%"
+  width="75%"
 />
 
 We can also represent each Voronoi cell as a node in graph and the each adjacent cell as neighbors to the node, this is a mathematically equivalent representaion of the Voronoi Diagram and is called **Delaunay triangulation**. This way for each point in the graph, finding the nearest neighbor is trivial, we just need to get the nearest out of the neighbors of the current node.
@@ -34,10 +34,17 @@ We can also represent each Voronoi cell as a node in graph and the each adjacent
   src="/blog/hnsw/delaunay_graph.svg"
   alt="Delaunay triangulation graph where nodes represent points and edges connect adjacent Voronoi cells"
   caption="Delaunay triangulation graph where nodes represent points and edges connect adjacent Voronoi cells"
-  width="100%"
+  width="75%"
 />
 
 But our problem statement is for point $q$ outside the given set of points, how do we use the Delaunay triangulation to answer this question? Imagine we are at a point $p$, such that the point $q$ is *not* in the Voronoi cell of $p$. What is a good decision I can make given the local information I have about my neighbors? I can find a neighbor $r$ such that $dist(r, q) < dist(p, q)$. But will this work? Lets say we move to $r$ and repeat the this process. We can see the we strictly decrease the $dist(r', q)$ until we reach a point wher we can no such $r'$ such that $dist(r', q) < dist(p', q)$, which means $p'$ _is_ the nearest neighbor of $q$.
+
+<SvgFigure
+  src="/blog/hnsw/delaunay_walk.svg"
+  alt="Delaunay Walk: greedy traversal from a start point following edges to reach the nearest neighbor of query point q"
+  caption="Delaunay Walk: starting from an arbitrary point, we greedily move to closer neighbors until reaching the nearest neighbor of q"
+  width="75%"
+/>
 
 You might have noticed that we selected any closer neighbor and not the _closest_ neighbor in the _Delaunay Walk_, since the process converges to produce the correct answer anyways, picking the _closest_ adds extra computation for a reduction in number of steps the algorithm takes to converge.
 
@@ -47,9 +54,7 @@ The big problem with this is the _curse of dimensionality_, the amount of space 
 
 You might have heard about the _six degrees of seperation_ experiment in which social psychologist Stanley Milgram asked people to send a letter to a _target_ individual, but a person can only forward the letter to a single acquaintance that they know on a first name basis. About a third of the letters reached the target persons with a median of 6 steps. This and further such experiments are serve as the basic evidence of existence of short paths in the global friendship network, linking all (or almost all) of us together in society.
 
-This kind of small world phenomena is also present in a lot of places outsied society, e.g. the internet itself, power grids, the fully mapped biological neural network of the worm C. elegans and many more.
-
-The key property of such networks is that thay have lengths on the order of $\mathcal{O}(\log n)$
+This kind of small world phenomena is also present in a lot of places outsied society, e.g. the internet itself, power grids, the fully mapped biological neural network of the worm C. elegans and many more. 
 
 
 ## Act 3 - Hierarchical Navigable Small Worlds

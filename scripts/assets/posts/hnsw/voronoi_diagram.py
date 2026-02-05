@@ -11,6 +11,7 @@ from scipy.spatial import Voronoi
 
 from _common.paths import output_path
 from _common.matplotlib import save_figure
+from _common.colors import Colors
 
 SEED = 2026
 N_POINTS = 10
@@ -103,14 +104,54 @@ def main():
 
     vor = Voronoi(points)
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    # Find which region the query point falls into
+    query_point = np.array([0.65, 0.75])
+    distances = np.linalg.norm(points - query_point, axis=1)
+    nearest_idx = np.argmin(distances)
 
     regions, vertices = voronoi_finite_polygons_2d(vor)
-    for region in regions:
+    for i, region in enumerate(regions):
         polygon = vertices[region]
-        ax.fill(*zip(*polygon), alpha=0.4)
+        # Highlight the region containing the query point
+        if i == nearest_idx:
+            ax.fill(
+                *zip(*polygon),
+                alpha=Colors.REGION_HIGHLIGHT_ALPHA,
+                color=Colors.REGION_HIGHLIGHT,
+                edgecolor=Colors.PRIMARY,
+                linewidth=2,
+            )
+        else:
+            ax.fill(*zip(*polygon), alpha=Colors.REGION_FILL_ALPHA, color=Colors.REGION_FILL)
 
-    ax.plot(points[:, 0], points[:, 1], "ko")
+    # Draw points
+    ax.plot(points[:, 0], points[:, 1], "o", color=Colors.NODE, markersize=8, zorder=3)
+
+    # Draw and label the query point
+    ax.plot(query_point[0], query_point[1], "*", color=Colors.QUERY_POINT, markersize=15, zorder=4)
+    ax.annotate(
+        "$q$",
+        query_point,
+        xytext=(8, 8),
+        textcoords="offset points",
+        fontsize=14,
+        fontweight="bold",
+        color=Colors.QUERY_POINT,
+    )
+
+    # Label the nearest point
+    ax.annotate(
+        "$p$",
+        points[nearest_idx],
+        xytext=(-12, -12),
+        textcoords="offset points",
+        fontsize=14,
+        fontweight="bold",
+        color=Colors.END_POINT,
+    )
+
     ax.set_xlim(vor.min_bound[0] - 0.1, vor.max_bound[0] + 0.1)
     ax.set_ylim(vor.min_bound[1] - 0.1, vor.max_bound[1] + 0.1)
     ax.set_aspect("equal")
