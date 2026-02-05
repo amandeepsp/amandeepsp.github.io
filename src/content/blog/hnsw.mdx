@@ -7,6 +7,8 @@ toc: true
 featured: true
 ---
 
+import SvgFigure from "@/components/SvgFigure.astro";
+
 You might have heard of this algorithm during the RAG-mania of late. But not a lot of sources on the web haven't gone into details about the inner workings and intuition building, which I would like to cover here.
 
 HNSW is a top-performing and popular nearest neighbor search algorithm. To find the nearest neighbor given a bunch of vectors, we need of find a vector that is the closest to a query vector.
@@ -19,17 +21,27 @@ A common approach when wanting to optimize for multiple queries, is to look for 
 
 These regions are called **Voronoi Cells** and if we draw the region boundaries, this becomes a **Voronoi Diagram**. Here is a small visualization.
 
-TODO: add visualization
+<SvgFigure
+  src="/blog/hnsw/voronoi_diagram.svg"
+  alt="Voronoi diagram showing points with colored regions representing their Voronoi cells. A query point q is shown."
+  caption="Voronoi diagram: each colored region contains all points closest to its center"
+  width="100%"
+/>
 
 We can also represent each Voronoi cell as a node in graph and the each adjacent cell as neighbors to the node, this is a mathematically equivalent representaion of the Voronoi Diagram and is called **Delaunay triangulation**. This way for each point in the graph, finding the nearest neighbor is trivial, we just need to get the nearest out of the neighbors of the current node.
 
-TODO: add visualization
+<SvgFigure
+  src="/blog/hnsw/delaunay_graph.svg"
+  alt="Delaunay triangulation graph where nodes represent points and edges connect adjacent Voronoi cells"
+  caption="Delaunay triangulation graph where nodes represent points and edges connect adjacent Voronoi cells"
+  width="100%"
+/>
 
 But our problem statement is for point $q$ outside the given set of points, how do we use the Delaunay triangulation to answer this question? Imagine we are at a point $p$, such that the point $q$ is *not* in the Voronoi cell of $p$. What is a good decision I can make given the local information I have about my neighbors? I can find a neighbor $r$ such that $dist(r, q) < dist(p, q)$. But will this work? Lets say we move to $r$ and repeat the this process. We can see the we strictly decrease the $dist(r', q)$ until we reach a point wher we can no such $r'$ such that $dist(r', q) < dist(p', q)$, which means $p'$ _is_ the nearest neighbor of $q$.
 
 You might have noticed that we selected any closer neighbor and not the _closest_ neighbor in the _Delaunay Walk_, since the process converges to produce the correct answer anyways, picking the _closest_ adds extra computation for a reduction in number of steps the algorithm takes to converge.
 
-The big problem with this is the _curse of dimensionality_, the amount of space needed to store the graph is $\mathcal{O}(n^{\lceil{d/2}\rceil})$, this is fine for 2-d case but for large $d$ this grows in a superlinear manner. Discussion about search times would be irrelevant here. Lets say we have a million vectors with 1000 dims, the vectors themselves stored in `f32` would be 4GB. The graph would take $4\text{e+}3000$ bytes of space, which is just absurd.
+The big problem with this is the _curse of dimensionality_, the amount of space needed to store the graph is $\mathcal{O}(n^{\lceil{d/2}\rceil})$[^1], this is fine for 2-d case but for large $d$ this grows in a superlinear manner. Discussion about search times would be irrelevant here. Lets say we have a million vectors with 1000 dims, the vectors themselves stored in `f32` would be 4GB. The graph would take $4 \times 10^{3000}$ bytes of space, which is just absurd.
 
 ## Act 2 - Small Worlds and their Navigation
 
@@ -41,3 +53,6 @@ The key property of such networks is that thay have lengths on the order of $\ma
 
 
 ## Act 3 - Hierarchical Navigable Small Worlds
+
+[^1]: Why? See [McMullen's Upper Bound Theorem](https://en.wikipedia.org/wiki/Upper_bound_theorem)
+

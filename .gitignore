@@ -39,3 +39,6 @@ build/
 # Manim Cache
 .manim-cache/
 
+# Asset build cache
+scripts/assets/.asset-cache.json
+
