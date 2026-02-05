@@ -14,7 +14,7 @@ from _common.matplotlib import save_figure
 from voronoi_diagram import voronoi_finite_polygons_2d
 
 SEED = 2026
-N_POINTS = 8
+N_POINTS = 10
 
 
 def main():

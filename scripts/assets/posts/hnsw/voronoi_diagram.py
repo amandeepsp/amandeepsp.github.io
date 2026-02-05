@@ -13,7 +13,7 @@ from _common.paths import output_path
 from _common.matplotlib import save_figure
 
 SEED = 2026
-N_POINTS = 8
+N_POINTS = 10
 
 
 def voronoi_finite_polygons_2d(vor, radius=None):
