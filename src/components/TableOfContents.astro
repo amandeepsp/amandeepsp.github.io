@@ -40,8 +40,9 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
 <script>
     function initToc() {
+        const tocNav = document.querySelector(".toc") as HTMLElement | null;
         const tocLinks = document.querySelectorAll(".toc-link");
-        if (tocLinks.length === 0) return;
+        if (tocLinks.length === 0 || !tocNav) return;
 
         const headingElements = Array.from(tocLinks).map((link) => {
             const slug = link.getAttribute("data-slug");
@@ -50,7 +51,8 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
         if (headingElements.length === 0) return;
 
-        const observer = new IntersectionObserver(
+        // Observer for active heading tracking
+        const headingObserver = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
                     const slug = entry.target.id;
@@ -69,13 +71,43 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
             }
         );
 
-        headingElements.forEach((el) => observer.observe(el));
+        headingElements.forEach((el) => headingObserver.observe(el));
+
+        // Observer for fading TOC when code blocks are in view
+        const codeBlocks = document.querySelectorAll(".prose-blog pre");
+        let visibleCodeBlocks = 0;
+
+        const codeObserver = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        visibleCodeBlocks++;
+                    } else {
+                        visibleCodeBlocks = Math.max(0, visibleCodeBlocks - 1);
+                    }
+                });
+
+                // Hide TOC when any code block is visible
+                if (visibleCodeBlocks > 0) {
+                    tocNav.classList.add("toc-hidden");
+                } else {
+                    tocNav.classList.remove("toc-hidden");
+                }
+            },
+            {
+                rootMargin: "-50px 0px -50px 0px",
+                threshold: 0
+            }
+        );
+
+        codeBlocks.forEach((el) => codeObserver.observe(el));
 
         // Cleanup on page change
         document.addEventListener(
             "astro:before-swap",
             () => {
-                observer.disconnect();
+                headingObserver.disconnect();
+                codeObserver.disconnect();
             },
             { once: true }
         );
@@ -88,5 +120,15 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
     .toc-link.toc-active {
         color: rgb(var(--color-text-main));
         font-weight: 500;
+    }
+
+    .toc {
+        transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    }
+
+    .toc.toc-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
     }
 </style>
