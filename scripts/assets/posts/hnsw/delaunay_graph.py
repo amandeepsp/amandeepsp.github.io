@@ -43,9 +43,9 @@ def main():
     regions, vertices = voronoi_finite_polygons_2d(vor)
     for region in regions:
         polygon = vertices[region]
-        ax.fill(*zip(*polygon), alpha=Colors.REGION_FILL_ALPHA, color=Colors.REGION_FILL)
+        ax.fill(*zip(*polygon), alpha=0.2, color=Colors.GRAY_400)
 
-    ax.plot(points[:, 0], points[:, 1], "o", color=Colors.NODE, markersize=8)
+    ax.plot(points[:, 0], points[:, 1], "o", color=Colors.GRAY_700, markersize=8)
     ax.set_xlim(vor.min_bound[0] - 0.1, vor.max_bound[0] + 0.1)
     ax.set_ylim(vor.min_bound[1] - 0.1, vor.max_bound[1] + 0.1)
     ax.set_aspect("equal")

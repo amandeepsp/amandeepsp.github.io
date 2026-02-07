@@ -23,6 +23,10 @@
         if (!articleContent) return;
 
         if (isLargeScreen) {
+            // Track sidenote positions to avoid overlaps
+            const sidenotes: Array<{ element: HTMLElement; top: number }> = [];
+            const MIN_GAP = 16; // Minimum gap between sidenotes in pixels
+
             // Create sidenotes for each footnote reference
             footnoteRefs.forEach((ref) => {
                 const href = ref.getAttribute("href");
@@ -40,16 +44,48 @@
                 // Extract footnote number from the reference text
                 const footnoteNum = ref.textContent || "";
 
-                // Create sidenote element with Tailwind classes
+                // Create sidenote element with Tailwind classes using DOM methods
                 const sidenote = document.createElement("span");
                 sidenote.className = "sidenote absolute right-[-236px] w-[200px] text-sm leading-snug text-muted font-serif";
-                sidenote.innerHTML = `<span class="font-semibold">${footnoteNum}.</span> ${footnoteContent.innerHTML}`;
+
+                // Build content using safe DOM methods
+                const numSpan = document.createElement("span");
+                numSpan.className = "font-semibold";
+                numSpan.textContent = `${footnoteNum}.`;
+                sidenote.appendChild(numSpan);
+                sidenote.appendChild(document.createTextNode(" "));
+
+                // Append the cloned footnote content nodes
+                while (footnoteContent.firstChild) {
+                    sidenote.appendChild(footnoteContent.firstChild);
+                }
 
                 // Find the parent paragraph or block element to position relative to
-                const parentBlock = ref.closest("p, li, blockquote") as HTMLElement;
+                const parentBlock = ref.closest("p, li, blockquote, figcaption") as HTMLElement;
                 if (parentBlock) {
                     parentBlock.style.position = "relative";
                     parentBlock.appendChild(sidenote);
+
+                    // Calculate the desired top position relative to the article
+                    const articleRect = articleContent.getBoundingClientRect();
+                    const refRect = ref.getBoundingClientRect();
+                    let desiredTop = refRect.top - articleRect.top;
+
+                    // Check for overlaps with previous sidenotes and adjust
+                    for (const prev of sidenotes) {
+                        const prevBottom = prev.top + prev.element.offsetHeight + MIN_GAP;
+                        if (desiredTop < prevBottom) {
+                            desiredTop = prevBottom;
+                        }
+                    }
+
+                    // Calculate position relative to the parent block
+                    const parentRect = parentBlock.getBoundingClientRect();
+                    const topRelativeToParent = desiredTop - (parentRect.top - articleRect.top);
+                    sidenote.style.top = `${topRelativeToParent}px`;
+
+                    // Track this sidenote for overlap detection
+                    sidenotes.push({ element: sidenote, top: desiredTop });
                 }
             });
 

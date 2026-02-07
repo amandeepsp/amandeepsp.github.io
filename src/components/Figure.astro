@@ -1,0 +1,24 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  width?: string;
+}
+
+const { src, alt, width } = Astro.props;
+const hasCaption = Astro.slots.has("caption");
+---
+
+<figure class="my-8">
+  <img
+    src={src}
+    alt={alt}
+    class="mx-auto"
+    style={width ? `width: ${width}` : undefined}
+  />
+  {hasCaption && (
+    <figcaption class="mt-2 text-center text-sm text-muted">
+      <slot name="caption" />
+    </figcaption>
+  )}
+</figure>

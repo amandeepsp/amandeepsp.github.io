@@ -47,13 +47,13 @@
         font-style: var(--shiki-dark-font-style) !important;
         font-weight: var(--shiki-dark-font-weight) !important;
         text-decoration: var(--shiki-dark-text-decoration) !important;
-        line-height: 1.5 !important;
+        line-height: 1.25 !important;
     }
 
     /* Light mode code blocks */
     .astro-code,
     .astro-code span {
-        line-height: 1.5 !important;
+        line-height: 1.25 !important;
     }
 
     html.dark article img {
@@ -107,6 +107,10 @@
         --tw-prose-td-borders: var(--color-border-main);
     }
 
+    .prose {
+        font-family: var(--font-serif);
+    }
+
     .prose a {
         font-weight: normal;
         text-decoration: underline;
@@ -118,13 +122,11 @@
         text-decoration-style: solid;
     }
 
-    .prose p {
+    .prose :is(p, li) {
         line-height: 1.5;
-        font-family: var(--font-serif);
     }
 
     .prose :is(h1, h2, h3, h4, h5, h6) {
-        font-family: var(--font-serif);
         font-weight: 500;
     }
     .prose :is(h1, h2, h3, h4, h5, h6) a.anchor-link {
@@ -135,7 +137,6 @@
     }
 
     .prose blockquote {
-        font-family: var(--font-serif);
         font-size: 1em;
         font-style: italic;
         font-weight: normal;

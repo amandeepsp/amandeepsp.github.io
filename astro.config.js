@@ -51,7 +51,7 @@ export default defineConfig({
         syntaxHighlight: "shiki",
         shikiConfig: {
             themes: {
-                light: "rose-pine-dawn",
+                light: "kanagawa-dragon",
                 dark: "kanagawa-dragon"
             }
         }

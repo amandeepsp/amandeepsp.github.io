@@ -1,63 +1,354 @@
 ---
-title: Hierarchical Navigable Small Worlds (HNSW)
-publishDate: "Jan 26 2026"
+title: Hierarchical Navigable Small Worlds
+publishDate: "Feb 8 2026"
 tags: [ml, algorithms]
 draft: true
 toc: true
 featured: true
 ---
 
-import SvgFigure from "@/components/SvgFigure.astro";
+import Figure from "@/components/Figure.astro";
 
 You might have heard of this algorithm during the RAG-mania of late. But not a lot of sources on the web haven't gone into details about the inner workings and intuition building, which I would like to cover here.
 
-HNSW is a top-performing and popular nearest neighbor search algorithm. To find the nearest neighbor given a bunch of vectors, we need of find a vector that is the closest to a query vector.
+HHierarchical Navigable Small Worlds (HNSW) is a top-performing and popular nearest neighbor search algorithm. To find the nearest neighbor given a bunch of vectors, we need of find a vector that is the closest to a query vector.
 
 The trivial but brute force way to do this is just iterate through all the vectors, find a minimum by distatance. This is not scalable since the amount of vectors can be in billions. Another aspect of this is the number of vector dimensions which can be as large as 1024 in latest state of the art [embedding models](). We would also want to eliminate any extra distance calculations, since the time spent in these will not be small.
 
-## Act 1 - Delaunay Triangulation
+## Delaunay Triangulation
 
 A common approach when wanting to optimize for multiple queries, is to look for a data structure we can build on top of current data so we can pay up some compute and memory to lower the per query cost exponentially. What if we could store a "region" around every vector, such that all points in that region are the closest to the vector. A query point $q$ if it falls into $p$'s region, $p$ by defination is the nearest neighbor of $q$.
 
 These regions are called **Voronoi Cells** and if we draw the region boundaries, this becomes a **Voronoi Diagram**. Here is a small visualization.
 
-<SvgFigure
-  src="/blog/hnsw/voronoi_diagram.svg"
-  alt="Voronoi diagram showing points with colored regions representing their Voronoi cells. A query point q is shown."
-  caption="Voronoi diagram: each colored region contains all points closest to its center"
-  width="75%"
-/>
+<Figure src="/blog/hnsw/voronoi_diagram.svg" alt="Voronoi diagram showing points with colored regions representing their Voronoi cells. A query point q is shown." width="100%">
+  <Fragment slot="caption">Voronoi diagram: each colored region contains all points closest to its center</Fragment>
+</Figure>
 
 We can also represent each Voronoi cell as a node in graph and the each adjacent cell as neighbors to the node, this is a mathematically equivalent representaion of the Voronoi Diagram and is called **Delaunay triangulation**. This way for each point in the graph, finding the nearest neighbor is trivial, we just need to get the nearest out of the neighbors of the current node.
 
-<SvgFigure
-  src="/blog/hnsw/delaunay_graph.svg"
-  alt="Delaunay triangulation graph where nodes represent points and edges connect adjacent Voronoi cells"
-  caption="Delaunay triangulation graph where nodes represent points and edges connect adjacent Voronoi cells"
-  width="75%"
-/>
+<Figure src="/blog/hnsw/delaunay_graph.svg" alt="Delaunay triangulation graph where nodes represent points and edges connect adjacent Voronoi cells" width="100%">
+  <Fragment slot="caption">Delaunay triangulation graph where nodes represent points and edges connect adjacent Voronoi cells</Fragment>
+</Figure>
 
 But our problem statement is for point $q$ outside the given set of points, how do we use the Delaunay triangulation to answer this question? Imagine we are at a point $p$, such that the point $q$ is *not* in the Voronoi cell of $p$. What is a good decision I can make given the local information I have about my neighbors? I can find a neighbor $r$ such that $dist(r, q) < dist(p, q)$. But will this work? Lets say we move to $r$ and repeat the this process. We can see the we strictly decrease the $dist(r', q)$ until we reach a point wher we can no such $r'$ such that $dist(r', q) < dist(p', q)$, which means $p'$ _is_ the nearest neighbor of $q$.
 
-<SvgFigure
-  src="/blog/hnsw/delaunay_walk.svg"
-  alt="Delaunay Walk: greedy traversal from a start point following edges to reach the nearest neighbor of query point q"
-  caption="Delaunay Walk: starting from an arbitrary point, we greedily move to closer neighbors until reaching the nearest neighbor of q"
-  width="75%"
-/>
+<Figure src="/blog/hnsw/delaunay_walk.svg" alt="Delaunay Walk: greedy traversal from a start point following edges to reach the nearest neighbor of query point q" width="100%">
+  <Fragment slot="caption">Delaunay Walk: starting from an arbitrary point, we greedily move to closer neighbors until reaching the nearest neighbor of q</Fragment>
+</Figure>
 
 You might have noticed that we selected any closer neighbor and not the _closest_ neighbor in the _Delaunay Walk_, since the process converges to produce the correct answer anyways, picking the _closest_ adds extra computation for a reduction in number of steps the algorithm takes to converge.
 
-The big problem with this is the _curse of dimensionality_, the amount of space needed to store the graph is $\mathcal{O}(n^{\lceil{d/2}\rceil})$[^1], this is fine for 2-d case but for large $d$ this grows in a superlinear manner. Discussion about search times would be irrelevant here. Lets say we have a million vectors with 1000 dims, the vectors themselves stored in `f32` would be 4GB. The graph would take $4 \times 10^{3000}$ bytes of space, which is just absurd.
+The big problem with this is the _curse of dimensionality_, the amount of space needed to store the graph is $\mathcal{O}(n^{\lceil{d/2}\rceil})$[^1], this is fine for 2-d case but for large $d$ this grows in a superlinear manner. Discussion about search times would be irrelevant here. Lets say we have a million vectors with 1000 dims, the vectors themselves stored in `f32` would be 4GB. The graph would take $4 \times 10^{3000}$ bytes of space, which is more memory than exists on Earth.
 
-## Act 2 - Small Worlds and their Navigation
+This can be easily skirted if we consider an apporximate problem, we can cap the number of neighbors to $M$ in which case, the memory requirements reduce to $\mathcal{O}(nM)$. But this risks the greedy walk stuck in local minima as there is no link diversity in the Delaunay graph to explore outside of a local cluster.
 
-You might have heard about the _six degrees of seperation_ experiment in which social psychologist Stanley Milgram asked people to send a letter to a _target_ individual, but a person can only forward the letter to a single acquaintance that they know on a first name basis. About a third of the letters reached the target persons with a median of 6 steps. This and further such experiments are serve as the basic evidence of existence of short paths in the global friendship network, linking all (or almost all) of us together in society.
+## Small Worlds and their Navigation
 
-This kind of small world phenomena is also present in a lot of places outsied society, e.g. the internet itself, power grids, the fully mapped biological neural network of the worm C. elegans and many more. 
+You might have heard about the _six degrees of seperation_ experiment in which social psychologist Stanley Milgram[^2] asked people to send a letter to a _target_ individual, but a person can only forward the letter to a single acquaintance that they know on a first name basis. About a third of the letters reached the target persons with a median of 6 steps. This and further such experiments are serve as the basic evidence of existence of short paths in the global friendship network, linking all (or almost all) of us together in society.
+
+This kind of small world phenomena is also present in a lot of places outsied society, e.g. the internet itself, power grids, the fully mapped biological neural network of the worm C. elegans and many more. All this happens because of "long-range links" between local custers, e.g most of your friends are local;the one overseas friend can shorten the total number of links needed to reach the desination.
+
+The same concept can work if we add these long range links to a the _Delaunay graph_. We can randomly add new links but adding too many of them, we loose local structure and the greedy walk will not easily converge since we can't determine if we are moving closer or not, we need to settle on some middle ground startegy. The optimal result comes from Jon Kleinberg[^3]. Long range links are added with the probability of link from $u \rightarrow v$, based on the distance $d(u,v)$ between them.
 
 
-## Act 3 - Hierarchical Navigable Small Worlds
+$$ P(u \rightarrow v) \propto \cfrac{1}{d(u,v)^{\alpha}} $$
+
+- If $\alpha$ is low; the distance doesn't matter much. Long links are just as likely as short ones. Jumps can overshoot the target.
+- If $\alpha$ is high; the penalty of distance is huge. We mostly just link to nearby links. Jumps can be too timid and might not help.
+
+<Figure src="/blog/hnsw/nsw_graph.svg" alt="Navigable Small World graph showing local Delaunay edges (solid) and long-range links (dashed) enabling faster greedy search" width="100%">
+  <Fragment slot="caption">NSW graph: local edges provide structure while long-range links (dashed) enable faster traversal across the graph</Fragment>
+</Figure>
+
+The number points at distance $r$ in a $d$ dimenstional spaces grows $\propto r^d$. And the probability of linking to one such node is $\propto r^{-\alpha}$  This means the total probability of reaching distance $r$ is $\approx r^{(d-\alpha)}$. Now at $\alpha = d$, this probability becomes constant, i.e we can reach any distance with the same probability and creates a _Scale Invariance_ in the graph.
+
+Due to the Scale Invariance property of the long-range links, we can imagine a "ring" $R_k$ between distance $2^{k-1}$ to $2^k$. There would be $\mathcal{O}(\log n)$ such rings. The probability of finding a link to a certian link in a ring is constant. Let's try to calculate this. We know $P(u \rightarrow u) \propto d^{-\alpha}$, but we need to normaliza the probability. The normalization demoninator would be.
+
+$$ Z = \displaystyle\sum_{u\not=v} \cfrac{1}{d(u, v)^{\alpha}}  $$
+
+substituting the ring distances we get
+
+$$ Z \approx \displaystyle\sum_{k=0}^{\mathcal{O}(\log n)}{2^{k(d-\alpha)}} $$
+
+at $d = \alpha$, this becomes a sum of $1$s.
+
+$$ Z \sim \mathcal{O}(\log n) $$
+
+this implies the probability of reaching a ring is, ring's weight ($1$) divided by $Z$.
+
+$$ P(R_k) \approx \cfrac{1}{Z} \sim \cfrac{1}{\mathcal{O}(\log n)} $$
+
+Our goal to move to the Ring $R_k$ from a previous ring $R_{k-1}$, we have only two choices either we find a long-link and move or continue to explore in the current ring. The expected number of triald before we succeed is $\mathbb{E}{[T]} = 1/p$, [^4] this implies expected number of steps to exit the ring is $\mathcal{O}(\log n)$. Hence.
+
+$$ \text{Total Cost} = \text{\# of Rings} \times \text{\# of Steps per Ring} = \mathcal{O}(\log^2 n) $$
+
+<Figure src="/blog/hnsw/alpha_sweep.svg" alt="Plot showing log expected steps vs alpha, with minimum around alpha=2" width="100%">
+  <Fragment slot="caption">Expected steps vs α in 2D: the sweet spot is at α = d = 2 where scale invariance emerges</Fragment>
+</Figure>
+
+This is a good improvement, but the algorithm still is very sensitive to input data and has a tendency to get stuck in a local minima when data is highly clustered. This means expensive restarts or adding more links, both of which increase runtime, we have to tradeoff latency to get a better recall. HNSW tries to fix robustness while providing an $\mathcal{O}(\log n)$ query time.
+
+
+## Hierarchical Navigable Small Worlds
+
+The NSW greedy walk's run can be seen as a set of _zoom in_ and _zoom out_ phases. Zoom in phase goes to nodes that are highly clustered, nodes here generally will have high degrees; on the other hand the zoom out phases travels long distances, nodes generally have low degrees. The higher the degree of nodes in a phase, higher the probability we get stuck.
+
+What if we seperate out links of different length; start from the longest ones and progressively switch to shorter ones as we exhaust possiblities in the longer ones. This could add some robustness since we are not constantly zooming in and out. Another benefit of this appoarch that the numnber of links will be a lot less in intial steps and we can explore a larger part of the graph, making our search cheaper.
+
+This is the key idea behind the Hierarchy of HNSW, we create layers of graphs each with increasing coarseness, akin to having different zoom levels.
+
+- **Layer 0**: _All_ the nodes, edges are short and local.
+- **Layer 1**: Fewer nodes, medium length edges.
+- ...
+- **Layer L**: Top level; very few nodes, we can globally traverse the graph in handful of hops.
+
+This is structurally very similar to Skip Lists[^5] [^6]
+
+Querying this structure is easy; we can start on the top layer; just do the same greedy walk on each layer and move to next layer when we exhaust our options.
+
+<Figure src="/blog/hnsw/hnsw_layers.png" alt="HNSW layers showing hierarchical structure with sparse top layer and dense bottom layer, with query traversal path">
+  <Fragment slot="caption">HNSW search traversal: starting from the top sparse layer, greedily descending through progressively denser layers.[^7]</Fragment>
+</Figure>
+
+Lets talk construction, so when adding a node to layer $l$, we need to a) add it to all the layers below $l$ downto $0$. How do we find a layer for a new node? Also, what would be the best distribution of nodes across layers for fast queries. We can take a similar geometric distribution from previous section, since we will get exponentially decreasing nodes in each layer and about $\mathcal{O}(\log n)$ layers. So $P(\text{layer} = l) \propto 1/{m_L}^l$, here $m_L$ the normalization parameter. Note that this is constant per layer and not dependent on the number of nodes. This means
+
+$$ P(L = l) = C \cdot {m_L}^{-l} $$
+
+To find $C$, we sum all the probabilities.
+
+$$ 1 = \displaystyle\sum_{l=0}^{\infty} C{m_L}^{-l} = C \displaystyle\sum_{l=0}^{\infty} {m_L}^{-l} $$
+
+Using sum of the geometric series, for $ m_L > 1 $.
+
+$$ 1 = C \cdot \cfrac{1}{1 - \frac{1}{m_L}} \implies C = 1 - \cfrac{1}{m_L} $$
+
+So
+
+$$ P(L = l) = \bigg(1 - \cfrac{1}{m_L}\bigg) \bigg(\cfrac{1}{{m_L}^l}\bigg) $$
+
+We can also compute the tail probability $P(L \geq l)$.
+
+$$ P(L \geq l) = \displaystyle\sum_{k=l}^{\infty} P(L=k) = \displaystyle\sum_{k=l}^{\infty}\bigg(1 - \cfrac{1}{m_L}\bigg){\bigg(\cfrac{1}{m_L}\bigg)}^k $$
+
+Factoring out $(1/{m_L})^l$
+
+$$ P(L \geq l) = \bigg(\cfrac{1}{m_L}\bigg)^l\displaystyle\sum_{t=0}^{\infty}\bigg(1 - \cfrac{1}{m_L}\bigg){\bigg(\cfrac{1}{m_L}\bigg)}^t = {m_L}^{-l} $$
+
+When sampling the level $L$, from uniform random distribution we see.
+
+$$ L = \bigg\lfloor \cfrac{-\ln U}{\ln m_L} \bigg\rfloor, U \sim \text{Uniform}(0,1) $$
+
+While adding a node we also have to select neighbors to add, we can use the naive startegy of just picking the $M$ nodes closest to us, but this startegy has the same issues with robustness as previously discussed. But we can easily add link diversity using a simple heuristic. We add a neighbor iff the neighbor is closer to us than any other neighbors, otherwise we skip. This startegy creates room in the $M$ node cap for longer links to fill.
+
+What is the runtime cost then? We know that we have $\mathcal{O}(\log n)$ layers; we just need to find the amount of work needed per layer. Imagine we have just come down from layer $l+1$ to $l$. Search on this layer would always terminate before encountering a node that is also present in $l+1$, otherwise the new point in $l+1$ would have been the entrypoint to layer $l$. The probability of a point being present in both $l+1$ and $l$ is
+
+$$ P(L \geq l+1 | L \geq l) = \cfrac{P(L \geq l+1)}{P(L \geq l)} = \cfrac{{m_L}^{-(l+1)}}{{m_L}^{-l}} = 1/{m_L}$$
+
+Note that this is indipendent of layers and number of nodes. While on a walk of layer $l$ we say $p$ is probability of find the point in $l+1$ (from above). The probability of continuous $s$ successes is $p(1-p)^s$. The expected number of steps using similar logic as NSW follows as $\mathbb{E}[s] = 1/p$, since $p = 1/m_L$, we get $\mathbb{E}[s] = m_L$. This is independent of number of nodes hence the total search complext is $ \sim \mathcal{O}(\log n)$.
+
+## Implementation
+
+I am implementing this in Zig, all nodes are stored as indices of a global vector array. Here is the definiation of a `Node`. You might have noticed that we have different sizes for neighbors in layer 0. In practice if we add more neighbors in layer 0 it can improve the recall. We generally set `neighbor_size0 = 2*neighbor_size`. Each node has neighbors in multiple layers.
+
+```zig
+pub const NodeIdx = u32;
+
+const Node = struct {
+    neighbors: []std.ArrayListUnmanaged(NodeIdx),
+
+    pub fn initEmpty(
+        alloc: std.mem.Allocator,
+        layer: usize,
+        neighbor_size: usize,
+        neighbor_size0: usize,
+    ) !Node {
+        const neighbors = try alloc.alloc(std.ArrayListUnmanaged(NodeIdx), layer + 1);
+        for (neighbors, 0..layer + 1) |*nbrs, l| {
+            nbrs.* = .empty;
+            const node_cap = if (l == 0) neighbor_size0 else neighbor_size;
+            try nbrs.ensureTotalCapacityPrecise(alloc, node_cap);
+        }
+
+        return .{ .neighbors = neighbors };
+    }
+};
+```
+Now we define the main data structure for HNSW, here `Params` as tunable parameters for the algorithm.
+- `max_neighbors_per_layer`: ($M$) Max. number of neighbors of a node. Large values can increase recall but at the cost of runtime.
+- `ef_construction`: Construction entry factor, number of nearest candidates kept during construction.
+- `ef_search`: Search entry factor, number of nearest candidates kept during search.
+- `layer_mult`: ($m_L$) Layer normalization factor, controls the probability of layer assignments.
+
+```zig
+pub const HnswIndex = struct {
+    pub const Params = struct {
+        max_neighbors_per_layer: usize,
+        ef_construction: usize,
+        ef_search: usize,
+        num_words: usize,
+        layer_mult: f64,
+        seed: u64 = 2026,
+    };
+
+    // ...omitted boilerplate vars...
+
+    entry_points: std.ArrayListUnmanaged(NodeIdx),
+    layers: usize = 0,
+    nodes: std.ArrayListUnmanaged(Node),
+    visited: std.DynamicBitSetUnmanaged,
+}
+```
+
+Lets add the function to search a single layer. We maintian two heaps one to store the node `candidates` we want to consider, and `farthest` stores the `entry_factor` amount for nearest candidates. Rest is standard best first search.
+```zig
+fn searchLayer(
+    self: *HnswIndex,
+    layer: usize,
+    idx: NodeIdx,
+    entry_points: std.ArrayListUnmanaged(NodeIdx),
+    entry_factor: usize,
+) !std.ArrayListUnmanaged(NodeIdx) {
+    self.visited.unsetAll();
+
+    var candidates = std.PriorityQueue(SearchEntry, void, minCompareSearch).init(self.allocator, {});
+    defer candidates.deinit();
+    var farthest = std.PriorityQueue(SearchEntry, void, maxCompareSearch).init(self.allocator, {});
+    defer farthest.deinit();
+
+    for (entry_points.items) |entry_point| {
+        self.visited.set(entry_point);
+        try candidates.add(.{ .idx = entry_point, .dist = self.dist(idx, entry_point) });
+        try farthest.add(.{ .idx = entry_point, .dist = self.dist(idx, entry_point) });
+    }
+
+    while (candidates.count() > 0) {
+        const curr_candidate = candidates.remove();
+        const curr_idx = curr_candidate.idx;
+        const curr_distq = curr_candidate.dist;
+        const curr_farthest = farthest.peek();
+
+        if (curr_distq > curr_farthest.?.dist) {
+            break;
+        }
+
+        for (self.nodes.items[curr_idx].neighbors[layer].items) |nbr| {
+            if (!self.visited.isSet(nbr)) {
+                self.visited.set(nbr);
+                const nbr_dist = self.dist(nbr, idx);
+                const curr_farthest_ = farthest.peek();
+                if (farthest.count() < entry_factor or nbr_dist < curr_farthest_.?.dist) {
+                    try candidates.add(.{ .idx = nbr, .dist = nbr_dist });
+                    try farthest.add(.{ .idx = nbr, .dist = nbr_dist });
+                    if (farthest.count() > entry_factor) {
+                        _ = farthest.remove();
+                    }
+                }
+            }
+        }
+    }
+
+    const count = farthest.count();
+    var results: std.ArrayListUnmanaged(NodeIdx) = .empty;
+    try results.resize(self.allocator, count);
+    var i: usize = count;
+    while (farthest.count() > 0) {
+        i -= 1;
+        const entry = farthest.remove();
+        results.items[i] = entry.idx;
+    }
+
+    return results;
+}
+```
+For insertion, we assign a random layer using the sampling method discussed earlier. Then seearch for entry_points into the `assigned_layer`, with `entry_factor = 1`. Then add the new node from the `assigned_layer` downto `0`.
+
+
+```zig
+pub fn insert(self: *HnswIndex, idx: NodeIdx) !void {
+    const random = self.prng.random();
+
+    const urandom = random.float(f64);
+    const assigned_layer: usize = @intFromFloat(std.math.floor(
+        -std.math.log(f64, std.math.e, urandom) / std.math.log(f64, std.math.e, self.layer_mult),
+    ));
+
+    const node = try Node.initEmpty(
+        self.allocator,
+        assigned_layer,
+        self.params.max_neighbors_per_layer,
+        self.max_neighbors_layer0,
+    );
+
+    try self.nodes.append(self.allocator, node);
+
+    if (self.nodes.items.len == 1) {
+        try self.entry_points.append(self.allocator, idx);
+        self.layers = assigned_layer;
+        return;
+    }
+
+    if (assigned_layer == self.layers) {
+        try self.entry_points.append(self.allocator, idx);
+    }
+
+    var curr_entry_points: std.ArrayListUnmanaged(NodeIdx) = self.entry_points;
+    var current_layer = self.layers;
+
+    var current_nearest: std.ArrayListUnmanaged(NodeIdx) = undefined;
+
+    while (current_layer > assigned_layer) {
+        const new_entry_points = try self.searchLayer(current_layer, idx, curr_entry_points, 1);
+        curr_entry_points = new_entry_points;
+        current_layer -= 1;
+    }
+
+    current_layer = @min(assigned_layer, self.layers) + 1;
+    while (current_layer > 0) {
+        current_layer -= 1;
+
+        current_nearest = try self.searchLayer(
+            current_layer,
+            idx,
+            curr_entry_points,
+            self.params.ef_construction,
+        );
+
+        try self.selectNeighbors(current_layer, idx, &current_nearest);
+
+        for (current_nearest.items) |nbr_idx| {
+            try self.nodes.items[idx].neighbors[current_layer].append(self.allocator, nbr_idx);
+
+            const nbr_neighbors = &self.nodes.items[nbr_idx].neighbors[current_layer];
+            try nbr_neighbors.append(self.allocator, idx);
+
+            const max_neighbors = if (current_layer == 0) self.max_nodes_layer0 else self.params.max_nodes_per_layer;
+            if (nbr_neighbors.items.len > max_neighbors) {
+                try self.selectNeighbors(current_layer, nbr_idx, nbr_neighbors);
+            }
+        }
+
+        curr_entry_points = current_nearest;
+    }
+
+    if (assigned_layer > self.layers) {
+        self.layers = assigned_layer;
+        self.entry_points.clearRetainingCapacity();
+        try self.entry_points.append(self.allocator, idx);
+    }
+}
+```
 
 [^1]: Why? See [McMullen's Upper Bound Theorem](https://en.wikipedia.org/wiki/Upper_bound_theorem)
 
+[^2]: Travers, Jeffrey, and Stanley Milgram. "An experimental study of the small world problem." *Sociometry* (1969): 425-443.
+
+[^3]: Kleinberg, Jon. "The small-world phenomenon: An algorithmic perspective." *Proceedings of the thirty-second annual ACM symposium on Theory of computing* (2000).
+
+[^4]: This follows from the geometric distribution. If each trial succeeds with probability $p$, then $\mathbb{E}[T] = \sum_{k=1}^{\infty} k \cdot p(1-p)^{k-1} = \frac{1}{p}$. Intuitively: with $p = 0.5$, you expect 2 coin flips to get heads; with $p = 0.1$, you expect 10 trials.
+
+[^5]: [Skip List: Wikipedia](https://en.wikipedia.org/wiki/Skip_list)
+
+[^6]: [An Anlaysis of Skip Lists](https://eugene-eeo.github.io/blog/skip-lists.html)
+
+[^7]: Figure from Malkov, Yu A., and D. A. Yashunin. "Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs." [arXiv:1603.09320](https://arxiv.org/pdf/1603.09320)
