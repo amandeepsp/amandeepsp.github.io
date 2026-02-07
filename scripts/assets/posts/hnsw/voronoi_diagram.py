@@ -118,19 +118,26 @@ def main():
         if i == nearest_idx:
             ax.fill(
                 *zip(*polygon),
-                alpha=Colors.REGION_HIGHLIGHT_ALPHA,
-                color=Colors.REGION_HIGHLIGHT,
+                alpha=0.4,
+                color=Colors.PRIMARY_LIGHT,
                 edgecolor=Colors.PRIMARY,
                 linewidth=2,
             )
         else:
-            ax.fill(*zip(*polygon), alpha=Colors.REGION_FILL_ALPHA, color=Colors.REGION_FILL)
+            ax.fill(*zip(*polygon), alpha=0.2, color=Colors.GRAY_400)
 
     # Draw points
-    ax.plot(points[:, 0], points[:, 1], "o", color=Colors.NODE, markersize=8, zorder=3)
+    ax.plot(points[:, 0], points[:, 1], "o", color=Colors.GRAY_700, markersize=8, zorder=3)
 
     # Draw and label the query point
-    ax.plot(query_point[0], query_point[1], "*", color=Colors.QUERY_POINT, markersize=15, zorder=4)
+    ax.plot(
+        query_point[0],
+        query_point[1],
+        "o",
+        color=Colors.ACCENT,
+        markersize=8,
+        zorder=4,
+    )
     ax.annotate(
         "$q$",
         query_point,
@@ -138,7 +145,7 @@ def main():
         textcoords="offset points",
         fontsize=14,
         fontweight="bold",
-        color=Colors.QUERY_POINT,
+        color=Colors.ACCENT,
     )
 
     # Label the nearest point
@@ -149,7 +156,7 @@ def main():
         textcoords="offset points",
         fontsize=14,
         fontweight="bold",
-        color=Colors.END_POINT,
+        color=Colors.SUCCESS,
     )
 
     ax.set_xlim(vor.min_bound[0] - 0.1, vor.max_bound[0] + 0.1)
