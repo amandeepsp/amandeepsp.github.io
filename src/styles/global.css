@@ -167,8 +167,6 @@
             width: calc(100% + var(--breakout-max) * 2);
             margin-left: calc(var(--breakout-max) * -1);
             margin-right: calc(var(--breakout-max) * -1);
-            padding-left: calc(var(--breakout-max) + 1rem);
-            padding-right: calc(var(--breakout-max) + 1rem);
             border-radius: 0.5rem;
         }
     }
@@ -179,18 +177,15 @@
         }
     }
 
-    /* Disable breakout on xl+ where sidenotes appear */
+    /* Symmetric breakout on xl+ - TOC hides and sidenotes reposition to avoid overlap */
     @media (min-width: 1280px) {
         .prose pre {
-            --breakout-max: 0rem;
-            width: 100%;
-            margin-left: 0;
-            margin-right: 0;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            --breakout-max: 5rem;
+            width: calc(100% + var(--breakout-max) * 2);
+            margin-left: calc(var(--breakout-max) * -1);
+            margin-right: calc(var(--breakout-max) * -1);
         }
     }
-
 
     /* Footnote reference styling */
     .prose a[data-footnote-ref] {

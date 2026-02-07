@@ -24,8 +24,18 @@
 
         if (isLargeScreen) {
             // Track sidenote positions to avoid overlaps
-            const sidenotes: Array<{ element: HTMLElement; top: number }> = [];
+            const sidenotes: Array<{ element: HTMLElement; top: number; bottom: number }> = [];
             const MIN_GAP = 16; // Minimum gap between sidenotes in pixels
+
+            // Collect all code blocks and their positions relative to article
+            const articleRect = articleContent.getBoundingClientRect();
+            const codeBlocks = Array.from(articleContent.querySelectorAll("pre")).map((pre) => {
+                const rect = pre.getBoundingClientRect();
+                return {
+                    top: rect.top - articleRect.top,
+                    bottom: rect.bottom - articleRect.top,
+                };
+            });
 
             // Create sidenotes for each footnote reference
             footnoteRefs.forEach((ref) => {
@@ -67,15 +77,26 @@
                     parentBlock.appendChild(sidenote);
 
                     // Calculate the desired top position relative to the article
-                    const articleRect = articleContent.getBoundingClientRect();
                     const refRect = ref.getBoundingClientRect();
                     let desiredTop = refRect.top - articleRect.top;
 
+                    // Estimate sidenote height (will refine after render)
+                    const estimatedHeight = sidenote.offsetHeight || 60;
+
+                    // Check for overlaps with code blocks and push below if needed
+                    for (const codeBlock of codeBlocks) {
+                        const sidenoteBottom = desiredTop + estimatedHeight;
+                        // Check if sidenote overlaps with code block
+                        if (desiredTop < codeBlock.bottom && sidenoteBottom > codeBlock.top) {
+                            // Push sidenote below the code block
+                            desiredTop = codeBlock.bottom + MIN_GAP;
+                        }
+                    }
+
                     // Check for overlaps with previous sidenotes and adjust
                     for (const prev of sidenotes) {
-                        const prevBottom = prev.top + prev.element.offsetHeight + MIN_GAP;
-                        if (desiredTop < prevBottom) {
-                            desiredTop = prevBottom;
+                        if (desiredTop < prev.bottom + MIN_GAP) {
+                            desiredTop = prev.bottom + MIN_GAP;
                         }
                     }
 
@@ -85,7 +106,11 @@
                     sidenote.style.top = `${topRelativeToParent}px`;
 
                     // Track this sidenote for overlap detection
-                    sidenotes.push({ element: sidenote, top: desiredTop });
+                    sidenotes.push({
+                        element: sidenote,
+                        top: desiredTop,
+                        bottom: desiredTop + sidenote.offsetHeight,
+                    });
                 }
             });
 
