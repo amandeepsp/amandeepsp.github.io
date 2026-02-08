@@ -13,12 +13,17 @@ many sources on the web go into the inner workings and intuition building,
 which I would like to cover here.
 
 Hierarchical Navigable Small Worlds (HNSW) is a top-performing and popular
-nearest neighbor search algorithm. To find the nearest neighbor given a bunch
-of vectors, we need to find a vector that is the closest to a query vector. s
+approximate nearest neighbor search algorithm. To find the exact nearest
+neighbor given a bunch of vectors, we need to find a vector that is the closest
+to a query vector. i.e. given a set of vectors $X = \{x_i\}$, and a query $q$,
+distance function $\text{dist}(\cdot, \cdot)$ the goal is
+
+$$ x^* = \operatorname*{argmin}_{x_i \in X} \text{dist}(x_i, q) $$
+
 The trivial but brute force way to do this is just iterate through all the
 vectors, find a minimum by distance. This is not scalable since the amount of
 vectors can be in billions. Another aspect of this is the number of vector
-dimensions which can be as large as 1024 in latest state of the art [embedding
+dimensions which can be as large as 4096 in latest state of the art [embedding
 models](https://huggingface.co/blog/mteb). We would also want to eliminate any
 extra distance calculations, since the time spent in these will not be small.
 
@@ -42,7 +47,7 @@ boundaries, this becomes a **Voronoi Diagram**. Here is a small visualization.
   <Fragment slot="caption">Voronoi diagram: each colored region contains all points closest to its center</Fragment>
 </Figure>
 
-We can also represent each Voronoi cell as a node in a graph, and each adjacent
+We can also represent each point as a node in a graph, and each adjacent
 cell as neighbors to the node. This is a mathematically equivalent
 representation of the Voronoi Diagram and is called **Delaunay triangulation**.
 This way for each point in the graph, finding the nearest neighbor is trivial,
@@ -64,7 +69,7 @@ a point $p$, such that the point $q$ is _not_ in the Voronoi cell of $p$. What
 is a good decision I can make given the local information I have about my
 neighbors? I can find a neighbor $r$ such that $dist(r, q) < dist(p, q)$. But
 will this work? Let's say we move to $r$ and repeat this process. We can see
-that we strictly decrease the $dist(r', q)$ until we reach a point where we can
+that we strictly decrease the $dist(\cdot, q)$ until we reach a point where we can
 find no such $r'$ such that $dist(r', q) < dist(p', q)$, which means $p'$ _is_
 the nearest neighbor of $q$.
 
@@ -85,18 +90,12 @@ produce the correct answer anyways, picking the _closest_ adds extra
 computation for a reduction in number of steps the algorithm takes to converge.
 
 The big problem with this is the _curse of dimensionality_, the amount of space
-needed to store the graph is $\mathcal{O}(n^{\lceil{d/2}\rceil})$[^1], this is
-fine for 2-d case but for large $d$ this grows in a superlinear manner.
-Discussion about search times would be irrelevant here. Lets say we have a
-million vectors with 1000 dims, the vectors themselves stored in `f32` would be
-4GB. The graph would take $4 \times 10^{3000}$ bytes of space, which is more
-memory than exists on Earth.
+needed to store the graph grows superpolynomially[^1] and becomes infeasible to
+store beyond small dimensions. This can be easily skirted if we consider an
+approximate problem, we can cap the number of neighbors to $M$ in which case,
+the memory requirements reduce to $\mathcal{O}(nM)$. But we lose the monotonic
+routing behavior we discussed earlier.
 
-This can be easily skirted if we consider an approximate problem, we can cap
-the number of neighbors to $M$ in which case, the memory requirements reduce to
-$\mathcal{O}(nM)$. But this risks the greedy walk stuck in local minima as
-there is no link diversity in the Delaunay graph to explore outside of a local
-cluster.
 
 ## Small Worlds and their Navigation
 
@@ -120,14 +119,17 @@ The same concept can work if we add these long range links to the _Delaunay
 graph_. We can randomly add new links but adding too many of them, we lose
 local structure and the greedy walk will not easily converge since we can't
 determine if we are moving closer or not, we need to settle on some middle
-ground strategy. The optimal result comes from Jon Kleinberg[^3]. Long range
-links are added with the probability of link from $u \rightarrow v$, based on
-the distance $d(u,v)$ between them.
+ground strategy. The optimal result comes from Jon Kleinberg[^3]. Kleinberg
+analyzed a lattice in d dimensions, where long range links are added with the
+probability of link from $u \rightarrow v$, based on the distance $d(u,v)$
+between them.
 
 $$ P(u \rightarrow v) \propto \cfrac{1}{d(u,v)^{\alpha}} $$
 
 - If $\alpha$ is low; the distance doesn't matter much. Long links are just as likely as short ones. Jumps can overshoot the target.
 - If $\alpha$ is high; the penalty of distance is huge. We mostly just link to nearby links. Jumps can be too timid and might not help.
+
+Kleinberg proved that the optimal result occurs at $\alpha = d$.
 
 <Figure
   src="/blog/hnsw/nsw_graph.svg"
@@ -138,6 +140,8 @@ $$ P(u \rightarrow v) \propto \cfrac{1}{d(u,v)^{\alpha}} $$
     NSW graph: local edges provide structure while long-range links (dashed) enable faster traversal across the graph
   </Fragment>
 </Figure>
+
+### Intuition Behind $\alpha = d$ and Runtime Cost
 
 The number of points at distance $r$ in a $d$-dimensional space grows $\propto
 r^d$. And the probability of linking to one such node is $\propto r^{-\alpha}$.
@@ -191,13 +195,12 @@ clustered. This means expensive restarts or adding more links, both of which
 increase runtime, we have to tradeoff latency to get a better recall. HNSW
 tries to fix robustness while providing an $\mathcal{O}(\log n)$ query time.
 
-## Hierarchical Navigable Small Worlds
+## Hierarchical Navigable Small Worlds[^5]
 
 The NSW greedy walk's run can be seen as a set of _zoom in_ and _zoom out_
-phases. Zoom in phase goes to nodes that are highly clustered, nodes here
-generally will have high degrees; on the other hand the zoom out phases travels
-long distances, nodes generally have low degrees. The higher the degree of
-nodes in a phase, higher the probability we get stuck.
+phases. Zoom in phase goes to nodes that are highly clustered, on the other
+hand the zoom out phases travels long distances. Zoom in phases can get stuck
+in local minimas, forcing us to do costly restarts.
 
 What if we separate out links of different length; start from the longest ones
 and progressively switch to shorter ones as we exhaust possibilities in the
@@ -214,7 +217,7 @@ each with increasing coarseness, akin to having different zoom levels.
 - ...
 - **Layer L**: Top level; very few nodes, we can globally traverse the graph in handful of hops.
 
-This is structurally very similar to Skip Lists.[^5] [^6]
+This is structurally very similar to Skip Lists.[^6] [^7]
 
 Querying this structure is easy; we can start on the top layer; just do the
 same greedy walk on each layer and move to next layer when we exhaust our
@@ -226,51 +229,70 @@ options.
 >
   <Fragment slot="caption">
     HNSW search traversal: starting from the top sparse layer, greedily descending through progressively denser
-    layers.[^7]
+    layers.[^8]
   </Fragment>
 </Figure>
+
+### Construction
 
 Let's talk construction, so when adding a node to layer $l$, we need to (a) add
 it to all the layers below $l$ down to $0$. How do we find a layer for a new
 node? Also, what would be the best distribution of nodes across layers for fast
 queries. We can take a similar geometric distribution from previous section,
 since we will get exponentially decreasing nodes in each layer and about
-$\mathcal{O}(\log n)$ layers. So $P(\text{layer} = l) \propto 1/{m_L}^l$, here
-$m_L$ the normalization parameter. Note that this is constant per layer and not
+$\mathcal{O}(\log n)$ layers. So $P(L = l) \propto m^{-l}$, [^9] here
+$m$ the tunable parameter. Note that this is constant per layer and not
 dependent on the number of nodes. This means
 
-$$ P(L = l) = C \cdot {m_L}^{-l} $$
+$$ P(L = l) = C \cdot {m}^{-l} $$
 
 To find $C$, we sum all the probabilities.
 
-$$ 1 = \displaystyle\sum_{l=0}^{\infty} C{m_L}^{-l} = C \displaystyle\sum_{l=0}^{\infty} {m_L}^{-l} $$
+$$ 1 = \displaystyle\sum_{l=0}^{\infty} C{m}^{-l} = C \displaystyle\sum_{l=0}^{\infty} {m}^{-l} $$
 
-Using sum of the geometric series, for $ m_L > 1 $.
+Using sum of the geometric series, for $ m > 1 $.
 
-$$ 1 = C \cdot \cfrac{1}{1 - \frac{1}{m_L}} \implies C = 1 - \cfrac{1}{m_L} $$
+$$ 1 = C \cdot \cfrac{1}{1 - \frac{1}{m}} \implies C = 1 - \cfrac{1}{m} $$
 
 So
 
-$$ P(L = l) = \bigg(1 - \cfrac{1}{m_L}\bigg) \bigg(\cfrac{1}{{m_L}^l}\bigg) $$
+$$ P(L = l) = \bigg(1 - \cfrac{1}{m}\bigg) \bigg(\cfrac{1}{{m}^l}\bigg) $$
 
 We can also compute the tail probability $P(L \geq l)$.
 
-$$ P(L \geq l) = \displaystyle\sum_{k=l}^{\infty} P(L=k) = \displaystyle\sum_{k=l}^{\infty}\bigg(1 - \cfrac{1}{m_L}\bigg){\bigg(\cfrac{1}{m_L}\bigg)}^k $$
+$$ P(L \geq l) = \displaystyle\sum_{k=l}^{\infty} P(L=k) = \displaystyle\sum_{k=l}^{\infty}\bigg(1 - \cfrac{1}{m}\bigg){\bigg(\cfrac{1}{m}\bigg)}^k $$
 
-Factoring out $(1/{m_L})^l$
+Factoring out $(1/{m})^l$
 
-$$ P(L \geq l) = \bigg(\cfrac{1}{m_L}\bigg)^l\displaystyle\sum_{t=0}^{\infty}\bigg(1 - \cfrac{1}{m_L}\bigg){\bigg(\cfrac{1}{m_L}\bigg)}^t = {m_L}^{-l} $$
+$$ P(L \geq l) = \bigg(\cfrac{1}{m}\bigg)^l\displaystyle\sum_{t=0}^{\infty}\bigg(1 - \cfrac{1}{m}\bigg){\bigg(\cfrac{1}{m}\bigg)}^t = {m}^{-l} $$
 
 When sampling the level $L$, from uniform random distribution we see.
 
-$$ L = \bigg\lfloor \cfrac{-\ln U}{\ln m_L} \bigg\rfloor, U \sim \text{Uniform}(0,1) $$
+$$ L = \bigg\lfloor \cfrac{-\ln U}{\ln m} \bigg\rfloor, U \sim \text{Uniform}(0,1) $$
+
+It is also interesting to observe the the expected number of nodes in a layer will be
+
+$$ \mathbb{E}[N_l] = N \cdot P(L \geq l) = N m^{-l} $$
+
+and the ratio of the layer sizes is
+
+$$ \cfrac{\mathbb{E}[N_l]}{\mathbb{E}[N_{l+1}]} = m $$
+
+Therefore, $m$ can also be thought of as a zoom factor.
+
+### Neighbor Selection Heuristic
 
 While adding a node we also have to select neighbors to add, we can use the
 naive strategy of just picking the $M$ nodes closest to us, but this strategy
 has the same issues with robustness as previously discussed. But we can easily
 add link diversity using a simple heuristic. We add a neighbor iff the neighbor
 is closer to us than any other neighbors, otherwise we skip. This strategy
-creates room in the $M$ node cap for longer links to fill.
+creates room in the $M$ node cap for longer links to fill. To implement this we
+can Sort candidates by distance to the new node; keep a candidate if it is not
+too close to any already selected neighbor `dist(candidate, selected) <
+dist(candidate, new)`.
+
+### Intuition Behind Runtime Cost
 
 What is the runtime cost then? We know that we have $\mathcal{O}(\log n)$
 layers; we just need to find the amount of work needed per layer. Imagine we
@@ -279,16 +301,16 @@ terminate before encountering a node that is also present in $l+1$, otherwise
 the new point in $l+1$ would have been the entrypoint to layer $l$. The
 probability of a point being present in both $l+1$ and $l$ is
 
-$$ P(L \geq l+1 | L \geq l) = \cfrac{P(L \geq l+1)}{P(L \geq l)} = \cfrac{{m_L}^{-(l+1)}}{{m_L}^{-l}} = 1/{m_L}$$
+$$ P(L \geq l+1 | L \geq l) = \cfrac{P(L \geq l+1)}{P(L \geq l)} = \cfrac{{m}^{-(l+1)}}{{m}^{-l}} = 1/{m}$$
 
 Note that this is independent of layers and number of nodes. While on a walk of
 layer $l$ we say $p$ is probability of finding the point in $l+1$ (from above).
 The probability of continuous $s$ successes is $p(1-p)^s$. The expected number
 of steps using similar logic as NSW follows as $\mathbb{E}[s] = 1/p$, since $p
-= 1/m_L$, we get $\mathbb{E}[s] = m_L$. This is independent of number of nodes
+= 1/m$, we get $\mathbb{E}[s] = m$. This is independent of number of nodes
 hence the total search complexity is $ \sim \mathcal{O}(\log n)$.
 
-## Implementation
+### Implementation
 
 I am implementing this in Zig, all nodes are stored as indices of a global
 vector array. Here is the definition of a `Node`. You might have noticed that
@@ -325,7 +347,7 @@ Now we define the main data structure for HNSW, here `Params` as tunable paramet
 - `max_neighbors_per_layer`: ($M$) Max. number of neighbors of a node. Large values can increase recall but at the cost of runtime.
 - `ef_construction`: Construction entry factor, number of nearest candidates kept during construction.
 - `ef_search`: Search entry factor, number of nearest candidates kept during search.
-- `layer_mult`: ($m_L$) Layer normalization factor, controls the probability of layer assignments.
+- `layer_mult`: ($m$) Layer Multiplier, usually set to approx. `max_neighbors_per_layer`.
 
 ```zig
 pub const HnswIndex = struct {
@@ -362,7 +384,7 @@ fn searchLayer(
 ) !std.ArrayListUnmanaged(NodeIdx) {
     self.visited.unsetAll();
 
-    var candidates = std.PriorityQueue(SearchEntry, void, minCompareSearch).init(self.allocator, {});
+    var candidates = std.PriorityQueue(SearchEntry, void,minCompareSearch).init(self.allocator,{});
     defer candidates.deinit();
     var farthest = std.PriorityQueue(SearchEntry, void, maxCompareSearch).init(self.allocator, {});
     defer farthest.deinit();
@@ -508,7 +530,11 @@ fn selectNeighbors(
     idx: NodeIdx,
     candidates: *std.ArrayListUnmanaged(NodeIdx),
 ) !void {
-    const max_nodes = if (layer == 0) self.max_nodes_layer0 else self.params.max_nodes_per_layer;
+    const max_neighbors = if (layer == 0) {
+        self.max_neighbors_layer0
+    } else {
+        self.params.max_neighbors_per_layer
+    };
 
     var candidate_entries: std.ArrayListUnmanaged(SearchEntry) = .empty;
     defer candidate_entries.deinit(self.allocator);
@@ -532,7 +558,7 @@ fn selectNeighbors(
         if (good) {
             try candidates.append(self.allocator, c.idx);
         }
-        if (candidates.items.len >= max_nodes) {
+        if (candidates.items.len >= max_neighbors) {
             break;
         }
     }
@@ -563,7 +589,7 @@ pub fn topK(self: *HnswIndex, idx: NodeIdx, k: usize) !std.ArrayListUnmanaged(No
 
 This implementation is not going to be very performant, since I am not using a
 lot of optimal data structures and we have a lot of pointer chasing. On my AMD
-Ryzen 9 9950x3D using the [GloVe
+Ryzen 9 9950x3D (single core) using the [GloVe
 Dataset](https://nlp.stanford.edu/projects/glove/)'s 50-dim sample, I am
 getting these results.
 
@@ -571,8 +597,9 @@ getting these results.
 - **Average recall**: 75.00%
 - **Average query time**: 92.0µs (100 queries, k=10)
 
-This seems good enough for a quick and dirty implementation, perhaps I will
-create another post about optimizing this in the future.
+This seems good enough for a quick and dirty implementation. Code can be found
+on [Github](https://github.com/amandeepsp/hnsw). Perhaps I will create another
+post about optimizing this in the future.
 
 [^1]: Why? See [McMullen's Upper Bound Theorem](https://en.wikipedia.org/wiki/Upper_bound_theorem)
 
@@ -582,8 +609,12 @@ create another post about optimizing this in the future.
 
 [^4]: This follows from the geometric distribution. If each trial succeeds with probability $p$, then $\mathbb{E}[T] = \sum_{k=1}^{\infty} k \cdot p(1-p)^{k-1} = \frac{1}{p}$. Intuitively: with $p = 0.5$, you expect 2 coin flips to get heads; with $p = 0.1$, you expect 10 trials.
 
-[^5]: [Skip List: Wikipedia](https://en.wikipedia.org/wiki/Skip_list)
+[^5]: Malkov, Yu A., and D. A. Yashunin. "Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs." _IEEE transactions on pattern analysis and machine intelligence_ 42.4 (2018): 824-836. [arXiv:1603.09320](https://arxiv.org/pdf/1603.09320)
 
-[^6]: [An Anlaysis of Skip Lists](https://eugene-eeo.github.io/blog/skip-lists.html)
+[^6]: [Skip List: Wikipedia](https://en.wikipedia.org/wiki/Skip_list)
 
-[^7]: Figure from Malkov, Yu A., and D. A. Yashunin. "Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs." [arXiv:1603.09320](https://arxiv.org/pdf/1603.09320)
+[^7]: [An Anlaysis of Skip Lists](https://eugene-eeo.github.io/blog/skip-lists.html)
+
+[^8]: Figure from [^5].
+
+[^9]: This is not the same in the original paper. Original paper uses $exp(-l/{m_L})$. But in my opinion $m^{-l}$ framing leads to better intuition.
