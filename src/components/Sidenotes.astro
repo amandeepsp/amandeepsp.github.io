@@ -71,7 +71,7 @@
                 }
 
                 // Find the parent paragraph or block element to position relative to
-                const parentBlock = ref.closest("p, li, blockquote, figcaption") as HTMLElement;
+                const parentBlock = ref.closest("p, li, blockquote, figcaption, h1, h2, h3, h4, h5, h6") as HTMLElement;
                 if (parentBlock) {
                     parentBlock.style.position = "relative";
                     parentBlock.appendChild(sidenote);
