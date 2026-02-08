@@ -594,8 +594,8 @@ pub fn topK(self: *HnswIndex, idx: NodeIdx, k: usize) !std.ArrayListUnmanaged(No
 This implementation is not going to be very performant, since I am not using a
 lot of optimal data structures and we have a lot of pointer chasing. On my AMD
 Ryzen 9 9950x3D (single core) using the [GloVe
-Dataset](https://nlp.stanford.edu/projects/glove/)'s 50-dim sample, I am
-getting these results.
+Dataset](https://nlp.stanford.edu/projects/glove/)'s 50-dim sample (1.29M
+vectors), I am getting these results.
 
 - **Index build time**: 93.10s
 - **Average recall**: 75.00%
