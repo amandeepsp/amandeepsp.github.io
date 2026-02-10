@@ -1,33 +1,72 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import siteConfig from "../data/site-config";
+
+const socialLinks = [
+    {
+        label: "Connect on LinkedIn",
+        href: "https://linkedin.com/in/amandeepsp",
+        icon: "linkedin",
+    },
+    {
+        label: "Follow on X",
+        href: "https://x.com/theamndeepsingh",
+        icon: "x",
+    },
+    {
+        label: "Browse my code on GitHub",
+        href: "https://github.com/amandeepsp",
+        icon: "github",
+    },
+];
+
+const emailEncoded = [...siteConfig.author.email].map((c) => `&#${c.charCodeAt(0)};`).join("");
 ---
 
-<BaseLayout title="Contact Me" description="Get in touch with me" pageType="website">
+<BaseLayout title="Contact Me" description="Get in touch with me" pageType="website" noindex={false}>
     <div class="mb-16 sm:mb-24">
-        <h1 class="mb-8 font-serif text-3xl italic sm:text-4xl">Contact Me</h1>
-        <p class="mb-8 text-lg">
-            I'd love to hear from you! Feel free to reach out through any of the following channels:
+        <h1 class="mb-4 font-serif text-3xl italic sm:text-4xl">Get in Touch</h1>
+        <p class="mb-10 max-w-xl text-muted">
+            Whether it's a question about something I've written, an interesting project,
+            or just a conversation about systems and software &mdash; I'm always happy to hear from you.
         </p>
-        <ul class="space-y-4">
-            <li>
-                <strong>Email:</strong>
-                <a href={`mailto:${siteConfig.author.email}`} class="underline hover:no-underline">
-                    {siteConfig.author.email}
-                </a>
-            </li>
-            {
-                siteConfig.socialLinks
-                    ?.filter((link) => link.text !== "Email" && link.text !== "RSS" && link.text !== "Github")
-                    .map((link) => (
-                        <li>
-                            <strong>{link.text}:</strong>
-                            <a href={link.href} target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">
-                                {link.href}
-                            </a>
-                        </li>
-                    ))
-            }
-        </ul>
+
+        <div class="space-y-10">
+            <section>
+                <h2 class="mb-4 font-serif text-xl italic">Email</h2>
+                <a
+                    href={`mailto:${siteConfig.author.email}`}
+                    class="inline-flex items-center gap-2 rounded-full border border-main px-5 py-2 font-serif italic transition hover:bg-muted"
+                    set:html={emailEncoded}
+                />
+            </section>
+
+            <section>
+                <h2 class="mb-4 font-serif text-xl italic">Elsewhere</h2>
+                <ul class="space-y-3">
+                    {
+                        socialLinks.map((link) => (
+                            <li>
+                                <a
+                                    href={link.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="inline-flex items-center gap-2 underline decoration-dashed underline-offset-8 transition hover:decoration-solid"
+                                >
+                                    {link.label}
+                                </a>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </section>
+
+            <!-- <section class="border-t border-main/20 pt-8"> -->
+            <!--     <p class="max-w-lg text-sm text-muted"> -->
+            <!--         I particularly enjoy conversations around distributed systems, performance engineering and I'm always open to exploring the right opportunity if it comes along. -->
+            <!--     </p> -->
+            <!-- </section> -->
+        </div>
     </div>
 </BaseLayout>
+

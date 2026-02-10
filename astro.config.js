@@ -13,7 +13,7 @@ import assetsPlugin from "./scripts/vite-plugin-assets.js";
 
 export default defineConfig({
     vite: {
-        plugins: [assetsPlugin()],
+        plugins: [assetsPlugin()]
     },
     site: "https://amandeepsp.github.io",
     integrations: [
@@ -51,7 +51,7 @@ export default defineConfig({
         syntaxHighlight: "shiki",
         shikiConfig: {
             themes: {
-                light: "kanagawa-dragon",
+                light: "min-light",
                 dark: "kanagawa-dragon"
             }
         }
