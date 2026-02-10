@@ -29,7 +29,7 @@ const siteConfig: SiteConfig = {
     title: "amandeep singh",
     author: {
         name: "Amandeep Singh",
-        email: "amandeepsp@gmail.com"
+        email: "amandeepspdhr@gmail.com"
     },
     lang: "en",
     locale: "en_US",
@@ -49,7 +49,7 @@ const siteConfig: SiteConfig = {
         {
             text: "Contact",
             href: "/contact-me"
-        },
+        }
     ],
     socialLinks: [
         {
