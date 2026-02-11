@@ -73,41 +73,11 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
         headingElements.forEach((el) => headingObserver.observe(el));
 
-        // Observer for fading TOC when code blocks are in view
-        const codeBlocks = document.querySelectorAll(".prose-blog pre");
-        let visibleCodeBlocks = 0;
-
-        const codeObserver = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        visibleCodeBlocks++;
-                    } else {
-                        visibleCodeBlocks = Math.max(0, visibleCodeBlocks - 1);
-                    }
-                });
-
-                // Hide TOC when any code block is visible
-                if (visibleCodeBlocks > 0) {
-                    tocNav.classList.add("toc-hidden");
-                } else {
-                    tocNav.classList.remove("toc-hidden");
-                }
-            },
-            {
-                rootMargin: "-50px 0px -50px 0px",
-                threshold: 0
-            }
-        );
-
-        codeBlocks.forEach((el) => codeObserver.observe(el));
-
         // Cleanup on page change
         document.addEventListener(
             "astro:before-swap",
             () => {
                 headingObserver.disconnect();
-                codeObserver.disconnect();
             },
             { once: true }
         );
@@ -126,9 +96,5 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
         transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
     }
 
-    .toc.toc-hidden {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-    }
+
 </style>
