@@ -56,6 +56,10 @@
         line-height: 1.25 !important;
     }
 
+    .astro-code {
+        border: 1px solid rgb(var(--color-border-main) / 0.4) !important;
+    }
+
     html.dark article img {
         background: white;
     }
@@ -101,8 +105,8 @@
         --tw-prose-quote-borders: var(--color-border-main);
         --tw-prose-captions: var(--color-text-main);
         --tw-prose-code: var(--color-text-main);
-        --tw-prose-pre-code: #f4f4f5; /* zinc-100 */
-        --tw-prose-pre-bg: #27272a; /* zinc-800 */
+        /* --tw-prose-pre-code: #f4f4f5;*/ /* zinc-100 */
+        /* --tw-prose-pre-bg: #27272a; /* zinc-800 */
         --tw-prose-th-borders: var(--color-border-main);
         --tw-prose-td-borders: var(--color-border-main);
     }
@@ -161,30 +165,9 @@
         content: none;
     }
 
-    /* Allow code blocks to break out of container on larger screens */
     @media (min-width: 768px) {
         .prose pre {
-            --breakout-max: 5rem;
-            width: calc(100% + var(--breakout-max) * 2);
-            margin-left: calc(var(--breakout-max) * -1);
-            margin-right: calc(var(--breakout-max) * -1);
             border-radius: 0.5rem;
-        }
-    }
-
-    @media (min-width: 1024px) and (max-width: 1279px) {
-        .prose pre {
-            --breakout-max: 8rem;
-        }
-    }
-
-    /* Symmetric breakout on xl+ - TOC hides and sidenotes reposition to avoid overlap */
-    @media (min-width: 1280px) {
-        .prose pre {
-            --breakout-max: 5rem;
-            width: calc(100% + var(--breakout-max) * 2);
-            margin-left: calc(var(--breakout-max) * -1);
-            margin-right: calc(var(--breakout-max) * -1);
         }
     }
 
@@ -198,4 +181,27 @@
         margin: 0;
         display: inline;
     }
+}
+
+/* Code block scrollbar styling (outside @layer to avoid purging) */
+.astro-code {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-text-muted) / 0.3) transparent;
+}
+
+.astro-code::-webkit-scrollbar {
+    height: 6px;
+}
+
+.astro-code::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.astro-code::-webkit-scrollbar-thumb {
+    background: rgb(var(--color-text-muted) / 0.3);
+    border-radius: 3px;
+}
+
+.astro-code::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--color-text-muted) / 0.5);
 }
