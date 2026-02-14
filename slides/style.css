@@ -1,0 +1,98 @@
+@font-face {
+    font-family: "source-serif-4-variable";
+    src: url("/fonts/source-serif-4-variable.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 200 900;
+}
+
+@font-face {
+    font-family: "source-serif-4-variable";
+    src: url("/fonts/source-serif-4-variable-italic.woff2") format("woff2");
+    font-display: swap;
+    font-style: italic;
+    font-weight: 200 900;
+}
+
+@font-face {
+    font-family: "source-sans-3-variable";
+    src: url("/fonts/source-sans-3-variable.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 200 900;
+}
+
+@font-face {
+    font-family: "source-sans-3-variable";
+    src: url("/fonts/source-sans-3-variable-italic.woff2") format("woff2");
+    font-display: swap;
+    font-style: italic;
+    font-weight: 200 900;
+}
+
+@font-face {
+    font-family: "source-code-pro-variable";
+    src: url("/fonts/source-code-pro-variable.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 200 900;
+}
+
+@font-face {
+    font-family: "source-code-pro-variable";
+    src: url("/fonts/source-code-pro-variable-italic.woff2") format("woff2");
+    font-display: swap;
+    font-style: italic;
+    font-weight: 200 900;
+}
+
+/* Blog theme variables */
+:root {
+    --color-text-main: 23 23 23; /* #171717 */
+    --color-text-muted: 102 102 102; /* #666666 */
+    --color-bg-main: 242 241 236; /* #F2F1EC */
+    --color-bg-muted: 234 233 225; /* #EAE9E1 */
+    --color-border-main: 23 23 23; /* #171717 */
+}
+
+html.dark {
+    --color-text-main: 242 241 236; /* #F2F1EC */
+    --color-text-muted: 153 153 153; /* #999999 */
+    --color-bg-main: 23 23 23; /* #171717 */
+    --color-bg-muted: 36 36 36; /* #242424 */
+    --color-border-main: 242 241 236; /* #F2F1EC */
+}
+
+/* Slidev overrides to match blog theme */
+:root {
+    --slidev-theme-primary: #171717;
+}
+
+html.dark {
+    --slidev-theme-primary: #f2f1ec;
+}
+
+.slidev-layout {
+    background-color: rgb(var(--color-bg-main));
+    color: rgb(var(--color-text-main));
+    font-family: "source-sans-3-variable", ui-sans-serif, system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "source-serif-4-variable", serif;
+    font-weight: 500;
+    color: rgb(var(--color-text-main));
+}
+
+h2 {
+    margin-bottom: 16px;
+}
+
+code {
+    font-family: "source-code-pro-variable", ui-monospace, monospace;
+}

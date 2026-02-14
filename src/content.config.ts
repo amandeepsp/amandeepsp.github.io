@@ -38,4 +38,12 @@ const pages = defineCollection({
         seo: seoSchema.optional()
     })
 });
-export const collections = { blog, pages };
+const slides = defineCollection({
+    loader: glob({ pattern: ["**/slides.md", "*.md"], base: "./slides" }),
+    schema: z.object({
+        title: z.string(),
+        subTitle: z.string().optional()
+    })
+});
+
+export const collections = { blog, slides };

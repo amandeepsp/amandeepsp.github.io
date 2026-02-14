@@ -8,19 +8,6 @@ featured: true
 seo:
   description: |
     A deep dive into building a Linux filesystem watcher. We compare fanotify vs. a powerful eBPF solution to solve in-kernel monitoring challenges.
-  keywords:
-    - eBPF
-    - Linux filesystem watcher
-    - BPF CO-RE
-    - filesystem monitor
-    - Kernel programming
-    - fanotify
-    - VFS hooks
-    - kprobes
-    - Linux system programming
-    - LSM hooks
-    - dentry
-    - BTF
 ---
 
 Some of the systems I work with are highly customized environments, and often need support engineers to maintain them.

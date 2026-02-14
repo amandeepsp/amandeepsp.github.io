@@ -22,6 +22,38 @@
     font-stretch: normal;
 }
 
+@font-face {
+    font-family: "source-sans-3-variable";
+    src: url("/fonts/source-sans-3-variable.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 200 900;
+}
+
+@font-face {
+    font-family: "source-sans-3-variable";
+    src: url("/fonts/source-sans-3-variable-italic.woff2") format("woff2");
+    font-display: swap;
+    font-style: italic;
+    font-weight: 200 900;
+}
+
+@font-face {
+    font-family: "source-code-pro-variable";
+    src: url("/fonts/source-code-pro-variable.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 200 900;
+}
+
+@font-face {
+    font-family: "source-code-pro-variable";
+    src: url("/fonts/source-code-pro-variable-italic.woff2") format("woff2");
+    font-display: swap;
+    font-style: italic;
+    font-weight: 200 900;
+}
+
 @layer base {
     :root {
         --color-text-main: 23 23 23; /* #171717 */
@@ -30,6 +62,8 @@
         --color-bg-muted: 234 233 225; /* #EAE9E1 */
         --color-border-main: 23 23 23; /* #171717 */
         --font-serif: source-serif-4-variable, ui-serif, serif;
+        --font-sans: source-sans-3-variable, ui-sans-serif, system-ui, sans-serif;
+        --font-mono: source-code-pro-variable, ui-monospace, monospace;
     }
     html.dark {
         --color-text-main: 242 241 236; /* #F2F1EC */
@@ -88,6 +122,10 @@
 
     .font-serif {
         font-family: var(--font-serif);
+    }
+
+    .font-sans {
+        font-family: var(--font-sans);
     }
 }
 

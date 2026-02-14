@@ -6,13 +6,15 @@
         "dev": "astro dev",
         "start": "astro dev",
         "build": "astro build",
+        "postbuild": "bun scripts/build-slides.ts",
         "preview": "astro preview",
         "astro": "astro",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
-        "og": "node scripts/og-generate.ts",
+        "og": "bun scripts/og-generate.ts",
         "assets": "uv run python scripts/assets/build.py",
-        "assets:force": "uv run python scripts/assets/build.py --force"
+        "assets:force": "uv run python scripts/assets/build.py --force",
+        "slides:build": "bun scripts/build-slides.ts"
     },
     "dependencies": {
         "@astrojs/mdx": "^4.3.13",
@@ -20,20 +22,22 @@
         "@astrojs/rss": "4.0.15",
         "@astrojs/sitemap": "3.7.0",
         "@astrojs/tailwind": "^6.0.2",
-        "@fontsource/source-sans-3": "^5.2.9",
-        "@fontsource/source-serif-4": "^5.2.9",
         "astro": "5.17.1",
+        "baseline-browser-mapping": "^2.9.19",
+        "caniuse-lite": "^1.0.30001770",
         "katex": "^0.16.22",
         "rehype-autolink-headings": "^7.1.0",
         "rehype-katex": "^7.0.1",
         "remark-gfm": "^4.0.1",
         "remark-github-blockquote-alert": "^2.0.0",
         "remark-math": "^6.0.0",
-        "tailwindcss": "^3.4.17"
+        "tailwindcss": "^3.4.17",
+        "yaml": "^2.8.2"
     },
     "devDependencies": {
         "@astrojs/check": "0.9.6",
         "@tailwindcss/typography": "^0.5.15",
+        "@slidev/cli": "^51.0.0",
         "playwright": "^1.55.1",
         "prettier": "^3.4.2",
         "prettier-plugin-astro": "^0.14.1",

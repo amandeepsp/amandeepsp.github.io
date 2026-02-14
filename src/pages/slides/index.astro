@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const decks = await getCollection("slides");
+---
+
+<BaseLayout title="Slides" description="Slide decks and talk materials." pageType="website" noindex={true}>
+    <section class="mb-16 sm:mb-24">
+        <h1 class="mb-8 font-serif text-3xl font-medium leading-tight sm:text-5xl sm:leading-tight">Slides</h1>
+
+        {
+            decks.length === 0 ? (
+                <p class="text-sm text-gray-700 dark:text-gray-200 sm:text-base">No slides</p>
+            ) : (
+                <div>
+                    {decks.map((deck) => (
+                        <article class="mb-6 border-b border-gray-200 pb-6 dark:border-gray-700 sm:mb-8">
+                            <a class="group flex items-start justify-between gap-8" href={`/slides/${deck.id}/`}>
+                                <div class="grow">
+                                    <h2 class="font-serif text-xl font-medium leading-tight group-hover:underline group-hover:decoration-dashed group-hover:decoration-1 group-hover:underline-offset-4 sm:text-2xl">
+                                        {deck.data.title}
+                                    </h2>
+                                    <p class="mt-2 text-sm text-gray-700 dark:text-gray-200 sm:text-base">
+                                        {deck.data.subTitle}
+                                    </p>
+                                </div>
+                                <div class="hidden font-serif italic opacity-0 transition group-hover:opacity-100 sm:inline-flex sm:shrink-0 sm:items-center sm:gap-1">
+                                    View Slides →
+                                </div>
+                            </a>
+                            <div class="mt-4 sm:hidden">
+                                <a class="text-main text-sm font-medium hover:underline" href={`/slides/${deck.id}/`}>
+                                    View Slides →
+                                </a>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            )
+        }
+    </section>
+</BaseLayout>
