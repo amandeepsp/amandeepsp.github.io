@@ -10,15 +10,6 @@ seo:
   description: |
     An account of experience using Clojure for Advent of Code 2021. Goes through Threading Macros, Clojure's collections
     and Zipper functionality
-  keywords:
-    - clojure
-    - advent of code
-    - zippers
-    - theading macro
-    - persistent data structures
-    - persistent vectors
-    - immutable data structures
-    - functional programming
 ---
 
 Very early in my career I had the absolute delight of reading [SICP](https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html)

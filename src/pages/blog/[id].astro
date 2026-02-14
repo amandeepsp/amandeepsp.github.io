@@ -51,13 +51,13 @@ const readingTime = calculateReadingTime(post.body);
 >
     <ReadingProgress />
     <Sidenotes />
-    <div class:list={[toc && "xl:grid xl:grid-cols-[200px_minmax(0,48rem)_1fr] xl:gap-8 xl:-ml-[232px]"]}>
+    <div class:list={[toc && "xl:-ml-[232px] xl:grid xl:grid-cols-[200px_minmax(0,48rem)_1fr] xl:gap-8"]}>
         {toc && <TableOfContents headings={headings} />}
         <article class:list={["mb-16 sm:mb-24", toc && "xl:col-start-2"]}>
             <header class="mb-8">
                 <h1 class="font-serif text-3xl font-medium leading-tight sm:text-5xl sm:leading-tight">{title}</h1>
                 {subTitle && <p class="font-serif text-xl text-gray-600 dark:text-gray-300">{subTitle}</p>}
-                <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300">
+                <div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300">
                     <div class="flex items-center gap-1">
                         <span class="font-medium">Published:</span>
                         <FormattedDate date={publishDate} />
@@ -80,7 +80,7 @@ const readingTime = calculateReadingTime(post.body);
                             tags.length > 0 && (
                                 <div class="flex flex-wrap gap-x-1 gap-y-1 text-sm">
                                     {tags.map((tag) => (
-                                        <a class="text-main hover:underline" href={`/tags/${slugify(tag)}`}>
+                                        <a class="text-main font-medium hover:underline" href={`/tags/${slugify(tag)}`}>
                                             #{tag}
                                         </a>
                                     ))}

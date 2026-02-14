@@ -42,3 +42,4 @@ build/
 # Asset build cache
 scripts/assets/.asset-cache.json
 
+public/styles

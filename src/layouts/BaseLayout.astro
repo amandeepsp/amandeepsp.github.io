@@ -34,24 +34,5 @@ const { ...head } = Astro.props;
             </main>
             <Footer />
         </div>
-        <script>
-            // Autoplay videos when scrolled into view
-            const observer = new IntersectionObserver(
-                (entries) => {
-                    entries.forEach((entry) => {
-                        const video = entry.target as HTMLVideoElement;
-                        if (entry.isIntersecting) {
-                            video.play();
-                        } else {
-                            video.pause();
-                        }
-                    });
-                },
-                { threshold: 0.75 }
-            );
-            document.querySelectorAll("video[data-autoplay]").forEach((video) => {
-                observer.observe(video);
-            });
-        </script>
     </body>
 </html>
