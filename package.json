@@ -38,6 +38,7 @@
         "@astrojs/check": "0.9.6",
         "@tailwindcss/typography": "^0.5.15",
         "@slidev/cli": "^51.0.0",
+        "@slidev/theme-default": "latest",
         "playwright": "^1.55.1",
         "prettier": "^3.4.2",
         "prettier-plugin-astro": "^0.14.1",
