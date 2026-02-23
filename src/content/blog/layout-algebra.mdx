@@ -1,0 +1,63 @@
+---
+title: "Intro to Layout Algebra"
+publishDate: "Feb 28 2026"
+tags: [ml, cuda, gpu]
+draft: true
+toc: true
+featured: true
+---
+
+import Figure from "@/components/Figure.astro";
+
+Layouts are a powerful abstraction introduced in NVIDIA's CuTe library for making operations on complicated Tensor configurations a little bit easier to understand.
+My goal here to provide a good taste of how operations on these layouts work and an example matrix-matrix multiplication kernel to show the value of these abstractions and its drawbacks.
+
+GPUs don't know about tensors and their structures, operation are only performed on linear memory. Tensor structures need to be maintained by the kernels themselves. e.g for a row-major matrix the matrix indices `i`, `j` will become index `i*C + j` where `C` is the number of columns. These kind of mappings are pivotal in building GPU kernels since the shapes and structures of tensors can get very complicated.
+
+A Layout we can easily defines as nothing but a combination of the shape and stride (num of jumps to go from one element to next in a dimension) of a Tensor. It defines a mapping from the Tensor coordinate space to a flat array layout indices. Here stride and shape are tuples of matching dimensions. Calling the shapes $S$ and the strides $D$ we say
+
+$$ L = S : D $$
+
+For example lets start with matrices, a row major $n \times m$ matrix will be represented as $(n, m) : (m, 1)$.
+Here we can see that increasing the first dimension (row) coordinate by $1$ will increase the flat index by $m$ and the second dimension (column) only increases it by $1$. For getting the flat index/offset given $i$, $j$, we know we can get it by $i \times m + j = i \times m + j \times 1$. Or more generally we can see from how stride is defined that the flat index $\text{offset}$ given indices $i = \{ i_0, i_1, ..., i_d\}$ and stride $s = \{s_0, s_1, ..., s_d\}$, 
+
+$$ I = \sum i_k s_k  = i \cdot s $$
+
+Similarly the column-major matrix represented as $(n,m):(1,m)$. Layouts can themselves be again made out of other Layouts. Lets analyze an example; $((2,2), (2,2)): ((1,4), (2,8))$. Okay! Lets try some coordinates.
+
+Coordinate $((i_0,i_1),(j_0,j_1))$|Calculation|Physical Offset
+----------------------------------|-----------|---------------
+$((0,0), (0,0))$|$0(1) + 0(4) + 0(2) + 0(8)$|0
+$((0,1), (0,0))$|$0(1) + 1(4) + 0(2) + 0(8)$|4
+$((1,0), (0,0))$|$1(1) + 0(4) + 0(2) + 0(8)$|1
+$((1,1), (0,0))$|$1(1) + 1(4) + 0(2) + 0(8)$|5
+$((0,0), (1,0))$|$0(1) + 0(4) + 1(2) + 0(8)$|2
+$((0,1), (1,0))$|$0(1) + 1(4) + 1(2) + 0(8)$|6
+$((1,0), (1,0))$|$1(1) + 0(4) + 1(2) + 0(8)$|3
+$((1,1), (1,0))$|$1(1) + 1(4) + 1(2) + 0(8)$|7
+
+As we can see this a interleaved layout (or swizzled). This kind of layouts are generally used in GPU kernels to prevent memory bank conflicts. 
+
+<Figure
+  src="/blog/layout-algebra/swizzle-1.svg"
+  alt=""
+  width="100%"
+>
+  <Fragment slot="caption">Visualization of the swizzled layout</Fragment>
+</Figure>
+
+This is okay, but it is inconvenient to do offset calculations of a particularly complex layout. Another way of visualizing this is to thinking about the groups individually first $(2, 2)$ has a stride of $(1, 4)$ creating a $ 0 \rightarrow 4 \rightarrow 1 \rightarrow 5 $ and this is repeated again in a $(2,2)$ shape with each block in a $ 0 \rightarrow 2 \rightarrow 1 \rightarrow 3$ layout. This can be seen by factorizing the expanded $\text{offset}$.
+
+$$ \text{offset} = i_0 \cdot 1 + i_1 \cdot 4 + j_0 \cdot 2 + j_1 \cdot 8 $$
+
+$$ \text{offset} = \underbrace{(i_0 + 2 \cdot j_0)}_{r} \cdot 1 + \underbrace{(i_1 + 2 \cdot j_1)}_{c} \cdot 4 $$
+
+This reduces a 4D layout into a 2D layout $(4, 4) : (1, 4)$ which is easy to visualize. But this is not possible for all layouts.
+
+Layouts can also be operated on. This is the algebra part of the layout algebra. So we can have functions that can map from one layout to another layout. Such a function is equivalent to mapping of one flat index space to another. Hence
+
+$$ f : L_1 \rightarrow L_2  \implies f(i) : I(L_1) \rightarrow I(L_2) $$
+
+Lets go through few of these operations.
+
+## Coalescing
