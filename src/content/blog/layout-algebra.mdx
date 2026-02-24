@@ -1,5 +1,6 @@
 ---
-title: "Intro to Layout Algebra"
+title: "Honey, I Tiled the Tensors"
+subTitle: "Shapes, Strides, Swizzles and Suffering! - An intro to Layout Algebra"
 publishDate: "Feb 28 2026"
 tags: [ml, cuda, gpu]
 draft: true
@@ -10,7 +11,7 @@ featured: true
 import Figure from "@/components/Figure.astro";
 
 Layouts are a powerful abstraction introduced in NVIDIA's CuTe library for making operations on complicated Tensor configurations a little bit easier to understand.
-My goal here to provide a good taste of how operations on these layouts work and an example matrix-matrix multiplication kernel to show the value of these abstractions and its drawbacks.
+My goal here to provide a good taste of how operations on these layouts work and an example matrix-matrix multiplication kernel to show the value of these abstractions and its drawbacks. This is not a full mathematical analysis of Layouts, for that a good reference is ["A note on the algebra of CuTe Layouts"](https://research.colfax-intl.com/wp-content/uploads/2024/01/layout_algebra.pdf)
 
 GPUs don't know about tensors and their structures, operation are only performed on linear memory. Tensor structures need to be maintained by the kernels themselves. e.g for a row-major matrix the matrix indices `i`, `j` will become index `i*C + j` where `C` is the number of columns. These kind of mappings are pivotal in building GPU kernels since the shapes and structures of tensors can get very complicated.
 
@@ -61,3 +62,263 @@ $$ f : L_1 \rightarrow L_2  \implies f(i) : I(L_1) \rightarrow I(L_2) $$
 Lets go through few of these operations.
 
 ## Coalescing
+Coalescing is to simplify a layout. More formally, we can define *Rank* of a layout as the number of modes it has, coalesce operation reduces the number of modes i.e. to reduce its Rank. For example the layout $(2,4):(1, 2)$ is the same as $8:1$ for 1-D coordinates. So how do we get a coalesced layout? Say we have a layout $L = (s_0, s_1, ...) : (d_0, d_1, ...) $, (no nesting) how do we reduce a pair of layouts into one layout?. We can check if the two modes are contiguous. When are they contiguous? When the next layout has a stride equaling the total flat indices of the former layout. This way they line up perfectly. so for $s_0: d_0$ and $s_1:d_1$ can reduce iff.
+
+$$ d_1 = s_0 \times d_0 $$
+
+and the two modes merge into $s_0 \times s_1 : d_0$. We can also see that $1$ shape is an identity in reduction. i.e. $1: d'$ and $s: d$ reduce to $s: d$. This is useful when we need to simplify some particularly narly tensor layouts.
+Coalescing can also be done by-mode i.e. we can only reduce some ranks e.g. from $4 \rightarrow 2$.
+
+## Composition
+
+Composition chains two layouts together. Given a layout $A$ and a layout $B$, the composition $B \circ A$ creates a new layout that first maps coordinates through $A$ and then uses those resulting indices as coordinates into $B$. In other words, the output indices of $A$ become the input coordinates of $B$.
+
+$$ (B \circ A)(i) = B(A(i)) $$
+
+Why is this useful? Composition is fundamental to the concept of tiling, where we partition a large data into smaller chunks that can we loaded into GPU's Shared Memory or further into Register Memory. Can we do this with composition operation as we can see in later sections.
+
+Lets work through an example. Take $A = (3, 2) : (1, 3)$ and $B = 6 : 2$. Layout $A$ maps 2-D coordinates to 1-D indices in a $3 \times 2$ arrangement. Layout $B$ maps a 1-D coordinate to offsets $\{0, 2, 4, 6, 8, 10\}$. The composition $B \circ A$ should give us a layout that maps 2-D coordinates directly to the physical offsets.
+
+Coordinate $(i, j)$|$A(i,j)$|$B(A(i,j))$
+-------------------|--------|----------
+$(0, 0)$|$0$|$0$
+$(1, 0)$|$1$|$2$
+$(2, 0)$|$2$|$4$
+$(0, 1)$|$3$|$6$
+$(1, 1)$|$4$|$8$
+$(2, 1)$|$5$|$10$
+
+We can verify this is the layout $(3, 2) : (2, 6)$. Now lets build up the general composition rules.
+
+### Single-mode $B$
+
+In the simple case where $B = s_B : d_B$ is a single mode, composition just scales the strides of $A$ by $d_B$:
+
+$$ (s_B : d_B) \circ (S_A : D_A) = S_A : (d_B \cdot D_A) $$
+
+This works because $B$ is linear — $B(k) = k \cdot d_B$ — so $B(A(i)) = d_B \cdot A(i)$. This is the case we saw in the example above: $(6:2) \circ ((3,2):(1,3)) = (3,2):(2,6)$.
+
+### Single-mode $A$
+
+When $B$ has multiple modes, the output of $A$ needs to be decomposed into coordinates for $B$. Given $B = (s_0, s_1, ...) : (d_0, d_1, ...)$ and $A = s : d$, the flat indices from $A$ (which are $\{0, d, 2d, ..., (s-1)d\}$) are split across $B$'s modes using its shapes. This can only be done if either $d \mid s_0$ or $s_0 \mid d$. Without this, $A$'s indices don't cleanly align with $B$'s mode boundaries and composition is undefined.
+
+There are two cases:
+
+**Case 1: $s_0 \mid d$ (stride skips past first mode).** Since $d$ is a multiple of $s_0$, every index $k \cdot d$ has $k \cdot d \mod s_0 = 0$, so $B$'s first mode coordinate is always zero. We skip it entirely and recurse with reduced stride:
+
+$$ (s_0, s_1, ...) : (d_0, d_1, ...) \circ (s : d) = (s_1, ...) : (d_1, ...) \circ (s : d / s_0) $$
+
+**Case 2: $d \mid s_0$ (stride fits within first mode).** Let $q = s_0 / d$. The first $q$ indices from $A$ cycle through $B$'s first mode before overflowing into the next.
+
+- If $s \leq q$: all indices fit in the first mode. Result: $s : (d_0 \cdot d)$
+- If $s > q$ and $q \mid s$: the first mode fills completely, and the rest recurse:
+$$ B \circ (s : d) = (q : d_0 \cdot d),\ ((s_1, ...) : (d_1, ...) \circ (s / q : 1)) $$ [^1]
+
+Lets trace through a concrete example. Take $B = (4, 3) : (1, 8)$ and $A = 6 : 2$.
+
+We have $d = 2$ and $s_0 = 4$. Since $d \mid s_0$, we're in Case 2 with $q = 4 / 2 = 2$. Since $s = 6 > q = 2$ and $q \mid s$:
+
+$$ (4, 3) : (1, 8) \circ (6 : 2) = (2 : 1 \cdot 2),\ ((3,) : (8,) \circ (3 : 1)) $$
+
+For the recursive step, $d = 1$ and $s_0 = 3$, so $q = 3$ and $s = 3 \leq q$:
+
+$$ (3,) : (8,) \circ (3 : 1) = 3 : 8 $$
+
+Combining: $B \circ A = (2, 3) : (2, 8)$.
+
+### General composition: left-associative reduction
+
+For the fully general case where both $A$ and $B$ are multi-mode, we reduce it to the cases above by processing $A$'s modes left to right. Given $A = (s_0^A, s_1^A, ...) : (d_0^A, d_1^A, ...)$, we compose each mode of $A$ one at a time (due to [^1]):
+
+$$ B \circ A = (B \circ (s_0^A : d_0^A)),\ (B_\text{rest} \circ (s_1^A : d_1^A)),\ ... $$
+
+Each single-mode composition consumes some of $B$'s leading modes (via the cases above), and the unconsumed remainder $B_\text{rest}$ carries forward for the next mode of $A$.
+
+## Complement
+Composition is always a subset of indices from the index space of $B$, what about the leftovers? The complement operator finds this remaining space. Given a layout $A$ within a larger layout $B$ (where $B \circ A$ selects a subset), the complement of $A$ with respect to $B$ is written:
+
+$$ A^*_B $$
+
+It produces a layout whose indices cover exactly the positions in $B$'s index space that are *not* reached by $A$. Together, $A$ and $A^*_B$ partition the full index space of $B$: $A$ gives the intra-tile indices and $A^*_B$ gives the inter-tile indices.
+
+As an example, take $A = (2, 3) : (1, 4)$ which covers 6 indices $\{0, 1, 4, 5, 8, 9\}$ out of a larger space. Lets compute $A^*_{M}$ where $M = 24$ (a simple size, not a layout). The complement needs to find the stride pattern that fills in the gaps. $A$'s first mode has stride $1$ and size $2$, so the next unused index is at offset $2$. The complement's first mode is $2 : 2$ (2 elements starting at stride 2, filling positions $2, 3$ between $A$'s groups). $A$'s second mode has stride $4$ and size $3$, so the next unused group starts at $12$. The complement's second mode is $2 : 12$ (2 remaining groups). Putting it together:
+
+$$ A^*_{24} = (2, 2) : (2, 12) $$
+
+We can verify: $A$ covers $\{0, 1, 4, 5, 8, 9\}$ and $A^*_{24}$ covers $\{0, 2, 12, 14\}$. Taking all combinations $A(i) + A^*_{24}(j)$ gives us the full range $\{0, 1, 2, 3, 4, 5, ..., 23\}$ — all 24 positions.
+
+Two definitions to note here. The **cosize** of a layout is the max index it can produce plus one — the size of its codomain. For $A = (2, 3) : (1, 4)$, the last coordinate $(1, 2)$ maps to offset $1 + 8 = 9$, so $\text{cosize}(A) = 10$. The **cotarget** $M$ is the size of the index space we're complementing within — it must be large enough to contain all of $A$'s image and compatible with $A$'s stride structure (specifically, divisible by the last mode's period $s_{last} \cdot d_{last}$, here $3 \cdot 4 = 12$, so $M = 24$ works since $24 / 12 = 2$).
+
+Notice that the cotarget is typically just a number (24), not a layout. We only need the *size* of the index space, not its full layout structure. The complement only cares about how many total indices there are so it can figure out how many "leftover" groups exist in each mode.
+
+## Division
+
+{/* Division defined as: A ⊘ B := A ∘ (B, B*) where B* is complement of B w.r.t. A */}
+{/* Result is a hierarchical layout: first mode = intra-tile (from composition), second mode = inter-tile (from complement) */}
+{/* Two variants below */}
+
+### Zipped Divide
+
+{/* Zipped divide flattens the result of division: zips the intra-tile and inter-tile modes together */}
+{/* Useful when you want a flat view of tiled data rather than a hierarchical one */}
+
+### Tiled Divide
+
+{/* Tiled divide keeps the hierarchical structure: result is ((tile), (num_tiles)) */}
+{/* This is what local_tile and partition use under the hood */}
+{/* Move the "tiling as composition" example here */}
+
+## Product
+
+{/* Logical product of two layouts: combines two layouts into one that covers the Cartesian product of their index spaces */}
+{/* Used to build thread-value layouts for tiled copies and MMAs */}
+
+## Putting it all together
+
+Now lets see how all these layout operations come together in a real tiled GEMM kernel using CuTe's Python DSL. We compute $C = A \times B$ where $A$ is $M \times K$, $B$ is $K \times N$ (stored as $N \times K$, i.e. row-major transposed), and $C$ is $M \times N$. The kernel tiles across all three dimensions with block tile sizes $(b_M, b_N, b_K)$.
+
+### Setup and Tiled Copies
+
+First we define shared memory layouts and tiled copy operations for moving data from global memory (GMEM) to shared memory (SMEM):
+
+```python
+# Shared memory layouts - column-major for vectorized MMA access
+sA_layout = cute.make_layout((b_m, b_k))  # (b_m, b_k) : (1, b_m)
+sB_layout = cute.make_layout((b_n, b_k))  # (b_n, b_k) : (1, b_n)
+
+# Thread layout for copy A: threads distributed across k-major order
+tA = cute.make_layout(
+    (num_threads // b_k, b_k), stride=(b_k, 1)
+)
+copy_atom_A = cute.make_copy_atom(
+    cute.nvgpu.cpasync.CopyG2SOp(), dtype,
+    num_bits_per_copy=dtype.width,
+)
+tiled_copy_A = cute.make_tiled_copy_tv(
+    copy_atom_A, thr_layout=tA, val_layout=cute.make_layout((1, 1))
+)
+
+# Thread layout for copy B: with vectorized loads along n-major
+num_vectorized = 4  # elements per vectorized load
+copy_atom_B = cute.make_copy_atom(
+    cute.nvgpu.cpasync.CopyG2SOp(), dtype,
+    num_bits_per_copy=dtype.width * num_vectorized,
+)
+major_mode_size = b_n // num_vectorized
+tB = cute.make_layout(
+    (major_mode_size, num_threads // major_mode_size),
+    stride=(1, major_mode_size),
+)
+tiled_copy_B = cute.make_tiled_copy_tv(
+    copy_atom_B, thr_layout=tB,
+    val_layout=cute.make_layout((num_vectorized, 1))
+)
+```
+
+The `make_tiled_copy_tv` function takes a copy atom (the hardware copy instruction), a thread layout (how threads are mapped to tile elements), and a value layout (how many elements each thread copies per invocation). This is where layout composition shines — CuTe composes these layouts to determine exactly which elements each thread is responsible for copying.
+
+### MMA Setup
+
+The tiled MMA is set up similarly. We distribute threads in a $(T/16, 16, 1)$ layout across the M, N, K modes:
+
+```python
+atoms_layout_mnk = cute.make_layout(
+    (num_threads // 16, 16, 1), stride=(16, 1, 0)
+)
+tiled_mma = cute.make_tiled_mma(
+    cute.nvgpu.MmaUniversalOp(abacc_dtype=acc_dtype),
+    atom_layout_mnk=atoms_layout_mnk,
+)
+```
+
+### The Kernel
+
+Inside the kernel, we first use `local_tile` to carve out each thread block's portion of the global tensors. The `proj` argument selects which modes the block tiler applies to:
+
+```python
+bidx, bidy, _ = cute.arch.block_idx()
+cta_coords = (bidx, bidy, None)
+
+# gA: (b_m, b_k, k_tiles), gB: (b_n, b_k, k_tiles), gC: (b_m, b_n)
+gA = cute.local_tile(mA, block_tiler, cta_coords, proj=(1, None, 1))
+gB = cute.local_tile(mB, block_tiler, cta_coords, proj=(None, 1, 1))
+gC = cute.local_tile(mC, block_tiler, cta_coords, proj=(1, 1, None))
+```
+
+Then we partition the tiles across threads for both copying and computation:
+
+```python
+tidx, _, _ = cute.arch.thread_idx()
+thr_mma = tiled_mma.get_slice(tidx)
+
+# Partition copy source (GMEM) and destination (SMEM) for each thread
+thr_copy_A = tiled_copy_A.get_slice(tidx)
+tAgA = thr_copy_A.partition_S(gA)  # (cpy, cpy_m, cpy_k, k_tiles)
+tAsA = thr_copy_A.partition_D(sA)  # (cpy, cpy_m, cpy_k)
+
+thr_copy_B = tiled_copy_B.get_slice(tidx)
+tBgB = thr_copy_B.partition_S(gB)  # (cpy, cpy_n, cpy_k, k_tiles)
+tBsB = thr_copy_B.partition_D(sB)  # (cpy, cpy_n, cpy_k)
+
+# Partition SMEM and output for MMA
+tCsA = thr_mma.partition_A(sA)
+tCsB = thr_mma.partition_B(sB)
+tCgC = thr_mma.partition_C(gC)
+tCrC = tiled_mma.make_fragment_C(tCgC)
+tCrC.fill(0.0)
+```
+
+Each `partition_*` call internally uses layout composition and division to split the tile into per-thread pieces. The `cpy` mode in the copy partitions captures both the vectorization width and the number of copy operations each thread performs.
+
+### The Main Loop
+
+The k-tile loop copies each $(b_M, b_K)$ and $(b_N, b_K)$ tile from GMEM to SMEM using async copies, then performs the MMA:
+
+```python
+k_tiles = cute.size(tAgA, mode=[3])
+
+for k in range(k_tiles):
+    cute.copy(tiled_copy_A, tAgA[None, None, None, k], tAsA, pred=tApA)
+    cute.copy(tiled_copy_B, tBgB[None, None, None, k], tBsB, pred=tBpB)
+
+    cute.arch.cp_async_commit_group()
+    cute.arch.cp_async_wait_group(0)
+    cute.arch.sync_threads()
+
+    cute.gemm(tiled_mma, tCrC, tCsA, tCsB, tCrC)
+    cute.arch.sync_threads()
+```
+
+The `pred` arguments handle boundary conditions — when M, N, or K aren't exact multiples of the tile sizes, predicate tensors mask out-of-bounds accesses. These predicates are themselves built using layout operations on identity tensors.
+
+### Epilogue
+
+Finally the accumulated results are written back to global memory, again with predication for bounds checking:
+
+```python
+cC = cute.make_identity_tensor(gC.shape)
+tCpC = thr_mma.partition_C(cC)
+predC = cute.make_rmem_tensor(tCrC.layout, cutlass.Boolean)
+residue_m = mC.shape[0] - b_m * bidx
+residue_n = mC.shape[1] - b_n * bidy
+for i in range(cute.size(tCrC.shape)):
+    predC[i] = cute.elem_less(tCpC[i], (residue_m, residue_n))
+atom = cute.make_copy_atom(cute.nvgpu.CopyUniversalOp(), mC.element_type)
+cute.copy(atom, tCrC, tCgC, pred=predC)
+```
+
+The full kernel is available in the [companion repo](https://github.com/amandeepsp/pmpp/blob/main/matmul/fmma_tiled_matmul.py).
+
+Notice how the layout algebra permeates the entire kernel — from defining how threads map to data (`make_tiled_copy_tv`), to carving tiles (`local_tile`), to splitting work across threads (`partition_*`), to bounds checking (`make_identity_tensor` + `elem_less`). Without these abstractions, we'd be manually computing thread-to-element mappings with error-prone index arithmetic. The layout algebra replaces all of that with composable, type-safe operations.
+
+## Closing thoughts
+
+CuTe's layout algebra turns what would be pages of error-prone index arithmetic into a handful of composable operations — composition, complement, and division — that are easier to reason about. But I want to be honest about the tradeoff here.
+
+GPU memory layouts are inherently complex. Swizzled shared memory, bank conflict avoidance, mixed-radix thread-to-data mappings — this complexity is *intrinsic* to the hardware. CuTe doesn't eliminate it; it repackages it into a different formalism. You're trading one kind of complexity (raw index math) for another (an algebra with its own rules, edge cases, and debugging challenges). As one Reddit commenter [put it](https://www.reddit.com/r/CUDA/comments/1ihb0wz/thoughts_on_cutlass/), CUTLASS is *"a typical example of a library with so much abstractions that makes complicated things simple and simple things complicated."*
+
+The learning curve is steep. You need to internalize layouts, composition, complement, division, cosize, cotarget, tiled copies, MMA atoms — a whole vocabulary before you can write your first kernel. For someone who already understands raw CUDA well, the value proposition is debatable: you're investing significant effort to learn abstractions that, at the end of the day, generate the same PTX you could have written by hand. The payoff comes when you need to support multiple GPU architectures, swap out MMA instructions, or restructure tiling strategies without rewriting everything — that's where the composability genuinely shines. But for a one-off kernel on a single architecture, you might be better off with raw CUDA and a good understanding of your hardware.
+
+If you want to dig deeper, the [CuTe documentation](https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/03_layout_algebra.md) is thorough, and the [CUTLASS Python DSL](https://github.com/NVIDIA/cutlass/tree/main/python/cutlass) makes it easier to experiment with these ideas interactively — the Python interface significantly reduces the compile-time pain that plagues the C++ templates.
+
+[^1]: $ (s_0, s_1, ...): (d_0, d_1, ...) $ and listing them elementwise $(s_0: d_0), (s_1: d_1), ... $ is the same.
