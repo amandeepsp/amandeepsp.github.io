@@ -134,22 +134,10 @@ $$ B \circ A = (B \circ (s_0^A : d_0^A)),\ (B_\text{rest} \circ (s_1^A : d_1^A))
 
 Each single-mode composition consumes some of $B$'s leading modes (via the cases above), and the unconsumed remainder $B_\text{rest}$ carries forward for the next mode of $A$.
 
+Composition of a Layout with a smaller Tile layout gives us a single first Tile from the original layout, we need some operation that can also do this for the rest of the layout.
+
 ## Complement
-Composition is always a subset of indices from the index space of $B$, what about the leftovers? The complement operator finds this remaining space. Given a layout $A$ within a larger layout $B$ (where $B \circ A$ selects a subset), the complement of $A$ with respect to $B$ is written:
-
-$$ A^*_B $$
-
-It produces a layout whose indices cover exactly the positions in $B$'s index space that are *not* reached by $A$. Together, $A$ and $A^*_B$ partition the full index space of $B$: $A$ gives the intra-tile indices and $A^*_B$ gives the inter-tile indices.
-
-As an example, take $A = (2, 3) : (1, 4)$ which covers 6 indices $\{0, 1, 4, 5, 8, 9\}$ out of a larger space. Lets compute $A^*_{M}$ where $M = 24$ (a simple size, not a layout). The complement needs to find the stride pattern that fills in the gaps. $A$'s first mode has stride $1$ and size $2$, so the next unused index is at offset $2$. The complement's first mode is $2 : 2$ (2 elements starting at stride 2, filling positions $2, 3$ between $A$'s groups). $A$'s second mode has stride $4$ and size $3$, so the next unused group starts at $12$. The complement's second mode is $2 : 12$ (2 remaining groups). Putting it together:
-
-$$ A^*_{24} = (2, 2) : (2, 12) $$
-
-We can verify: $A$ covers $\{0, 1, 4, 5, 8, 9\}$ and $A^*_{24}$ covers $\{0, 2, 12, 14\}$. Taking all combinations $A(i) + A^*_{24}(j)$ gives us the full range $\{0, 1, 2, 3, 4, 5, ..., 23\}$ — all 24 positions.
-
-Two definitions to note here. The **cosize** of a layout is the max index it can produce plus one — the size of its codomain. For $A = (2, 3) : (1, 4)$, the last coordinate $(1, 2)$ maps to offset $1 + 8 = 9$, so $\text{cosize}(A) = 10$. The **cotarget** $M$ is the size of the index space we're complementing within — it must be large enough to contain all of $A$'s image and compatible with $A$'s stride structure (specifically, divisible by the last mode's period $s_{last} \cdot d_{last}$, here $3 \cdot 4 = 12$, so $M = 24$ works since $24 / 12 = 2$).
-
-Notice that the cotarget is typically just a number (24), not a layout. We only need the *size* of the index space, not its full layout structure. The complement only cares about how many total indices there are so it can figure out how many "leftover" groups exist in each mode.
+Composition is always a subset of indices from the index space of $A$, what about the leftovers? The complement operator finds this remaining space. 
 
 ## Division
 
