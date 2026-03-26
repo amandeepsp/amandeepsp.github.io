@@ -7,7 +7,8 @@ import FormattedDate from "../../components/FormattedDate.astro";
 import PostPreview from "../../components/PostPreview.astro";
 import TableOfContents from "../../components/TableOfContents.astro";
 import Sidenotes from "../../components/Sidenotes.astro";
-import { sortItemsByDateDesc, calculateReadingTime, filterDrafts } from "../../utils/data-utils";
+import SeriesNav from "../../components/SeriesNav.astro";
+import { sortItemsByDateDesc, calculateReadingTime, filterDrafts, getSeriesPosts } from "../../utils/data-utils";
 import { slugify } from "../../utils/common-utils";
 import "remark-github-blockquote-alert/alert.css";
 
@@ -28,13 +29,17 @@ type Props = { post: CollectionEntry<"blog">; prevPost: CollectionEntry<"blog">;
 
 const { href } = Astro.url;
 const { post, prevPost, nextPost } = Astro.props;
-const { title, subTitle, publishDate, updatedDate, excerpt, tags = [], toc, seo } = post.data;
+const { title, subTitle, publishDate, updatedDate, excerpt, tags = [], toc, series, seo } = post.data;
 const { Content, headings } = await render(post);
 
 const postKeywords = seo?.keywords?.length ? seo.keywords : tags;
 
 // Calculate reading time from the post content
 const readingTime = calculateReadingTime(post.body);
+
+// Get series posts if this post belongs to a series
+const allPosts = filterDrafts(await getCollection("blog"));
+const seriesPosts = series ? getSeriesPosts(series.name, allPosts) : [];
 ---
 
 <BaseLayout
@@ -57,37 +62,34 @@ const readingTime = calculateReadingTime(post.body);
             <header class="mb-8">
                 <h1 class="font-serif text-3xl font-medium leading-tight sm:text-5xl sm:leading-tight">{title}</h1>
                 {subTitle && <p class="font-serif text-xl text-gray-600 dark:text-gray-300">{subTitle}</p>}
-                <div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300">
-                    <div class="flex items-center gap-1">
-                        <span class="font-medium">Published:</span>
+                {series && seriesPosts.length > 1 && (
+                    <SeriesNav seriesName={series.name} posts={seriesPosts} currentPostId={post.id} />
+                )}
+                <div class="mt-8 text-sm text-gray-600 dark:text-gray-300">
+                    <div class="flex flex-wrap items-center gap-x-1">
                         <FormattedDate date={publishDate} />
+                        {
+                            updatedDate && (
+                                <Fragment>
+                                    <span class="mx-1">&middot;</span>
+                                    <span>Updated <FormattedDate date={updatedDate} /></span>
+                                </Fragment>
+                            )
+                        }
+                        <span class="mx-1">&middot;</span>
+                        <span>{readingTime}</span>
                     </div>
                     {
-                        updatedDate && (
-                            <div class="flex items-center gap-1">
-                                <span class="font-medium">Updated:</span>
-                                <FormattedDate date={updatedDate} />
+                        tags.length > 0 && (
+                            <div class="mt-1 flex flex-wrap gap-x-2 text-sm">
+                                {tags.map((tag) => (
+                                    <a class="text-main font-medium hover:underline" href={`/tags/${slugify(tag)}`}>
+                                        #{tag}
+                                    </a>
+                                ))}
                             </div>
                         )
                     }
-                    <div class="flex items-center gap-1">
-                        <span class="font-medium">Reading time:</span>
-                        <span>{readingTime}</span>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <span class="font-medium">Tags:</span>
-                        {
-                            tags.length > 0 && (
-                                <div class="flex flex-wrap gap-x-1 gap-y-1 text-sm">
-                                    {tags.map((tag) => (
-                                        <a class="text-main font-medium hover:underline" href={`/tags/${slugify(tag)}`}>
-                                            #{tag}
-                                        </a>
-                                    ))}
-                                </div>
-                            )
-                        }
-                    </div>
                 </div>
             </header>
             <div class="prose-blog prose max-w-none leading-snug sm:prose-lg">

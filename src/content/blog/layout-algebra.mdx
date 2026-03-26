@@ -2,6 +2,7 @@
 title: "Honey, I Tiled the Tensors"
 subTitle: "Shapes, Strides, Swizzles and Suffering! - An intro to Layout Algebra"
 publishDate: "Feb 26 2026"
+updatedDate: "Mar 26 2026"
 tags: [ml, cuda, gpu]
 seo:
   description: "A practical guide to CuTe's layout algebra — shapes, strides, composition, complement, division and product — with a tiled GEMM kernel walkthrough."
@@ -12,7 +13,7 @@ featured: true
 import Figure from "@/components/Figure.astro";
 
 Layouts are a powerful abstraction introduced in NVIDIA's [CuTe library](https://docs.nvidia.com/cutlass/latest/media/docs/cpp/cute/00_quickstart.html) for making operations on complicated Tensor configurations a little bit easier to understand.
-My goal here is to provide a good taste of how operations on these layouts work and an example matrix-matrix multiplication kernel to show the value of these abstractions and its drawbacks. This is not a full mathematical analysis of Layouts, for that a good reference is ["A note on the algebra of CuTe Layouts"](https://research.colfax-intl.com/wp-content/uploads/2024/01/layout_algebra.pdf)
+My goal here is to provide a good taste of how operations on these layouts work and an example matrix-matrix multiplication kernel to show the value of these abstractions and its drawbacks. This is not a full mathematical analysis of Layouts, for that a good reference is the official paper by CuTe's creator Cris Cecka, ["CuTe Layout Representation and Algebra"](https://arxiv.org/abs/2603.02298), or the earlier community note ["A note on the algebra of CuTe Layouts"](https://research.colfax-intl.com/wp-content/uploads/2024/01/layout_algebra.pdf)
 
 GPUs don't know about tensors and their structures, operations are only performed on linear memory. Tensor structures need to be maintained by the kernels themselves. e.g. for a row-major matrix the matrix indices `i`, `j` will become index `i*C + j` where `C` is the number of columns. These kinds of mappings are pivotal in building GPU kernels since the shapes and structures of tensors can get very complicated.
 
@@ -41,7 +42,7 @@ $((1,1), (1,0))$|$1(1) + 1(4) + 1(2) + 0(8)$|7
 As we can see this is an interleaved layout (or swizzled). These kinds of layouts are generally used in GPU kernels to prevent memory bank conflicts.
 
 <Figure
-  src="/blog/layout-algebra/swizzle-1.svg"
+  src="/blog/layout-algebra/swizzle.svg"
   alt=""
   width="100%"
 >
@@ -145,11 +146,11 @@ $$ A^*_M = (d_0, \frac{d_1}{s_0 \cdot d_0}, \frac{d_2}{s_1 \cdot d_1}, ...,  \fr
 Here is an example for complement. Note we can reduce the $s_0: d_0 = 1:1$ from this example. The gray part is the original layout and colored indices
 
 <Figure
-  src="/blog/layout-algebra/complement1.png"
+  src="/blog/layout-algebra/complement.svg"
   alt=""
   width="100%"
 >
-  <Fragment slot="caption">Visualization of complement of a layout (from NVIDIA)</Fragment>
+  <Fragment slot="caption">Visualization of complement of a layout</Fragment>
 </Figure>
 
 ## Division
@@ -393,6 +394,6 @@ GPU memory layouts are inherently complex. Swizzled shared memory, bank conflict
 
 The learning curve is steep. You need to internalize layouts, composition, complement, division, cosize, cotarget, tiled copies, MMA atoms — a whole vocabulary before you can write your first kernel. For someone who already understands raw CUDA well, the value proposition is debatable: you're investing significant effort to learn abstractions that, at the end of the day, generate the same PTX. The payoff comes when you need to support multiple GPU architectures, swap out MMA instructions, or restructure tiling strategies without rewriting everything — that's where the composability genuinely shines. But for a one-off kernel on a single architecture, you might be better off with raw CUDA and a good understanding of your hardware.
 
-If you want to dig deeper, the [CuTe documentation](https://docs.nvidia.com/cutlass/latest/media/docs/cpp/cute/02_layout_algebra.html) is thorough, and the [CUTLASS Python DSL](https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/overview.html) makes it easier to experiment with these ideas interactively — the Python interface significantly reduces the compile-time pain that plagues the C++ templates.
+If you want to dig deeper, Cris Cecka's ["CuTe Layout Representation and Algebra"](https://arxiv.org/abs/2603.02298) is the definitive reference — it formalizes everything covered here and more, including inversion and cotarget. The [CuTe documentation](https://docs.nvidia.com/cutlass/latest/media/docs/cpp/cute/02_layout_algebra.html) is thorough, and the [CUTLASS Python DSL](https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/overview.html) makes it easier to experiment with these ideas interactively — the Python interface significantly reduces the compile-time pain that plagues the C++ templates.
 
 [^1]: $ (s_0, s_1, ...): (d_0, d_1, ...) $ and listing them elementwise $(s_0: d_0), (s_1: d_1), ... $ is the same.

@@ -8,5 +8,6 @@ dependencies = [
     "matplotlib",
     "scipy",
     "manim",
+    "tensor-layouts[viz]>=0.1.1",
 ]
 
