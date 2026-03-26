@@ -44,6 +44,12 @@ export function getPostsByTag(posts: CollectionEntry<"blog">[], tagId: string) {
     return filteredPosts;
 }
 
+export function getSeriesPosts(seriesName: string, posts: CollectionEntry<"blog">[]) {
+    return posts
+        .filter((post) => post.data.series?.name === seriesName)
+        .sort((a, b) => (a.data.series?.order ?? 0) - (b.data.series?.order ?? 0));
+}
+
 export function calculateReadingTime(content?: string): string {
     // Remove HTML tags and get plain text
     const plainText = content?.replace(/<[^>]*>/g, "") ?? "";

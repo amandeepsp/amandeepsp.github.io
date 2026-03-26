@@ -1,0 +1,38 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+    seriesName: string;
+    posts: CollectionEntry<"blog">[];
+    currentPostId: string;
+}
+
+const { seriesName, posts, currentPostId } = Astro.props;
+const currentIndex = posts.findIndex((p) => p.id === currentPostId);
+const partNumber = currentIndex + 1;
+const totalParts = posts.length;
+---
+
+<details class="series-nav mt-4 text-sm">
+    <summary class="cursor-pointer font-serif font-medium text-gray-600 dark:text-gray-300">
+        Part {partNumber} of {totalParts} in &ldquo;{seriesName}&rdquo;
+    </summary>
+    <ol class="mt-2 list-inside list-decimal space-y-1 rounded bg-muted px-4 py-3 font-serif text-gray-600 dark:text-gray-300">
+        {
+            posts.map((post) => (
+                <li>
+                    {post.id === currentPostId ? (
+                        <strong class="text-main">{post.data.title}</strong>
+                    ) : (
+                        <a
+                            href={`/blog/${post.id}`}
+                            class="underline decoration-dashed decoration-1 underline-offset-2 hover:decoration-solid"
+                        >
+                            {post.data.title}
+                        </a>
+                    )}
+                </li>
+            ))
+        }
+    </ol>
+</details>
