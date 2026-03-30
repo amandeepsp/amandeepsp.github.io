@@ -1,7 +1,8 @@
 ---
 title: "The Boon of Dimensionality"
-subTitle: "High-dimensional space is mostly empty. Machine learning lives in the gap."
+subTitle: "or: Why High Dimensions work for ML"
 publishDate: "Mar 3 2026"
+updatedDate: "Mar 30 2026"
 tags: [ml]
 toc: true
 featured: false
@@ -28,7 +29,7 @@ You can see the volume peaks at around $d=5$, roughly 5.26 and at $d=50$ becomes
 
 $$  \cfrac{V(1-\epsilon)}{V(1)} = {(1-\epsilon)}^d \leq {e}^{-\epsilon d}$$
 
-Since $(1-x) \leq e^{-x}$ from Taylor expansion of $ e^{-x} $. We can see that as $ d \rightarrow \infty $, the ratio $ \rightarrow 0 $. This tells us that most of the already small volume is concentrated near its surface. This is a special case of a general principle called **[concentration of measure](https://en.wikipedia.org/wiki/Concentration_of_measure)** — the tendency for high-dimensional probability distributions to concentrate their mass in thin regions.
+Since $(1-x) \leq e^{-x}$ from Taylor expansion of $ e^{-x} $. We can see that as $ d \rightarrow \infty $, the ratio $ \rightarrow 0 $. This tells us that most of the already small volume is concentrated near its surface. This is a special case of a general principle called **[concentration of measure](https://en.wikipedia.org/wiki/Concentration_of_measure)**, the tendency for high-dimensional probability distributions to concentrate their mass in thin regions.
 
 ## Equators
 
@@ -57,14 +58,15 @@ following [^jl]:
 
 While this is originally stated as a compression result, we can read it backwards to see that a $d$ dimensional space has the capacity to represent $e^{\Omega(d)}$ points with geometry intact. Note that this is exponential in $d$.
 
-This is not just a theoretical curiosity. Embedding models like word2vec [^w2v] or sentence transformers [^sbert] pack millions of concepts into ~768 dimensions. The JL capacity result tells us why this works: $e^{\Omega(768)}$ is an absurdly large number of near-orthogonal directions. Unrelated words get mapped to nearly orthogonal vectors and don't interfere with each other. Analogy arithmetic (king - man + woman = queen) works because directions in this space are meaningful *and* there is room for them to not collide. Random projections exploit this directly too: you can project high-dimensional data down to $O(\log n)$ dims via a random matrix and preserve distances, which is the basis of [locality-sensitive hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) and streaming sketches.
+This is not just a theoretical curiosity. Embedding models like word2vec [^w2v] or sentence transformers [^sbert] pack millions of concepts into ~768 dimensions. The JL capacity result tells us why this works: even after accounting for the constant hidden in the $\Omega$, a 768-dimensional space has room for a huge number of near-orthogonal directions, far more than any vocabulary needs. Unrelated words get mapped to nearly orthogonal vectors and don't interfere with each other, which is why cosine similarity between embeddings tracks semantic similarity so well. The famous analogy arithmetic (king - man + woman ≈ queen) suggests that directions in this space can be meaningful, though in practice this only works for cherry-picked examples [^analogy]. What matters more is the geometric separation. Random projections exploit this directly too: you can project high-dimensional data down to $O(\log n)$ dims via a random matrix and preserve distances, which is the basis of [locality-sensitive hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) and streaming sketches.
 
 ## Where next
 
-The curse of dimensionality tells us that data gets sparse and distances lose meaning as dimensions grow. The boon is the flip side: exponential capacity, near-orthogonality for free, and distances that survive projection. Same geometry, two readings. ML lives in the gap since real data is high-dimensional but structured (it sits on a manifold), and the boon wins over the curse.
+The curse of dimensionality tells us that data gets sparse and distances lose meaning as dimensions grow. The boon is the flip side: exponential capacity, near-orthogonality for free, and distances that survive projection. Same geometry, two readings. These two operate at different scales though: the curse applies to the *intrinsic* dimensionality of the data (you still need samples proportional to the manifold dimension), while the boon applies to the *ambient* dimensionality (the room you have to embed things in). ML lives in the gap since real data is high-dimensional but structured (it sits on a manifold), and the boon wins over the curse.
 
 There are two directions I want to explore from here. First is [Cover's theorem](https://en.wikipedia.org/wiki/Cover%27s_theorem) (1965), which says data that is not linearly separable in low dimensions becomes separable when mapped to higher dimensions. This is why kernel methods and neural network hidden layers work, they buy room. Second is [superposition](https://transformer-circuits.pub/2022/toy_model/index.html) in neural networks, the idea that a network with $m$ neurons can represent far more than $m$ features by packing them into near-orthogonal directions, which connects directly to the geometry above. But those are for another post.
 
 [^jl]: W. B. Johnson and J. Lindenstrauss, "Extensions of Lipschitz mappings into a Hilbert space," *Contemporary Mathematics*, 26, 1984.
 [^w2v]: T. Mikolov et al., "Efficient Estimation of Word Representations in Vector Space," [arXiv:1301.3781](https://arxiv.org/abs/1301.3781), 2013.
 [^sbert]: N. Reimers and I. Gurevych, "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks," [arXiv:1908.10084](https://arxiv.org/abs/1908.10084), 2019.
+[^analogy]: O. Levy and Y. Goldberg, "Linguistic Regularities in Sparse and Explicit Word Representations," [CoNLL 2014](https://aclanthology.org/W14-1618/). See also Nissim et al., "Fair is Better than Sensational," [arXiv:1905.09866](https://arxiv.org/abs/1905.09866), 2019.
