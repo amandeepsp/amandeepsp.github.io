@@ -32,5 +32,15 @@ const { ...head } = Astro.props;
             </main>
             <Footer />
         </div>
+        {
+            import.meta.env.PROD && (
+                <script
+                    is:inline
+                    type="module"
+                    src="https://static.cloudflareinsights.com/beacon.min.js"
+                    data-cf-beacon='{"token":"7af3e5dee991434cb956b9f30f59a409"}'
+                />
+            )
+        }
     </body>
 </html>
