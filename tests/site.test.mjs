@@ -104,7 +104,7 @@ test("generated routes preserve every published post, tag, redirect, and index",
     assert.deepEqual(published.map(({ id }) => id).sort(), PUBLISHED_IDS, "published post IDs changed");
     assert.deepEqual(
         entries.filter(({ data }) => data.series).map(({ id, data }) => ({ id, series: data.series })),
-        [{ id: "hnsw", series: { name: "The Missing Middle", order: 1 } }],
+        [],
         "series assignments changed"
     );
 
@@ -114,7 +114,6 @@ test("generated routes preserve every published post, tag, redirect, and index",
         "index.html",
         "blog/index.html",
         "contact-me/index.html",
-        "series/index.html",
         "tags/index.html",
         "making-models-smaller-1/index.html",
         "ml-model-compression-part1/index.html",
@@ -203,7 +202,7 @@ test("RSS is a summary feed with every published post", async () => {
     }
 });
 
-test("sitemap URLs resolve and include all posts, tags, and series", async () => {
+test("sitemap URLs resolve and include all posts and tags", async () => {
     const sitemap = await readFile(path.join(DIST, "sitemap-0.xml"), "utf8");
     const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
     const entries = await contentEntries();
@@ -211,7 +210,6 @@ test("sitemap URLs resolve and include all posts, tags, and series", async () =>
     for (const expected of [
         `${SITE}/`,
         `${SITE}/blog/`,
-        `${SITE}/series/`,
         `${SITE}/tags/`,
         ...PUBLISHED_IDS.map((id) => `${SITE}/blog/${id}/`),
         ...tags.map((tag) => `${SITE}/tags/${tag}/`)
