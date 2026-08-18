@@ -1,6 +1,6 @@
 ---
-title: "Honey, I Tiled the Tensors"
-subTitle: "Shapes, Strides, Swizzles and Suffering! - An intro to Layout Algebra"
+title: "An introduction to CuTe's Layout Algebra"
+subTitle: ""
 publishDate: "Feb 26 2026"
 updatedDate: "Mar 26 2026"
 tags: [ml, cuda, gpu]
@@ -39,7 +39,7 @@ $((0,1), (1,0))$|$0(1) + 1(4) + 1(2) + 0(8)$|6
 $((1,0), (1,0))$|$1(1) + 0(4) + 1(2) + 0(8)$|3
 $((1,1), (1,0))$|$1(1) + 1(4) + 1(2) + 0(8)$|7
 
-As we can see this is an interleaved layout (or swizzled). These kinds of layouts are generally used in GPU kernels to prevent memory bank conflicts.
+As we can see this is an interleaved layout. These kinds of layouts are generally used in GPU kernels to prevent memory bank conflicts.
 
 <Figure
   src="/blog/layout-algebra/swizzle.svg"
@@ -57,19 +57,19 @@ $$ \text{offset} = \underbrace{(i_0 + 2 \cdot j_0)}_{r} \cdot 1 + \underbrace{(i
 
 This reduces a 4D layout into a 2D layout $(4, 4) : (1, 4)$ which is easy to visualize. But this is not possible for all layouts.
 
-Layouts can also be operated on. This is the algebra part of the layout algebra. So we can have functions that can map from one layout to another layout. Such a function is equivalent to mapping of one flat index space to another. Hence
+Layouts can also be operated on. This is the algebra part of the layout algebra. So you can have functions that can map from one layout to another layout. Such a function is equivalent to mapping of one flat index space to another. Hence
 
 $$ f : L_1 \rightarrow L_2  \implies f(i) : I(L_1) \rightarrow I(L_2) $$
 
 Lets go through a few of these operations.
 
 ## Coalescing
-Coalescing is to simplify a layout. More formally, we can define *Rank* of a layout as the number of modes it has, coalesce operation reduces the number of modes i.e. to reduce its Rank. For example the layout $(2,4):(1, 2)$ is the same as $8:1$ for 1-D coordinates. So how do we get a coalesced layout? Say we have a layout $L = (s_0, s_1, ...) : (d_0, d_1, ...) $, (no nesting) how do we reduce a pair of layouts into one layout? We can check if the two modes are contiguous. When are they contiguous? When the next layout has a stride equaling the total flat indices of the former layout. This way they line up perfectly. so for $s_0: d_0$ and $s_1:d_1$ can reduce iff.
+Coalescing is to simplify or flatten a layout. More formally, we can define *Rank* of a layout as the number of modes it has, coalesce operation reduces the number of modes i.e. to reduce its Rank. For example the layout $(2,4):(1, 2)$ is the same as $8:1$ for 1-D coordinates. So how do we get a coalesced layout? Say we have a layout $L = (s_0, s_1, ...) : (d_0, d_1, ...) $, (no nesting) how do we reduce a pair of layouts into one layout? I need to check if the two modes are contiguous. When are they contiguous? When the next layout has a stride equaling the total flat indices of the former layout. This way they line up perfectly so for $s_0: d_0$ and $s_1:d_1$ can reduce if and only if
 
 $$ d_1 = s_0 \times d_0 $$
 
-and the two modes merge into $s_0 \times s_1 : d_0$. We can also see that $1$ shape is an identity in reduction. i.e. $1: d'$ and $s: d$ reduce to $s: d$. This is useful when we need to simplify some particularly gnarly tensor layouts.
-Coalescing can also be done by-mode i.e. we can only reduce some ranks e.g. from $4 \rightarrow 2$.
+and the two modes merge into $s_0 \times s_1 : d_0$. You can also see that $1$ shape is an identity in reduction. i.e. $1: d'$ and $s: d$ reduce to $s: d$. This is useful when we need to simplify some particularly gnarly tensor layouts.
+Coalescing can also be done by-mode i.e. we can only reduce so me of the ranks e.g. from $4 \rightarrow 2$.
 
 ## Composition
 
@@ -90,11 +90,11 @@ $(0, 1)$|$3$|$6$
 $(1, 1)$|$4$|$8$
 $(2, 1)$|$5$|$10$
 
-We can verify this is the layout $(3, 2) : (2, 6)$. Now lets build up the general composition rules.
+We can verify this is the layout $(3, 2) : (2, 6)$. Now also lets build up the general composition rules.
 
 ### Single-mode $B$
 
-In the simple case where $B = s_B : d_B$ is a single mode, composition just scales the strides of $A$ by $d_B$:
+Lets start with the simple case where $B = s_B : d_B$ is a single mode, composition just scales the strides of $A$ by $d_B$:
 
 $$ (s_B : d_B) \circ (S_A : D_A) = S_A : (d_B \cdot D_A) $$
 
@@ -143,14 +143,14 @@ Composition is always a subset of indices from the index space of $A$, what abou
 
 $$ A^*_M = (d_0, \frac{d_1}{s_0 \cdot d_0}, \frac{d_2}{s_1 \cdot d_1}, ...,  \frac{M}{s_n \cdot d_n}) : (1, s_0 \cdot d_0, s_1 \cdot d_1, ..., s_n \cdot d_n) $$
 
-Here is an example for complement. Note we can reduce the $s_0: d_0 = 1:1$ from this example. The gray part is the original layout and colored indices
+For example, take $A = (2,2):(1,6)$ and $M = 24$. The formula gives $(1,3,2):(1,2,12)$, which reduces to $(3,2):(2,12)$ because the leading $1:1$ mode is trivial. The original layout $A$ covers indices $\{0,1,6,7\}$; these are the gray cells below. Each other color is a shifted copy of $A$ selected by another complement offset. Together, the six copies cover all indices from $0$ through $23$ exactly once.
 
 <Figure
   src="/blog/layout-algebra/complement.svg"
-  alt=""
+  alt="The original layout covers gray cells 0, 1, 6, and 7. Five colored shifted copies fill the remaining indices through 23."
   width="100%"
 >
-  <Fragment slot="caption">Visualization of complement of a layout</Fragment>
+  <Fragment slot="caption">Complement of $(2,2):(1,6)$ under $M=24$: gray is the original layout; each color is one shifted copy.</Fragment>
 </Figure>
 
 ## Division
@@ -197,7 +197,7 @@ Logical divide result: $((2, 2), (3, 2)) : ((1, 2), (4, 12))$
 
 This is rank-4. Each original mode became a nested pair of $(\text{intra}, \text{inter})$.
 
-This layout is difficult to work with due to its nesting, we can reduce it to easier layouts
+This layout is difficult to work with due to its nesting, we can reduce it to easier layouts.
 
 ### Zipped, Tiled and Flat Divides
 These are just convenience representations of the logical divide operation. Lets say a layout $L$ has shape $(m, n, l, ....)$ and a tiler $T$ with shape $(t_m, t_n)$. The convenience forms are as below
@@ -207,29 +207,29 @@ These are just convenience representations of the logical divide operation. Lets
 - Tiled: $((t_m, t_n), r_m, r_n, l, ...) $
 - Flat: $(t_m, t_n, r_m, r_n, l, ...) $
 
-Tiled Divide is especially interesting, it regroups the modes by role: all intra-tile modes together, all inter-tile modes together. The result is a clean two-level hierarchy — first group is "what's inside a tile," second group is "which tile." This is the workhorse form that local_tile and partition_* use under the hood. It's what you want when different parts of the kernel need to reason about tiles independently — the CTA picks its tile via the inter-tile mode, then threads work within it via the intra-tile mode.
+These are various equivalent to the vanilla division, just re-organized for convenience. Tiled division is particularly interesting; it regroups the modes by intra-tile first and rest are flattened inter-tile modes. This is used in CuTe's `local_tile`and `partition_*` functions. It is what you would use when we can a CTA to pick a tile and work on it. You can index into the rest indices to select a tile.
 
 ## Product
 
-Where division breaks a layout into tiles, product does the opposite — it *replicates* a layout to fill a larger space. Given a layout $A$ (the atom to replicate) and a layout $B$ (the replication pattern), the product is
+Product is kind of the opposite of division, it *replicates* a layout to fill a larger space. Given a layout $A$ (the atom to replicate) and a layout $B$ (the replication pattern), the product is
 
 $$ A \otimes B := (A, A^* \circ B) $$
 
-The result is a two-mode layout: mode 0 is the atom $A$ itself and mode 1 is $A^* \circ B$ which describes how the copies of $A$ are arranged. The complement $A^*$ finds the gaps between elements of $A$, and composing with $B$ maps the replication pattern into those gaps.
+This gives you a two-mode layout: mode 0 is the atom $A$ itself and mode 1 is $A^* \circ B$ which describes how the copies of $A$ are arranged. The complement $A^*$ finds the gaps between elements of $A$, and composing with $B$ maps the replication pattern into those gaps.
 
 Lets work through a 1D example. Take $A = 4:1$ (a contiguous atom of 4 elements) and $B = 3:1$ (replicate 3 times).
 
-First we need the complement of $A$ with respect to $M = \text{size}(A) \times \text{size}(B) = 12$. We get $A^*_{12} = 3:4$ — the three offsets $\{0, 4, 8\}$ where copies begin.
+First we need the complement of $A$ with respect to $M = \text{size}(A) \times \text{size}(B) = 12$. We get $A^*_{12} = 3:4$.
 
 $$ A^* \circ B = (3:4) \circ (3:1) = 3:4 $$
 
-So the product is $A \otimes B = (4, 3) : (1, 4)$. Notice anything? This is the same layout we got from dividing $12:1$ by $4:1$. That's the duality — division splits a layout into tiles, product builds one up from tiles. Two sides of the same coin.
+So the product is $A \otimes B = (4, 3) : (1, 4)$. Notice anything? This is the same layout we got from dividing $12:1$ by $4:1$. This shows a duality between division and product.
 
 Where product really shines is building *thread-value* layouts for distributing work across GPU threads. Say we have 4 threads each handling 2 values. The thread layout $T = 4:1$ and value layout $V = 2:1$, the product $T \otimes V$ tells us which elements each thread owns.
 
 $T^*_8 = 2:4$, so $T^* \circ V = (2:4) \circ (2:1) = 2:4$. The product is $(4, 2) : (1, 4)$.
 
-Thread 0 handles elements $\{0, 4\}$, thread 1 handles $\{1, 5\}$ and so on — each thread's values are spaced apart by the number of threads. This cyclic distribution is exactly what CuTe's `make_tiled_copy_tv` builds internally from a thread layout and value layout.
+Thread 0 handles elements $\{0, 4\}$, thread 1 handles $\{1, 5\}$ and so on. Each thread's values are spaced apart by the number of threads. This cyclic distribution is exactly what CuTe's `make_tiled_copy_tv` builds internally from a thread layout and value layout.
 
 ### Blocked and Raked Products
 
@@ -237,7 +237,7 @@ For multi-dimensional layouts, the logical product works mode-by-mode just like 
 
 **Blocked product** groups like-modes with the atom inside: $((a_m, r_m), (a_n, r_n))$. Each atom occupies a contiguous block and replicas tile these blocks across the space. Think of it as "each thread gets a contiguous rectangle of elements."
 
-**Raked product** reverses the nesting: $((r_m, a_m), (r_n, a_n))$. The replicas interleave within the atom dimensions, creating a cyclic distribution. Thread 0 gets element 0, thread 1 gets element 1, wrapping around. This is the classic GPU pattern for coalesced memory access — adjacent threads access adjacent memory locations.
+**Raked product** reverses the nesting: $((r_m, a_m), (r_n, a_n))$. The replicas interleave within the atom dimensions, creating a cyclic distribution. Thread 0 gets element 0, thread 1 gets element 1, wrapping around. This is a classic GPU pattern for coalesced memory access where adjacent threads access adjacent memory locations.
 
 ### Zipped and Tiled Products
 
@@ -356,15 +356,13 @@ for k in range(k_tiles):
     cute.copy(tiled_copy_A, tAgA[None, None, None, k], tAsA, pred=tApA)
     cute.copy(tiled_copy_B, tBgB[None, None, None, k], tBsB, pred=tBpB)
 
-    cute.arch.cp_async_commit_group()
-    cute.arch.cp_async_wait_group(0)
     cute.arch.sync_threads()
 
     cute.gemm(tiled_mma, tCrC, tCsA, tCsB, tCrC)
     cute.arch.sync_threads()
 ```
 
-The `pred` arguments handle boundary conditions — when M, N, or K aren't exact multiples of the tile sizes, predicate tensors mask out-of-bounds accesses. These predicates are themselves built using layout operations on identity tensors.
+The `pred` arguments handle boundary conditions when M, N, or K aren't exact multiples of the tile sizes, predicate tensors mask out-of-bounds accesses. These predicates are themselves built using layout operations on identity tensors (implementation skipped here).
 
 ### Epilogue
 
@@ -372,28 +370,23 @@ Finally the accumulated results are written back to global memory, again with pr
 
 ```python
 cC = cute.make_identity_tensor(gC.shape)
-tCpC = thr_mma.partition_C(cC)
-predC = cute.make_rmem_tensor(tCrC.layout, cutlass.Boolean)
-residue_m = mC.shape[0] - b_m * bidx
-residue_n = mC.shape[1] - b_n * bidy
-for i in range(cute.size(tCrC.shape)):
-    predC[i] = cute.elem_less(tCpC[i], (residue_m, residue_n))
+# skipped predC creation
 atom = cute.make_copy_atom(cute.nvgpu.CopyUniversalOp(), mC.element_type)
 cute.copy(atom, tCrC, tCgC, pred=predC)
 ```
 
 The full kernel is available in the [companion repo](https://github.com/amandeepsp/cuda/blob/master/matmul/fmma_tiled_matmul.py).
 
-Notice how the layout algebra permeates the entire kernel — from defining how threads map to data (`make_tiled_copy_tv`), to carving tiles (`local_tile`), to splitting work across threads (`partition_*`), to bounds checking (`make_identity_tensor` + `elem_less`). Without these abstractions, we'd be manually computing thread-to-element mappings with error-prone index arithmetic. The layout algebra replaces all of that with composable, type-safe operations.
+You notice how layout algebra is a useful and powerful abstraction here. I could define how threads map to data (`make_tiled_copy_tv`), building tiles (`local_tile`) and splitting work across threads (`partition_*`). Without this abstraction you would be manually writing index arithmetic.
 
 ## Closing thoughts
 
-CuTe's layout algebra turns what would be pages of error-prone index arithmetic into a handful of composable operations — composition, complement, and division — that are easier to reason about. But I want to be honest about the tradeoff here.
+CuTe's layout algebra turns what would be pages of error-prone index arithmetic into a handful of composable operations viz. composition, complement, and division. These make it a little bit easier to reason about. But I want to be honest about the tradeoff here.
 
-GPU memory layouts are inherently complex. Swizzled shared memory, bank conflict avoidance, mixed-radix thread-to-data mappings — this complexity is *intrinsic* to the hardware. CuTe doesn't eliminate it; it repackages it into a different formalism. You're trading one kind of complexity (raw index math) for another (an algebra with its own rules, edge cases, and debugging challenges). As one Reddit commenter [put it](https://www.reddit.com/r/CUDA/comments/1ihb0wz/thoughts_on_cutlass/), CUTLASS is *"a typical example of a library with so much abstractions that makes complicated things simple and simple things complicated."*
+GPU memory layouts are inherently complex. This complexity is *intrinsic* to the hardware. CuTe doesn't eliminate it; it repackages it into a different formalism. You're trading one kind of complexity (raw index math) for another (an algebra with its own rules, edge cases, and debugging challenges). As one Reddit commenter [put it](https://www.reddit.com/r/CUDA/comments/1ihb0wz/thoughts_on_cutlass/), CUTLASS is *"a typical example of a library with so much abstractions that makes complicated things simple and simple things complicated."*
 
-The learning curve is steep. You need to internalize layouts, composition, complement, division, cosize, cotarget, tiled copies, MMA atoms — a whole vocabulary before you can write your first kernel. For someone who already understands raw CUDA well, the value proposition is debatable: you're investing significant effort to learn abstractions that, at the end of the day, generate the same PTX. The payoff comes when you need to support multiple GPU architectures, swap out MMA instructions, or restructure tiling strategies without rewriting everything — that's where the composability genuinely shines. But for a one-off kernel on a single architecture, you might be better off with raw CUDA and a good understanding of your hardware.
+The learning curve is steep. You need to internalize a whole new vocabulary; layouts, composition, complement, division, cosize, cotarget, tiled copies, MMA atoms before you can write your first kernel. For someone who already understands raw CUDA well, the value proposition is debatable: you're investing significant effort to learn abstractions that, at the end of the day, generate the same PTX. The payoff comes when you need to support multiple GPU architectures, swap out MMA instructions, or restructure tiling strategies without rewriting everything. But for a one-off kernel on a single architecture, you might be better off with raw CUDA and a good understanding of your hardware.
 
-If you want to dig deeper, Cris Cecka's ["CuTe Layout Representation and Algebra"](https://arxiv.org/abs/2603.02298) is the definitive reference — it formalizes everything covered here and more, including inversion and cotarget. The [CuTe documentation](https://docs.nvidia.com/cutlass/latest/media/docs/cpp/cute/02_layout_algebra.html) is thorough, and the [CUTLASS Python DSL](https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/overview.html) makes it easier to experiment with these ideas interactively — the Python interface significantly reduces the compile-time pain that plagues the C++ templates.
+If you want to dig deeper, Cris Cecka's ["CuTe Layout Representation and Algebra"](https://arxiv.org/abs/2603.02298) is the definitive reference; it formalizes everything covered here and more, including inversion and cotarget. The [CuTe documentation](https://docs.nvidia.com/cutlass/latest/media/docs/cpp/cute/02_layout_algebra.html) is thorough, and the [CUTLASS Python DSL](https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/overview.html) makes it easier to experiment with these ideas interactively — the Python interface significantly reduces the compile-time pain that plagues the C++ templates.
 
 [^1]: $ (s_0, s_1, ...): (d_0, d_1, ...) $ and listing them elementwise $(s_0: d_0), (s_1: d_1), ... $ is the same.

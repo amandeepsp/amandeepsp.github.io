@@ -74,13 +74,13 @@ const resolvedImage = image?.src
  */
 function formatCanonicalURL(url: string | URL) {
     let path = url.toString();
-    const hasQueryParams = path.includes("?");
-    // If there are query params, make sure the URL has no trailing slash
-    if (hasQueryParams) {
-        path = path.replace(/\/?$/, "");
+    const parsed = new URL(path);
+    const isFile = /\.[a-z0-9]+$/i.test(parsed.pathname);
+    // Files and URLs with query parameters do not receive a trailing slash.
+    if (parsed.search || isFile) {
+        return path.replace(/\/(?=[?#]|$)/, "");
     }
-    // otherwise, canonical URL always has a trailing slash
-    return path.replace(/\/?$/, hasQueryParams ? "" : "/");
+    return path.replace(/\/?$/, "/");
 }
 ---
 
@@ -135,14 +135,3 @@ function formatCanonicalURL(url: string | URL) {
 {resolvedImage?.alt && <meta name="twitter:image:alt" content={resolvedImage?.alt} />}
 <meta name="twitter:creator" content="@theamndeepsingh" />
 <meta name="twitter:site" content="@theamndeepsingh" />
-
-<!-- Google tag (gtag.js) -->
-<script is:inline type="text/partytown" src="https://www.googletagmanager.com/gtag/js?id=G-LVRYYR0DZN"></script>
-<script is:inline type="text/partytown">
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-        dataLayer.push(arguments);
-    }
-    gtag("js", new Date());
-    gtag("config", "G-LVRYYR0DZN");
-</script>

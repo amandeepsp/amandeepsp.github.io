@@ -9,13 +9,13 @@ interface Props {
 }
 
 const { src, alt, caption, autoplay = true, loop = true, poster = true } = Astro.props;
-const baseName = src.split('/').pop();
-const posterSrc = poster ? `${src.replace(baseName!, `poster-${baseName}`).replace(/\/$/, '')}.png` : undefined;
+const baseName = src.split("/").pop();
+const posterSrc = poster ? `${src.replace(baseName!, `poster-${baseName}`).replace(/\/$/, "")}.png` : undefined;
 ---
 
-<figure class="my-8">
+<figure class="media-figure">
     <video
-        class="w-full rounded"
+        class="media-video"
         controls
         autoplay={autoplay}
         loop={loop}
@@ -28,9 +28,5 @@ const posterSrc = poster ? `${src.replace(baseName!, `poster-${baseName}`).repla
         <source src={`${src}.mp4`} type="video/mp4" />
         Your browser does not support the video tag.
     </video>
-    {caption && (
-        <figcaption class="mt-2 text-center text-sm text-muted">
-            {caption}
-        </figcaption>
-    )}
+    {caption && <figcaption class="media-caption">{caption}</figcaption>}
 </figure>

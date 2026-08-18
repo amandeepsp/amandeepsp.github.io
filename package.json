@@ -1,54 +1,42 @@
 {
     "name": "amandeepsp.github.io",
+    "private": true,
     "type": "module",
     "version": "0.0.0",
+    "engines": {
+        "node": ">=22.12.0",
+        "npm": ">=9.6.5"
+    },
     "scripts": {
         "dev": "astro dev",
-        "start": "astro dev",
         "build": "astro build",
-        "postbuild": "bun scripts/build-slides.ts",
-        "preview": "astro preview",
-        "astro": "astro",
+        "postbuild": "node scripts/social-cards.mjs && node --test tests/site.test.mjs",
+        "check": "astro check",
         "format": "prettier --write .",
-        "format:check": "prettier --check .",
-        "og": "bun scripts/og-generate.ts",
-        "assets": "uv run python scripts/assets/build.py",
-        "assets:force": "uv run python scripts/assets/build.py --force",
-        "slides:build": "bun scripts/build-slides.ts"
+        "format:check": "prettier --check ."
     },
     "dependencies": {
-        "@astrojs/mdx": "^4.3.13",
-        "@astrojs/partytown": "^2.1.4",
-        "@astrojs/rss": "4.0.15",
-        "@astrojs/sitemap": "3.7.0",
-        "@astrojs/tailwind": "^6.0.2",
-        "astro": "5.17.1",
-        "baseline-browser-mapping": "^2.9.19",
-        "caniuse-lite": "^1.0.30001770",
+        "@astrojs/markdown-remark": "^7.2.2",
+        "@astrojs/mdx": "^7.0.5",
+        "@astrojs/rss": "^4.0.19",
+        "@astrojs/sitemap": "^3.7.3",
+        "astro": "^7.2.2",
         "katex": "^0.16.22",
         "rehype-autolink-headings": "^7.1.0",
         "rehype-katex": "^7.0.1",
-        "rehype-stringify": "^10.0.1",
         "remark-gfm": "^4.0.1",
         "remark-github-blockquote-alert": "^2.0.0",
         "remark-math": "^6.0.0",
-        "remark-parse": "^11.0.0",
-        "remark-rehype": "^11.1.2",
-        "sanitize-html": "^2.17.1",
-        "tailwindcss": "^3.4.17",
-        "unified": "^11.0.5",
-        "yaml": "^2.8.2"
+        "sharp": "^0.35.3",
+        "yaml": "^2.9.0"
     },
     "devDependencies": {
         "@astrojs/check": "0.9.6",
-        "@slidev/cli": "^51.0.0",
-        "@slidev/theme-default": "latest",
-        "@tailwindcss/typography": "^0.5.15",
-        "@types/sanitize-html": "^2.16.0",
-        "playwright": "^1.55.1",
         "prettier": "^3.4.2",
         "prettier-plugin-astro": "^0.14.1",
-        "prettier-plugin-tailwindcss": "^0.6.9",
         "typescript": "^5.9.2"
+    },
+    "allowScripts": {
+        "esbuild@0.28.2": true
     }
 }

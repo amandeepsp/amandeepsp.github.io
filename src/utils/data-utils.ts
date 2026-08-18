@@ -50,6 +50,17 @@ export function getSeriesPosts(seriesName: string, posts: CollectionEntry<"blog"
         .sort((a, b) => (a.data.series?.order ?? 0) - (b.data.series?.order ?? 0));
 }
 
+export function getAllSeries(posts: CollectionEntry<"blog">[]) {
+    const seriesNames = [...new Set(posts.map((post) => post.data.series?.name).filter((name) => name !== undefined))];
+
+    return seriesNames
+        .sort((nameA, nameB) => nameA.localeCompare(nameB))
+        .map((name) => ({
+            name,
+            posts: getSeriesPosts(name, posts)
+        }));
+}
+
 export function calculateReadingTime(content?: string): string {
     // Remove HTML tags and get plain text
     const plainText = content?.replace(/<[^>]*>/g, "") ?? "";

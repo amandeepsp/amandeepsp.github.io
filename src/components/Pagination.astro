@@ -4,11 +4,11 @@ import IconButton from "./IconButton.astro";
 const { page, class: className } = Astro.props;
 ---
 
-<nav aria-label="Pagination" class:list={["relative px-12 py-2 text-center", className]}>
+<nav aria-label="Pagination" class:list={["pagination", className]}>
     {
         page.url.prev && (
             <IconButton
-                class="absolute left-0 top-1/2 -translate-y-1/2"
+                class="pagination-previous"
                 href={page.url.prev}
                 aria-label={`Go to page ${page.currentPage - 1} of ${page.lastPage}`}
             >
@@ -16,11 +16,11 @@ const { page, class: className } = Astro.props;
             </IconButton>
         )
     }
-    <span class="text-sm" aria-current="page">Page {page.currentPage} of {page.lastPage}</span>
+    <span class="pagination-status" aria-current="page">Page {page.currentPage} of {page.lastPage}</span>
     {
         page.url.next && (
             <IconButton
-                class="absolute right-0 top-1/2 -translate-y-1/2"
+                class="pagination-next"
                 href={page.url.next}
                 aria-label={`Go to page ${page.currentPage + 1} of ${page.lastPage}`}
             >

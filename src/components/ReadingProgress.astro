@@ -6,27 +6,8 @@
     <div class="reading-progress-bar" id="reading-progress"></div>
 </div>
 
-<style>
-    .reading-progress-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 3px;
-        background: transparent;
-        z-index: 50;
-    }
-
-    .reading-progress-bar {
-        height: 100%;
-        width: 0%;
-        background: rgb(var(--color-text-main) / 0.7);
-        transition: width 50ms ease-out;
-    }
-</style>
-
 <script>
-    document.addEventListener("astro:page-load", () => {
+    function initReadingProgress() {
         const progressBar = document.getElementById("reading-progress");
         if (!progressBar) return;
 
@@ -61,5 +42,7 @@
         window.addEventListener("scroll", updateProgress, { passive: true });
         window.addEventListener("resize", updateProgress, { passive: true });
         updateProgress();
-    });
+    }
+
+    initReadingProgress();
 </script>

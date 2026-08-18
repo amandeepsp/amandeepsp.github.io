@@ -1,5 +1,4 @@
 ---
-import { ClientRouter } from "astro:transitions";
 import BaseHead, { type Props as HeadProps } from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
@@ -11,25 +10,24 @@ const { ...head } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" class="break-words antialiased">
+<html lang="en">
     <head>
         <BaseHead {...head} />
-        <script>
-            if (localStorage.theme === "dark") {
-                document.documentElement.classList.add("dark");
-            }
+        <script is:inline>
+            const savedTheme = localStorage.getItem("theme");
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.classList.toggle("dark", savedTheme ? savedTheme === "dark" : prefersDark);
         </script>
-        <ClientRouter />
     </head>
-    <body class="bg-main text-main">
-        <div class="flex min-h-screen flex-col px-4 md:px-8">
-            <div class="mx-auto w-full max-w-3xl pb-12 pt-4 sm:pb-16 md:pt-8">
-                <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+    <body>
+        <div class="site-shell">
+            <div class="site-header-wrap">
+                <div class="site-header">
                     <Header />
                     <Nav />
                 </div>
             </div>
-            <main class="mx-auto w-full max-w-3xl grow">
+            <main class="site-main">
                 <slot />
             </main>
             <Footer />

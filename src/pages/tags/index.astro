@@ -17,25 +17,23 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
     pageType="website"
     noindex={false}
 >
-    <h1 class="mb-12 font-serif text-2xl italic sm:mb-16 sm:text-4xl">All Tags</h1>
-    {
-        tags.map((tag) => {
-            const postCount = getPostsByTag(posts, tag.id).length;
-            return (
-                <a class="group mb-4 flex items-start justify-between gap-4 sm:mb-6" href={`/tags/${tag.id}`}>
-                    <div class="flex grow flex-row items-center gap-4">
-                        <h2 class="font-serif text-xl font-medium leading-tight group-hover:underline group-hover:decoration-dashed group-hover:decoration-1 group-hover:underline-offset-4 sm:text-2xl">
-                            {tag.name}
-                        </h2>
-                        <div class="text-sm leading-normal">
-                            {postCount} {postCount === 1 ? "post" : "posts"}
+    <h1 class="page-title">All Tags</h1>
+    <div class="tag-list">
+        {
+            tags.map((tag) => {
+                const postCount = getPostsByTag(posts, tag.id).length;
+                return (
+                    <a class="tag-row" href={`/tags/${tag.id}`}>
+                        <div class="tag-label">
+                            <h2 class="tag-name">{tag.name}</h2>
+                            <div class="tag-count">
+                                {postCount} {postCount === 1 ? "post" : "posts"}
+                            </div>
                         </div>
-                    </div>
-                    <div class="hidden font-serif italic opacity-0 transition group-hover:opacity-100 sm:inline-flex sm:shrink-0 sm:items-center sm:gap-1">
-                        View Tag Archive →
-                    </div>
-                </a>
-            );
-        })
-    }
+                        <div class="tag-prompt">View Tag Archive →</div>
+                    </a>
+                );
+            })
+        }
+    </div>
 </BaseLayout>

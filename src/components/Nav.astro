@@ -6,23 +6,18 @@ import ThemeToggle from "./ThemeToggle.astro";
 const navLinks = siteConfig.headerNavLinks || [];
 ---
 
-<nav>
+<nav class="primary-nav" aria-label="Primary navigation">
     {
         navLinks.length > 0 && (
-            <ul class="flex flex-row items-center gap-6">
+            <ul>
                 {navLinks.map((link) => (
                     <li>
-                        <NavLink
-                            class="text-main font-serif text-base hover:underline hover:decoration-1 hover:underline-offset-2"
-                            href={link.href}
-                        >
-                            {link.text}
-                        </NavLink>
+                        <NavLink href={link.href}>{link.text}</NavLink>
                     </li>
                 ))}
-                <div class="ml-auto">
+                <li class="theme-control">
                     <ThemeToggle />
-                </div>
+                </li>
             </ul>
         )
     }

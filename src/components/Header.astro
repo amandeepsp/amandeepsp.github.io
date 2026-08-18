@@ -2,11 +2,7 @@
 import siteConfig from "../data/site-config";
 ---
 
-<header>
-    <div class="flex flex-row items-end gap-4">
-        <a class="text-theme-foreground font-serif text-2xl font-medium leading-tight sm:text-2xl" href="/">
-            {siteConfig.title}
-        </a>
-    </div>
-    {siteConfig.subtitle && <p class="mt-1 text-sm leading-tight">{siteConfig.subtitle}</p>}
+<header class="site-brand">
+    <a class="site-title" href="/">{siteConfig.title}</a>
+    {siteConfig.subtitle && <p class="site-subtitle">{siteConfig.subtitle}</p>}
 </header>

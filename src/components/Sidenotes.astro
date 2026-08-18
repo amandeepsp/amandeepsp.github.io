@@ -33,7 +33,7 @@
                 const rect = pre.getBoundingClientRect();
                 return {
                     top: rect.top - articleRect.top,
-                    bottom: rect.bottom - articleRect.top,
+                    bottom: rect.bottom - articleRect.top
                 };
             });
 
@@ -54,13 +54,13 @@
                 // Extract footnote number from the reference text
                 const footnoteNum = ref.textContent || "";
 
-                // Create sidenote element with Tailwind classes using DOM methods
+                // Create the sidenote using the same semantic styles as the article.
                 const sidenote = document.createElement("span");
-                sidenote.className = "sidenote absolute right-[-236px] w-[200px] text-sm leading-snug text-muted font-serif";
+                sidenote.className = "sidenote";
 
                 // Build content using safe DOM methods
                 const numSpan = document.createElement("span");
-                numSpan.className = "font-semibold";
+                numSpan.className = "sidenote-number";
                 numSpan.textContent = `${footnoteNum}.`;
                 sidenote.appendChild(numSpan);
                 sidenote.appendChild(document.createTextNode(" "));
@@ -109,16 +109,16 @@
                     sidenotes.push({
                         element: sidenote,
                         top: desiredTop,
-                        bottom: desiredTop + sidenote.offsetHeight,
+                        bottom: desiredTop + sidenote.offsetHeight
                     });
                 }
             });
 
             // Hide the footnotes section on large screens
-            footnotesSection.classList.add("hidden");
+            footnotesSection.classList.add("footnotes-hidden");
         } else {
             // Ensure footnotes are visible on smaller screens
-            footnotesSection.classList.remove("hidden");
+            footnotesSection.classList.remove("footnotes-hidden");
         }
 
         // Handle resize events
@@ -133,16 +133,7 @@
         };
 
         window.addEventListener("resize", resizeHandler);
-
-        // Cleanup on page change
-        document.addEventListener(
-            "astro:before-swap",
-            () => {
-                window.removeEventListener("resize", resizeHandler);
-            },
-            { once: true }
-        );
     }
 
-    document.addEventListener("astro:page-load", initSidenotes);
+    initSidenotes();
 </script>

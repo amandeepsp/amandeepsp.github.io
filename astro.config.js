@@ -1,53 +1,40 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
-import tailwind from "@astrojs/tailwind";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import partytown from "@astrojs/partytown";
 import { remarkAlert } from "remark-github-blockquote-alert";
-import { rehypeHeadingIds } from "@astrojs/markdown-remark";
+import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
 import remarkGfm from "remark-gfm";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdx from "@astrojs/mdx";
-import assetsPlugin from "./scripts/vite-plugin-assets.js";
 
 export default defineConfig({
-    vite: {
-        plugins: [assetsPlugin()]
-    },
     site: "https://amandeepsp.github.io",
-    integrations: [
-        sitemap(),
-        tailwind(),
-        mdx(),
-        partytown({
-            config: {
-                forward: ["dataLayer.push"]
-            }
-        })
-    ],
+    integrations: [sitemap(), mdx()],
     markdown: {
-        remarkPlugins: [remarkMath, remarkAlert, remarkGfm],
-        rehypePlugins: [
-            rehypeHeadingIds,
-            rehypeKatex,
-            [
-                rehypeAutolinkHeadings,
-                {
-                    behavior: "append",
-                    content: {
-                        type: "text",
-                        value: "#"
-                    },
-                    headingProperties: {
-                        className: ["anchor"]
-                    },
-                    properties: {
-                        className: ["anchor-link"]
+        processor: unified({
+            remarkPlugins: [remarkMath, remarkAlert, remarkGfm],
+            rehypePlugins: [
+                rehypeHeadingIds,
+                [rehypeKatex, { strict: false }],
+                [
+                    rehypeAutolinkHeadings,
+                    {
+                        behavior: "append",
+                        content: {
+                            type: "text",
+                            value: "#"
+                        },
+                        headingProperties: {
+                            className: ["anchor"]
+                        },
+                        properties: {
+                            className: ["anchor-link"]
+                        }
                     }
-                }
+                ]
             ]
-        ],
+        }),
         syntaxHighlight: "shiki",
         shikiConfig: {
             themes: {

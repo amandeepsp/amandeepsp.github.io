@@ -17,17 +17,13 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
 {
     tocHeadings.length > 0 && (
-        <nav class="toc hidden xl:col-start-1 xl:block xl:sticky xl:top-8 xl:self-start" aria-label="Table of contents">
+        <nav class="toc" aria-label="Table of contents">
             <div>
-                <h2 class="mb-3 text-sm font-medium text-muted">On this page</h2>
-                <ul class="space-y-2 text-sm">
+                <h2>On this page</h2>
+                <ul>
                     {tocHeadings.map((heading) => (
-                        <li class={heading.depth === 3 ? "ml-3" : ""}>
-                            <a
-                                href={`#${heading.slug}`}
-                                class="toc-link block text-muted transition-colors hover:text-main"
-                                data-slug={heading.slug}
-                            >
+                        <li class={heading.depth === 3 ? "toc-nested" : ""}>
+                            <a href={`#${heading.slug}`} class="toc-link" data-slug={heading.slug}>
                                 {heading.text}
                             </a>
                         </li>
@@ -44,10 +40,12 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
         const tocLinks = document.querySelectorAll(".toc-link");
         if (tocLinks.length === 0 || !tocNav) return;
 
-        const headingElements = Array.from(tocLinks).map((link) => {
-            const slug = link.getAttribute("data-slug");
-            return document.getElementById(slug!);
-        }).filter(Boolean) as HTMLElement[];
+        const headingElements = Array.from(tocLinks)
+            .map((link) => {
+                const slug = link.getAttribute("data-slug");
+                return document.getElementById(slug!);
+            })
+            .filter(Boolean) as HTMLElement[];
 
         if (headingElements.length === 0) return;
 
@@ -72,29 +70,7 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
         );
 
         headingElements.forEach((el) => headingObserver.observe(el));
-
-        // Cleanup on page change
-        document.addEventListener(
-            "astro:before-swap",
-            () => {
-                headingObserver.disconnect();
-            },
-            { once: true }
-        );
     }
 
-    document.addEventListener("astro:page-load", initToc);
+    initToc();
 </script>
-
-<style>
-    .toc-link.toc-active {
-        color: rgb(var(--color-text-main));
-        font-weight: 500;
-    }
-
-    .toc {
-        transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-    }
-
-
-</style>

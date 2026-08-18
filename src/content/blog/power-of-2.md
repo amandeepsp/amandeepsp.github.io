@@ -5,19 +5,8 @@ tags:
   - distributed-systems
 seo:
   description: >
-    Discover how power of two load balancing reduces hotspots, achieves O(log log n) max load,
-    and connects to cuckoo hashing for efficiency.
-  keywords:
-    - Power of 2 load balancing
-    - Two random choices load balancing
-    - Load balancing algorithms
-    - System design
-    - Balls and bins problem
-    - Request herding
-    - Server hotspots
-    - Cuckoo hashing
-    - Distributed systems
-    - Algorithm analysis
+    An intuition based explanation around why random choice of 2 load balancing
+    works so well.
 ---
 
 One of the hardest parts of balancing load across many targets is keeping an accurate view of their load.
@@ -32,9 +21,7 @@ Where we place balls into bins, where a bin can house any number of balls.
 From here, we get that the typical max load on a target is exponentially better with 2 choices, i.e. $ \mathcal{O(\frac{\log n}{\log\log n})}$ for random and
 $\mathcal{O(\frac{\log\log n}{\log d})}$ for $d$ random choices, for 2 this will be $\mathcal{O(\log \log n)}$.
 From this result, we can also see that going from 1 to 2 improvement is far better than selections of 3 or 4, which are only marginally better.
-But it is not obvious intuitively, since we are still selecting the two targets randomly.
-This same exponential gap underlies why data structures like [cuckoo hashing](https://en.m.wikipedia.org/wiki/Cuckoo_hashing)
-work so well: having two random choices dramatically reduces collisions and spreads keys more evenly.
+But it is not obvious intuitively, since we are still selecting the two targets randomly. [^cuckoo]
 
 Here is a visualisation of how the Power of 2 choices approach perform better, as you can see in the gif, the load appears
 more uniform as the number of requests increases.
@@ -63,3 +50,6 @@ Let's go through with an example
 - Now we should expect only $n/16$ targets to have the max $5$ requests, and then only $n/256 = n/(2^{2^3})$ targets with max $6$ requests
 - This amounts to $\frac{n}{2^{2^{k-3}}}$ for a max of $k$ requests.
 - To find the upper bound of $k$ at a fixed $n$ we can set the $N_k$ to the minimum $1$. This will give us $ k = \mathcal{O(\log \log n)} $
+
+[^cuckoo]: This exponential gap is why data structures like [cuckoo hashing](https://en.m.wikipedia.org/wiki/Cuckoo_hashing)
+work so well, having two random choices dramatically reduces collisions and spreads keys more evenly
