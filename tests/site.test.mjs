@@ -147,6 +147,26 @@ test("all internal links, images, styles, and scripts resolve", async () => {
     assert.deepEqual(broken, []);
 });
 
+test("email addresses are absent from generated HTML", async () => {
+    const protectedAddresses = [["amandeepspdhr", "gmail.com"].join("@"), ["amandeepsp", "gmail.com"].join("@")];
+    const htmlFiles = (await filesUnder(DIST)).filter((file) => file.endsWith(".html"));
+
+    for (const file of htmlFiles) {
+        const html = await readFile(file, "utf8");
+        for (const address of protectedAddresses) {
+            assert.doesNotMatch(
+                html,
+                new RegExp(address, "i"),
+                `${path.relative(DIST, file)} exposes an email address`
+            );
+        }
+    }
+
+    const contactPage = await readFile(path.join(DIST, "contact-me", "index.html"), "utf8");
+    assert.match(contactPage, /data-contact-email/);
+    assert.doesNotMatch(contactPage, /href=["']mailto:/i);
+});
+
 test("published posts have canonical URLs and one deterministic social card", async () => {
     const cards = (await readdir(path.join(DIST, "og"))).filter((file) => file.endsWith(".png")).sort();
     assert.deepEqual(cards, PUBLISHED_IDS.map((id) => `${id}.png`).sort());

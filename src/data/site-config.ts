@@ -19,7 +19,6 @@ export type SiteConfig = {
     postsPerPage?: number;
     author: {
         name: string;
-        email: string;
     };
     lang: string;
     locale: string;
@@ -28,8 +27,7 @@ export type SiteConfig = {
 const siteConfig: SiteConfig = {
     title: "amandeep singh",
     author: {
-        name: "Amandeep Singh",
-        email: "amandeepspdhr@gmail.com"
+        name: "Amandeep Singh"
     },
     lang: "en",
     locale: "en_US",
@@ -70,7 +68,7 @@ const siteConfig: SiteConfig = {
         },
         {
             text: "Email",
-            href: "mailto:amandeepsp@gmail.com"
+            href: "/contact-me"
         },
         {
             text: "RSS",
