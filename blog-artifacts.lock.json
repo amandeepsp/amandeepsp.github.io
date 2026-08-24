@@ -1,16 +1,17 @@
 {
-    "outputs": {
-        "blog/high-dims/orthogonality.svg": "0a32122436a254de0eb395e496bec12294ae9cc3d8345d4b38a2902af11b4b58",
-        "blog/high-dims/volume.svg": "0eeabe5e61bc9fd0b610e99edde63284c768e131e1c4655b7681ee2d0310316c",
-        "blog/hnsw/alpha_sweep.svg": "076e86c63375b70b3c87d6ff06cdbddb5b9f8ae699014fd53b137084096f229c",
-        "blog/hnsw/delaunay_graph.svg": "33aa1e89f9f1b63625ea0969e4280677960b50f1d205eb08780a0a653ed57bd2",
-        "blog/hnsw/delaunay_walk.svg": "ea71b40663c7f883c15db0c8ad6868b33b6ace0c982db5992408b0a7958c3c8f",
-        "blog/hnsw/nsw_graph.svg": "320f12acfaa3967bd420106c13f403c25e2e4623f537a3f7d40570456de237c7",
-        "blog/hnsw/voronoi_diagram.svg": "1d9e6396885ac95bde75358f2804e53effca28115652d458726dab69819bcfbd",
-        "blog/layout-algebra/complement.svg": "bef81d7366bac9ec89f4a50f295eb8ed45e9f4efc89033201b9a0bbb78bbd12e",
-        "blog/layout-algebra/divide_1d.svg": "a4f138e0b13fdd30645b2b9597ac5515a209fea587f5979cf10722608fff49d6",
-        "blog/layout-algebra/divide_2d.svg": "94b866e2b97d549f7d9234ef14b71d5decc7ae044a03571858f261b1e5f05bee",
-        "blog/layout-algebra/swizzle.svg": "cc710639280a5ec677403f7ce6d06ed158b7315b70044ba1843eb72f2e5214ad",
-        "blog/power-of-2/heatmap.gif": "ed216b7b6167fc7b5e780c6370f31fcd69189d0d864ba4c48e7df237c8804501"
-    }
+  "outputs": {
+    "blog/high-dims/orthogonality.svg": "0a32122436a254de0eb395e496bec12294ae9cc3d8345d4b38a2902af11b4b58",
+    "blog/high-dims/volume.svg": "0eeabe5e61bc9fd0b610e99edde63284c768e131e1c4655b7681ee2d0310316c",
+    "blog/hnsw/alpha_sweep.svg": "076e86c63375b70b3c87d6ff06cdbddb5b9f8ae699014fd53b137084096f229c",
+    "blog/hnsw/delaunay_graph.svg": "33aa1e89f9f1b63625ea0969e4280677960b50f1d205eb08780a0a653ed57bd2",
+    "blog/hnsw/delaunay_walk.svg": "ea71b40663c7f883c15db0c8ad6868b33b6ace0c982db5992408b0a7958c3c8f",
+    "blog/hnsw/nsw_graph.svg": "320f12acfaa3967bd420106c13f403c25e2e4623f537a3f7d40570456de237c7",
+    "blog/hnsw/voronoi_diagram.svg": "1d9e6396885ac95bde75358f2804e53effca28115652d458726dab69819bcfbd",
+    "blog/layout-algebra/complement.svg": "bef81d7366bac9ec89f4a50f295eb8ed45e9f4efc89033201b9a0bbb78bbd12e",
+    "blog/layout-algebra/divide_1d.svg": "a4f138e0b13fdd30645b2b9597ac5515a209fea587f5979cf10722608fff49d6",
+    "blog/layout-algebra/divide_2d.svg": "94b866e2b97d549f7d9234ef14b71d5decc7ae044a03571858f261b1e5f05bee",
+    "blog/layout-algebra/swizzle.svg": "cc710639280a5ec677403f7ce6d06ed158b7315b70044ba1843eb72f2e5214ad",
+    "blog/power-of-2/heatmap.gif": "ed216b7b6167fc7b5e780c6370f31fcd69189d0d864ba4c48e7df237c8804501",
+    "blog/spec-decode/surprisal.svg": "823ee88d31df250836ffa7e2daf810ab0f9f0a870efdb7851cfaaaa19c92fd5e"
+  }
 }

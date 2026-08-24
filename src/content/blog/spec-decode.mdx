@@ -1,0 +1,59 @@
+---
+title: "You could have come up with Speculative Decoding"
+subTitle: ""
+publishDate: "Aug 20 2026"
+tags: [ml, inference]
+toc: false
+featured: false
+draft: true
+---
+
+import Figure from "@/components/Figure.astro";
+
+Speculative Decoding is a great example of how good systems understanding can lead to performance increases; in some case around 2-3x tokens/sec. It is kind of a perfect study since it involves knowing the entire inference stack from batch scheduling, hardware limitations to the model internals to make it work well.
+
+Lets dive into how you could have also come up Speculative Decoding. Whenever you think of optimization, you might imagine various axes of freedom the problem has e.g. to get a specific result you might be able to add more compute, this is a variable you could change; although the relation might not be linear, but the idea is there is a relation. Start with the boundary conditions for our problem; first, you might know that autoregressive decoding is
+  
+  1. Memory-bound, you can't just add more compute and expect better results[^1] and 
+
+  2. you have to generate the $n$-th token before you can generate the $n+1$-th token, or that decode is inherently sequential.
+
+Note that boundary conditions are just we have arbitrarily agreed here, they are soft conditions to simplify the systems model[^2]. Here is what I think our axes might be.
+
+  1. You could find a way to reduce what we load from memory, you would stop being memory limited and get closer to the memory/compute roofline. This is where ideas around various attention variants (MQA, GQA etc.), KV compression techniques, Paged / Radix attention lie.
+
+  2. Use more of the compute available, since assuming we anyways have to load from memory, might as well do more compute for that load.
+
+  3. Batch scheduling; when serving a model to a lot of users, we can schedule a number of these decode requests together to a) amortize the cost of loading the full model across all the requests[^3] and b) more efficiently use more of the available compute.
+
+In some techniques, the axes might be coupled e.g. with quantization we get a better FLOPs/bytes both due to higher FLOPS being possible on low bit data types and reduced memory movement due to small size.
+
+Another observation about natural language; which I think almost everybody would know; is that it has a lot of redundancies and easy repeatable patterns around grammar, repeated phrases and writing conventions. And we are spending full model's worth compute and memory to predict something that might locally be very easy to predict, lets take a side quest first to understand this more.
+
+## Side Quest I - Information Theory
+
+At each decode step, we sample $y_{i+1} \sim p(y \mid y_{\le i}, x)$, where $p$ is probability distribution the LLM models. We can measure how surprising a token was under the model using its _surprisal_,
+
+$$ S(y_{i+1}) = -\log_2 p(y_{i+1} \mid y_{\le i}, x) $$
+
+Higher the probability, less the surprise about the output and vice versa.  Here is a heatmap visualization of how the surprisal varies with as the sentence becomes syntactically richer.
+
+<Figure
+  src="/blog/spec-decode/surprisal.svg"
+  alt="Three increasingly elaborate variations of a sentence about pouring coffee, with each GPT-2 token shaded from low to high surprisal."
+>
+  <Fragment slot="caption">
+    Observed-token surprisal across three variations of the same scene, measured locally with <a href="https://huggingface.co/openai-community/gpt2-large">GPT-2 Large (774M parameters)</a>. Brighter red means the observed token received less probability from the model. Blocks follow the model's tokenization, so a word can span several blocks.
+  </Fragment>
+</Figure>
+
+It is very easy to see that a lot of language patterns are not very surprising to the model and us and we all but certian about the token. Note that the probability $p$ here is the probability assuming the $i+1$-th token is chosen, in actually model might have chosen another token. We have not conditioned on a prompt which is why surprisal is high in the starting of the sentence.
+
+
+
+
+[^1]: 
+
+[^2]: You can actually say that you would change the model architecture to do parallel decode in turn increasing the arithmetic intensity of decode operation.
+
+[^3]: Still might be bound by the amount of KV cache size / token since we still have to load it for each request in a batch.
