@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+step() {
+    local label="$1"
+    shift
+    printf '\n==> %s\n' "$label"
+    time "$@"
+}
+
+step "Checking the Node.js toolchain" node -e '
+const [major, minor] = process.versions.node.split(".").map(Number);
+if (major < 22 || (major === 22 && minor < 12)) {
+    console.error(`Node.js >=22.12.0 is required; found ${process.version}`);
+    process.exit(1);
+}
+console.log(`Node.js ${process.version}`);
+'
+step "Checking npm" npm --version
+step "Installing locked dependencies" npm ci --no-audit --no-fund
+
+if [[ ! -f .env ]]; then
+    step "Creating .env from .env.example" cp -- .env.example .env
+fi
+
+printf '\nOrb setup complete.\n'

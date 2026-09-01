@@ -9,6 +9,8 @@ node_modules/
 # logs
 npm-debug.log*
 
+# Amp orb runtime files
+.amp/portals/*
 
 # environment variables
 .env
