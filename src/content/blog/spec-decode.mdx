@@ -9,6 +9,8 @@ draft: true
 ---
 
 import Figure from "@/components/Figure.astro";
+import TypstFigure from "@/components/TypstFigure.astro";
+import VerificationDiagram from "@/diagrams/spec-decode/verification.svg.typ";
 
 Speculative Decoding is a great example of how good systems understanding can lead to performance increases; in some case around 2-3x tokens/sec. It is kind of a perfect study since it involves knowing the entire inference stack from batch scheduling, hardware limitations to the model internals to make it work well.
 
@@ -48,6 +50,32 @@ Higher the probability, less the surprise about the output and vice versa.  Here
 </Figure>
 
 It is very easy to see that a lot of language patterns are not very surprising to the model and us and we all but certian about the token. Note that the probability $p$ here is the probability assuming the $i+1$-th token is chosen, in actually model might have chosen another token. We have not conditioned on a prompt which is why surprisal is high in the starting of the sentence.
+
+## Draft, then verify
+
+Suppose a smaller model proposes `sat`, `on`, and `mat` after the context `The cat`. These are the **draft tokens**: provisional guesses which have not been returned to the user yet.
+
+<TypstFigure
+  alt="A draft model proposes sat, on, and mat after The cat. One target-model forward pass accepts sat and on, rejects mat in favor of the, and commits sat on the."
+  minWidth="42rem"
+  src={VerificationDiagram}
+>
+  <Fragment slot="caption">
+    A causal forward pass produces the target model's distribution at every draft position. Verification remains valid from left to right only while the preceding draft tokens are accepted.
+  </Fragment>
+</TypstFigure>
+
+The target model does not compute only $p(y \mid \text{context}, \text{all draft tokens})$. Its output at every sequence position is shifted by one token, so this single forward pass gives us
+
+$$
+\begin{aligned}
+p_1(y \mid \text{The cat}) &\\
+p_2(y \mid \text{The cat sat}) &\\
+p_3(y \mid \text{The cat sat on}).
+\end{aligned}
+$$
+
+These are the same distributions ordinary decoding would calculate in three sequential target-model calls, provided we stop at the first rejected draft token. In this example, `sat` and `on` become part of the real prefix, the target model replaces `mat` with `the`, and verification starts again from `The cat sat on the`.
 
 
 

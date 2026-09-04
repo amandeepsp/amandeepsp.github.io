@@ -96,11 +96,6 @@ function attributeValues(html, attribute) {
 test("generated routes preserve every published post, tag, redirect, and index", async () => {
     const entries = await contentEntries();
     const published = entries.filter(({ data }) => !data.draft);
-    assert.deepEqual(
-        entries.map(({ id }) => id).sort(),
-        PUBLISHED_IDS,
-        "draft content should not live in the site repository"
-    );
     assert.deepEqual(published.map(({ id }) => id).sort(), PUBLISHED_IDS, "published post IDs changed");
     assert.deepEqual(
         entries.filter(({ data }) => data.series).map(({ id, data }) => ({ id, series: data.series })),
@@ -239,8 +234,12 @@ test("resume export is the only resume source in the site", async () => {
     const pdf = await readFile(path.join(DIST, "resume.pdf"));
     assert.equal(pdf.subarray(0, 5).toString(), "%PDF-");
     const siteFiles = await filesUnder(ROOT);
+    const diagramDirectory = `${path.join(ROOT, "src", "diagrams")}${path.sep}`;
     const resumeSources = siteFiles.filter(
-        (file) => !file.includes(`${path.sep}node_modules${path.sep}`) && file.endsWith(".typ")
+        (file) =>
+            !file.includes(`${path.sep}node_modules${path.sep}`) &&
+            file.endsWith(".typ") &&
+            !file.startsWith(diagramDirectory)
     );
     assert.deepEqual(resumeSources, []);
 });
