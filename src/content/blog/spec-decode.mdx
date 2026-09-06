@@ -1,59 +1,453 @@
 ---
-title: "You could have come up with Speculative Decoding"
-subTitle: ""
-publishDate: "Aug 20 2026"
-tags: [ml, inference]
-toc: false
-featured: false
-draft: true
+title: "You Could Have Come Up with Speculative Decoding"
+subTitle: "Building up speculative decoding from first principles"
+publishDate: "Sep 7 2026"
+tags: [ml, inference, systems-programming]
+seo:
+  description: "Learn how speculative decoding accelerates LLM inference through predictable tokens, rejection sampling, parallel verification, and GPU roofline analysis."
+toc: true
+featured: true
+draft: false
 ---
 
 import Figure from "@/components/Figure.astro";
 
-Speculative Decoding is a great example of how good systems understanding can lead to performance increases; in some case around 2-3x tokens/sec. It is kind of a perfect study since it involves knowing the entire inference stack from batch scheduling, hardware limitations to the model internals to make it work well.
+Speculative Decoding is a great example of how good systems understanding can lead to performance increases; in some case around 2-3x decode throughput.[^original] It is kind of a perfect study since it involves knowing the entire inference stack from batch scheduling, hardware limitations to the model internals to make it work well.
+
+## Starting with the Constraints
 
 Lets dive into how you could have also come up Speculative Decoding. Whenever you think of optimization, you might imagine various axes of freedom the problem has e.g. to get a specific result you might be able to add more compute, this is a variable you could change; although the relation might not be linear, but the idea is there is a relation. Start with the boundary conditions for our problem; first, you might know that autoregressive decoding is
-  
-  1. Memory-bound, you can't just add more compute and expect better results[^1] and 
+
+  1. Memory-bound, you can't just add more compute and expect better results[^decode-memory-bound] and
 
   2. you have to generate the $n$-th token before you can generate the $n+1$-th token, or that decode is inherently sequential.
 
-Note that boundary conditions are just we have arbitrarily agreed here, they are soft conditions to simplify the systems model[^2]. Here is what I think our axes might be.
+Note that boundary conditions are just arbitrary here, they are soft conditions to simplify the systems model[^boundary-condition-caveat]. Here is what I think our axes might be.
 
-  1. You could find a way to reduce what we load from memory, you would stop being memory limited and get closer to the memory/compute roofline. This is where ideas around various attention variants (MQA, GQA etc.), KV compression techniques, Paged / Radix attention lie.
+  1. You could find a way to reduce what is loaded from memory, you would stop being memory limited and get closer to the memory/compute roofline. This is where ideas around various attention variants (MQA, GQA etc.), KV compression techniques, Paged / Radix attention lie.[^memory-techniques]
 
-  2. Use more of the compute available, since assuming we anyways have to load from memory, might as well do more compute for that load.
+  2. Use more of the compute available, since anyways the model needs to be loaded from memory, might as well do more compute for that load.
 
-  3. Batch scheduling; when serving a model to a lot of users, we can schedule a number of these decode requests together to a) amortize the cost of loading the full model across all the requests[^3] and b) more efficiently use more of the available compute.
+  3. Batch scheduling; when serving a model to a lot of users, you can schedule a number of these decode requests together to a) amortize the cost of loading the full model across all the requests[^kv-batch-caveat] and b) more efficiently use more of the available compute.
 
-In some techniques, the axes might be coupled e.g. with quantization we get a better FLOPs/bytes both due to higher FLOPS being possible on low bit data types and reduced memory movement due to small size.
+In some techniques, the axes might be coupled e.g. with quantization you get a better FLOPs/bytes both due to higher FLOPS being possible on low bit data types and reduced memory movement due to small size.
 
-Another observation about natural language; which I think almost everybody would know; is that it has a lot of redundancies and easy repeatable patterns around grammar, repeated phrases and writing conventions. And we are spending full model's worth compute and memory to predict something that might locally be very easy to predict, lets take a side quest first to understand this more.
+### Not Every Token is Equal
 
-## Side Quest I - Information Theory
+Another observation about natural language; which I think almost everybody would know; is that it has a lot of redundancies and easy repeatable patterns around grammar, repeated phrases and writing conventions.[^shannon] And you are spending full model's worth compute and memory to predict something that might locally be very easy to predict, lets take a side quest first to understand this more.
 
-At each decode step, we sample $y_{i+1} \sim p(y \mid y_{\le i}, x)$, where $p$ is probability distribution the LLM models. We can measure how surprising a token was under the model using its _surprisal_,
+At each decode step, the model has a next token distribution $p$ sample from
 
-$$ S(y_{i+1}) = -\log_2 p(y_{i+1} \mid y_{\le i}, x) $$
+$$
+Y_{i+1} \sim p( \cdot \mid c_i), c_i = (y_{\le i}, x)
+$$
 
-Higher the probability, less the surprise about the output and vice versa.  Here is a heatmap visualization of how the surprisal varies with as the sentence becomes syntactically richer.
+Here Information Theory gives a way to quantify how predictable this next token is. For the realized token $y_{i+1}$, define its _information content_, under the model as
+
+$$
+h_p (y_{i+1} \mid c_i) = - \log_2 p(y_{i+1} \mid c_i)
+$$
+
+Higher the probability, lesser the new information the token carries and vice versa. Here is a heatmap visualization of how the information content varies with as the sentence becomes syntactically richer.
 
 <Figure
   src="/blog/spec-decode/surprisal.svg"
   alt="Three increasingly elaborate variations of a sentence about pouring coffee, with each GPT-2 token shaded from low to high surprisal."
 >
   <Fragment slot="caption">
-    Observed-token surprisal across three variations of the same scene, measured locally with <a href="https://huggingface.co/openai-community/gpt2-large">GPT-2 Large (774M parameters)</a>. Brighter red means the observed token received less probability from the model. Blocks follow the model's tokenization, so a word can span several blocks.
+    Observed-token information content across three variations of the same scene, measured locally with <a href="https://huggingface.co/openai-community/gpt2-large">GPT-2 Large (774M parameters)</a>. Brighter red means the observed token received less probability from the model. Blocks follow the model's tokenization, so a word can span several blocks.
   </Fragment>
 </Figure>
 
-It is very easy to see that a lot of language patterns are not very surprising to the model and us and we all but certian about the token. Note that the probability $p$ here is the probability assuming the $i+1$-th token is chosen, in actually model might have chosen another token. We have not conditioned on a prompt which is why surprisal is high in the starting of the sentence.
+But the amount of information is know only after a token is sampled from the distribution. To gauge the a sense of the next token information without selecting a token, you would think about aggregate metrics like what would be the expected information value under $p$. This is the _conditional entropy_ of the token
+
+$$
+H_p (Y_{i+1} \mid c_i) = - \displaystyle\sum_{y \in V} {p (y \mid c_i) \log_2 p (y \mid c_i)}
+$$
+
+Entropy therefore measures how uncertian is the model about its own outcomes. An entropy of $H$ bits corresponds very loosely to a choice among $2^H$ equally likely choices. Although the full vocabulary may have a lot many tokens, at many positions grammar, repitition, formatting and semantic context reduces a lot choices.
+
+### Guessing is Enough?
+
+This observation suggests another systems opportunity. If a lot of next-token distributions have low entropy, perhaps you don't need the full large model to predict every token. Remember that decode is memory-bound and has some unused compute capacity.
+
+A cheap proposal mechanism[^proposal-mechanisms] could predict the easy patterns in natural language and manufacture a provisional block of $k$ future tokens, $\hat{y}_{i+1}, \hat{y}_{i+2}, ..., \hat{y}_{i+k}$. It could be a smaller autoregressive model, a parallel prediction model, an n-gram lookup, or a continuation copied from the existing context. Its purpose is to provide the future tokens needed to expose parallel work for the large model. For example, say "The cat" is $c_i$ and the proposed next tokens are "sat on a mat" ($\hat{y}$s).
+
+Now these proposals might be totally wrong. How do you verify them cheaply? First, simply run a causally masked forward pass on the $\hat{y}$ sequence and get distributions from the large model conditioned on the preceding draft prefix. These are calculated at a better arithmetic intensity than vanilla decode. Assuming you are using greedy decoding[^greedy-assumption], you would get
+
+$$
+\begin{aligned}
+y_{i+1} &= \operatorname*{arg\,max}_y p(\,\cdot \mid c_i) \\
+y_{i+2} &= \operatorname*{arg\,max}_y p(\,\cdot \mid c_i, \hat{y}_{i+1}) \\
+y_{i+3} &= \operatorname*{arg\,max}_y p(\,\cdot \mid c_i, \hat{y}_{i+1}, \hat{y}_{i+2}) \\
+&\vdots \\
+y_{i+k+1}  &= \operatorname*{arg\,max}_y p(\,\cdot \mid c_i, \hat{y}_{i+1}, \hat{y}_{i+2}, \dots, \hat{y}_{i+k})
+\end{aligned}
+$$
+
+What do you do with these? Notice how you can verify the entire sequence using this forward pass by comparing $y$s and $\hat{y}$s. If they match the draft prediction, keep the token; at the first mismatch, emit the large model's token and drop the remaining draft tokens. The expectation is that more often than not a good chunk of the draft sequence will match. In the example above, say verification gives "sat", "on", "the" while the draft proposed "sat on a mat". The first two tokens match and are kept, "the" is emitted from the large model, and "a mat" is dropped because it was conditioned on a token that was not accepted.
+
+If all $k$ proposals are accepted, the final distribution computed by the same forward pass,
+
+$$
+p(\cdot \mid c_i, \hat y_{i+1}, \ldots, \hat y_{i+k}),
+$$
+
+provides one additional target token. A successful round can therefore produce $k+1$ tokens even though the proposer supplied only $k$. This greedy construction is closely related to earlier work on blockwise parallel decoding.[^blockwise]
+
+## Preservation of Target Distributon
+
+But greedy decoding is just a special case. It removes diversity from the output and can produce repetitive, degenerate continuations. Real deployments use temperature, top-k, or top-p sampling[^sampling-transforms]. If speculative decoding is only a systems-level optimization, it should not change the target model's sampling distribution.
+
+Suppose the proposer samples a token $\hat{y}$ from a distribution $q$, while $p$ is the target model's distribution. Here $p$ and $q$ mean the final distributions after applying temperature and any top-k or top-p transformation, not necessarily the raw softmax distributions. Instead of comparing single tokens, ask how you can retain the proposed token from $q$ without changing its frequency under $p$. Imagine running the sampling step many times, where the proposer outputs $y$ with probability $q(y)$ and the target model wants it to appear with probability $p(y)$. If $q(y) \le p(y)$, every proposal of $y$ can be accepted since the draft does not propose $y$ more frequently than the target permits. If $q(y) > p(y)$, accepting every proposal would overindex it. Retain only the fraction $\frac{p(y)}{q(y)}$ of these proposals[^modified-rejection-sampling]. Combining these cases, draft tokens are accepted with probability
+
+$$
+a(\hat y) = \min\left(1,\frac{p(\hat y)}{q(\hat y)}\right)
+$$
+
+To turn this acceptance probability into a yes/no decision, sample $u\sim U(0,1)$ and accept when
+
+$$
+u \le a(\hat y).
+$$
+
+This works because, for any $a\in[0,1]$, the fraction of the unit interval below $a$ is exactly $a$:
+
+$$
+\Pr_{u\sim U(0,1)}(u\le a)=a.
+$$
+
+The uniform draw therefore gives us a Bernoulli event with exactly the acceptance probability required above. This accepts as much of the draft distribution as possible without assigning any token more probability than the target model does. The accepted tokens have the probability mass
+
+$$
+q(y)a(y) = \min\left(q(y), p(y)\right)
+$$
+
+This is not yet all of $p$. The target probability still missing for token $y$ is
+
+$$
+p(y) - \min\left(p(y), q(y)\right) = \max\left(0, p(y) - q(y)\right)
+$$
+
+This implies that when a proposal is rejected, a replacement can be sampled from the remaining normalized mass.
+
+$$
+p_{\text{res}}(y) = \frac{\max(0, p(y) - q(y))}{\sum_z \max(0, p(z) - q(z))}
+$$
+
+With this, the final token has the same distribution as a token sampled directly from the large model. To know how often this succeeds, take the expected acceptance
+
+$$
+\begin{aligned}
+\beta &= \mathbb{E}_{y \sim q} [a(\hat{y})] \\
+&= \sum_y q(y)a(y) \\
+&= \sum_y q(y)\min\left(1,\frac{p(y)}{q(y)}\right) \\
+&=\sum_y\min(p(y),q(y)).
+\end{aligned}
+$$
+
+Since $\min(p(y),q(y))=\frac{p(y)+q(y)-|p(y)-q(y)|}{2}$
+
+$$
+\begin{aligned}
+\beta &=1-\frac12\sum_y|p(y)-q(y)|\\
+&=1-\operatorname{TV}(p,q),
+\end{aligned}
+$$
+
+Here $\operatorname{TV}(p,q)=\frac12\sum_y|p(y)-q(y)|$ is the total variation distance[^tv] between the draft and target distributions. This has a very meaningful implication. The shared probability mass is accepted, while the non-overlapping mass is rejected and corrected. So
+
+$$
+\Pr(\text{accept})=1-\operatorname{TV}(p,q),
+\qquad
+\Pr(\text{reject})=\operatorname{TV}(p,q).
+$$
+
+Note that greedy decoding is a special case for this where $p$ collapses to
+
+$$
+\text{For } g = \operatorname*{arg\,max}_y p(y \mid c) \\
+p'(y) = \begin{cases}
+1 & \text{if } y = g \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+A matching draft token is accepted with probability one, while every other token is rejected. Low target entropy created the opportunity for cheap prediction; total variation tells us whether the proposer actually captured it.
 
 
 
+## When is it Actually Faster?
 
-[^1]: 
+Lets refocus on performance. Every speculative decoding round produces at least one token, either a correction at first rejection or an additional target token when every proposal is accepted. Say $A_j$ is the event that the first $j$ draft tokens are accepted, and let $Z$ be the number of tokens produced by the round. Then
 
-[^2]: You can actually say that you would change the model architecture to do parallel decode in turn increasing the arithmetic intensity of decode operation.
+$$
+G = \mathbb{E}[Z] = 1 + \sum_{j=1}^{k}\Pr(A_j).
+$$
 
-[^3]: Still might be bound by the amount of KV cache size / token since we still have to load it for each request in a batch.
+The initial $1$ is the token that the target pass always produces. Each additional term is another draft token that survives verification. As a simplification, assume independent events with average probability $\beta$; then $\Pr(A_j)=\beta^j$. This gives
+
+$$
+\begin{aligned}
+G = \mathbb{E}[Z] &= 1 + \beta + \beta^2 + \cdots + \beta^k \\
+&= \frac{1-\beta^{k+1}}{1-\beta}.
+\end{aligned}
+$$
+
+Do a sanity check: $\beta=0$ implies just one token and speculation gives us nothing, while as $\beta\to1$ the round produces close to $k+1$ tokens. Increasing $k$ also has diminishing effect on $G$: as $k\to\infty$, $G$ approaches $1/(1-\beta)$. For $\beta=0.7$, this means a round produces at most $3.33$ tokens on average under this approximation. For example, with $k=4$, $W=5$, and $\beta=0.7$,
+
+$$
+G = 1 + 0.7 + 0.7^2 + 0.7^3 + 0.7^4 \approx 2.77.
+$$
+
+<Figure
+  src="/blog/spec-decode/expected_tokens.svg"
+  alt="Expected useful tokens per speculative round as a function of the assumed independent acceptance probability for several draft lengths."
+>
+  <Fragment slot="caption">
+    Expected output under the independent, constant-acceptance approximation. The exact expression is $G=1+\sum_{j=1}^k \Pr(A_j)$ because acceptance varies across positions and contexts.
+  </Fragment>
+</Figure>
+
+
+### Roofline Analysis and Critical Batch Sizes
+
+Number of tokens per pass itself is not the speedup. Lets do a roofline analysis. Lets define some terms
+
+|   |   |
+|---|---|
+| $B$ | Batch Size |
+| $N$ | # of target model parameters |
+| $s$ | Number of bytes per weight |
+| $F$ | Peak FLOP/s of the accelerator |
+| $M$ | Memory Bandwidth of the accelerator |
+| $W$ | Target-equivalent positions evaluated during verification (approximately $k+1$) |
+| $L$ | Context length |
+| $\kappa(L)$ | Existing KV-cache bytes read per sequence per decode step |
+| $c(L)$ | Compute FLOPs per token |
+| $T_p(B, L)$ | Latency of one target decode step |
+| $T_v(B, W, L)$ | Latency for target verification over k proposals |
+| $T_d(B, W, L)$ | Latency of producing the draft |
+
+Now lets build out the $T_p$ and $T_v$ values
+
+$$
+T_p(B, L) = \max\left(T_p^{mem}, T_p^{compute}\right)
+= \max\left( \frac{sN + B\kappa(L)}{M}, \frac{Bc(L)}{F} \right)
+$$
+
+The critical batch size where decode becomes compute bound $B_p^*$ is when
+
+$$
+\frac{B_p^* c(L)}{F} = \frac{sN + B_p^* \kappa(L)}{M} \implies B_p^* = \frac{FsN}{Mc(L) - F\kappa(L)}
+$$
+
+$F/M$ is a constant and substituing $\rho = F/M$
+
+$$
+B_p^* = \frac{\rho sN}{c(L) - \rho\kappa(L)}
+$$
+
+Similarly for $T_v$, same amount of memory is transferred but $W$ times more compute is done to verify the drafts
+
+$$
+T_v(B, W, L) = \max\left( \frac{sN + B\kappa(L)}{M}, \frac{WBc(L)}{F} \right)
+$$
+
+and consequently its easy to derive that the critical batch $B_v^*$ is
+
+$$
+B_v^* = \frac{\rho sN}{Wc(L) - \rho\kappa(L)}
+$$
+
+For short context the KV cache traffic $\kappa(L) \to 0$ which means.
+
+$$
+\begin{aligned}
+\frac{B_p^*}{B_v^*} &= \frac{Wc(L) - \rho\kappa(L)}{c(L) - \rho\kappa(L)} \\[1em]
+\frac{B_p^*}{B_v^*} &\approx W
+\end{aligned}
+$$
+
+This means verification becomes compute-bound much earlier than ordinary decoding, confirming that block verification has higher arithmetic intensity. For longer contexts, where $\kappa(L) > 0$, the ratio $B_p^*/B_v^*$ grows as $L$ grows. Under our assumption that verification reuses the existing KV cache across the draft block, this makes verification relatively more attractive.
+
+But $B_v^*$ is only where verification becomes compute-bound; this is not the break-even point where speculative decoding becomes helpful. Using $G=\mathbb{E}[Z]$ from above, speedup for short contexts can be defined as
+
+$$
+\begin{aligned}
+S &= \frac{G \cdot T_p}{T_d + T_v} \\
+&= \frac{G \cdot \max(T_{mem}, 2BN / F)}{T_d + \max(T_{mem}, 2BNW/F)}
+\qquad \text{extracting } T_{mem} \\
+&= \frac{G \cdot \max(1, B / B_p^*)}{\delta + \max(1, B / B_v^*)}
+\qquad \text{where } \delta = T_d / T_{mem}
+\end{aligned}
+$$
+
+Here $T_d$ and therefore $\delta$ can generally depend on batch size. To keep the roofline model piecewise and closed-form, assume fixed $W$ and $L$, and that $\delta$ is approximately constant over the batch range being analyzed. If the drafter has its own memory-to-compute transition, the same speedup equation still applies, but the break-even point must be solved using the measured $T_d(B,W,L)$.
+
+Under this approximation, you might see three regimes coming out of this.
+| Regime | Batch | Decode | Verification | Speedup |
+|--------|-------|--------|--------------|---------|
+| I | $ B < B_v^* $ | Memory-Bound | Memory-Bound | $\frac{G}{1 + \delta}$ (constant) |
+| II | $ B_v^* \le B < B_p^* $ | Memory-Bound | Compute-Bound | $\frac{G}{B/B_v^* + \delta}$ (monotonic $\downarrow$) |
+| III | $ B \ge B_p^* $ | Compute-Bound | Compute-Bound | $\to G/W$ |
+
+<Figure
+  src="/blog/spec-decode/batch_ridges.svg"
+  alt="Idealized speculative decoding speedup versus batch size, showing verification, break-even, and ordinary decode ridges."
+>
+  <Fragment slot="caption">
+    Idealized short-context roofline for $W=5$, $\beta=0.7$, $G=2.77$, and total normalized draft latency $\delta=0.15$. These are analytical ridges, not calibrated hardware measurements.
+  </Fragment>
+</Figure>
+
+Under the same constant-$\delta$ approximation, a break even batch size can also be calculated in regime II.
+$$
+\boxed{B_{\mathrm{SD}}^* = (G-\delta)B_v^* = \frac{G-\delta}{W}B_p^*}.
+$$
+
+Above $B_{\mathrm{SD}}^*$ speculation is slower even though target-model decoding might still be memory-bound. Above $B_p^*$ both paths are compute-bound and the speedup approaches $G/W \le 1$.[^batching]
+
+### Long-Context effects
+
+The result above assumed $\kappa(L) \to 0$, if you don't assume this, the general speedup is
+
+$$
+S = \frac{G \cdot \max\left(\frac{sN+B\kappa(L)}{M}, \frac{Bc(L)}{F}\right)}
+{T_d + \max\left(\frac{sN+B\kappa(L)}{M}, \frac{WBc(L)}{F}\right)}
+$$
+
+Again in regime II, set $ S = 1 $.
+
+$$
+B_{\mathrm{SD}}^*(L)
+=
+\frac{G\rho sN-\rho M T_d}
+{Wc(L)-G\rho\kappa(L)}
+$$
+
+If draft latency is written as $T_d=\delta \cdot (sN / M)$, this becomes
+
+$$
+\boxed{
+B_{\mathrm{SD}}^*(L)
+=
+\frac{(G-\delta)\rho sN}
+{Wc(L)-G\rho\kappa(L)}
+}.
+$$
+
+When KV traffic grows faster than the comparatively small attention contribution to $c(L)$, this break-even batch moves outward: ordinary decoding pays more KV bandwidth per generated token, while verification amortizes the same cache read across several speculative positions. Long context can therefore make speculative decoding useful over a wider range of batch sizes.[^magic]
+
+This conclusion depends on KV reuse. More generally, verification reads $\kappa_W(L)$ bytes per sequence, where
+
+$$
+\kappa(L) \lesssim \kappa_W(L) \lesssim W\kappa(L).
+$$
+
+The lower end represents effective block-level reuse; the upper end represents reading nearly the same cache traffic for every speculative position. If $\kappa_W(L)$ approaches $W\kappa(L)$, much of the long-context advantage disappears. The actual break-even point and speedup must be measured for the specific attention kernel, KV layout, and serving configuration in use.
+
+<Figure
+  src="/blog/spec-decode/long_context_ridges.svg"
+  alt="Analytical decode, verification, and speculative break-even batch ridges as normalized KV-cache pressure increases."
+>
+  <Fragment slot="caption">
+    Long context can move the useful batch range outward when block verification reuses the existing KV cache. This analytical curve assumes one effective KV-cache read per block; it is not generic to every attention implementation.
+  </Fragment>
+</Figure>
+
+
+### Choosing drafting width
+
+Another interesting question to ask is: What is the optimal $W$? A wider draft exposes more parallel target work, but later proposals are useful only when every proposal before them survives. At the same time, both drafting and verification generally become more expensive. Intuition would say that small width is bad since you are not doing enough work, while large $W$ is also bad since $G$ saturates very quickly. There should be a middle ground. Simply, the optimal $W^*$ would be
+
+$$
+\begin{aligned}
+W^* &= \operatorname*{arg\,max}_W S \\
+&= \operatorname*{arg\,max}_W \frac{G(W)}{T_d(W) + T_v(W)} \qquad T_p \text{ doesn't depend on } W.
+\end{aligned}
+$$
+
+Let $T(W)=T_d(W)+T_v(W)$. Adding one more speculative position is useful while
+
+$$
+\frac{\Delta G(W)}{G(W)} > \frac{\Delta T(W)}{T(W)}.
+$$
+
+At the crossover the two sides are equal. This isn't easy to solve analytically, but there are insights that can be extracted from it. Since $W=k+1$,
+
+$$
+G(W) = 1 + \beta + \beta^2 + \cdots + \beta^{W-1},
+$$
+
+and therefore
+
+$$
+G(W+1)-G(W)=\Delta G(W)=\beta^W.
+$$
+
+This means the benefit of adding new tokens drops exponentially ($\beta\le1$). On the other hand, $T$ is expected to increase as $W$ grows, with $T_v$ eventually growing linearly once verification becomes compute-bound and $T_d$ depending on the proposal mechanism. The optimal width is controlled by both an **algorithmic limit**, where prefix-survival probability becomes too small, and a **hardware limit**, where verification consumes the remaining compute capacity. In practice the algorithmic limit usually arrives first, which is why useful draft widths remain in the single digits even when an ideal roofline suggests capacity for hundreds of positions[^WRidge]. This also suggests that $W$ should not necessarily be fixed. A serving system can draft farther when the proposer is confident and stop early when the estimated survival probability of the next token no longer repays its marginal cost.[^dynamic-lookahead]
+
+<Figure
+  src="/blog/spec-decode/optimal_width.svg"
+  alt="Idealized speculative decoding speedup and useful-work efficiency as verification width increases for several acceptance rates."
+>
+  <Fragment slot="caption">
+    Idealized optimal width with memory-bound verification, independent acceptance, and per-proposal draft cost $d=0.05$. The practical optimum depends on measured draft and verification latency.
+  </Fragment>
+</Figure>
+
+### Optimization Design Space
+
+Lets sum up the design space that follows directly from the speedup equation:
+
+- $\uparrow G$: better drafts.
+- $\downarrow T_d$: faster proposal mechanisms, n-grams, prompt lookups, retrieval, etc.
+- $\uparrow G/T_v$: adaptive $W$, trees, and dynamic speculation that increase useful output per unit of verification time.[^trees]
+- $\downarrow T_v$ at fixed $G$: better block kernels and KV reuse.
+- Specialize the drafting and verification stages: disaggregated drafting.
+
+Trees and wider candidate sets can increase both $G$ and $T_v$, so $G/T_v$ is the relevant verifier-efficiency ratio rather than $T_v$ alone. End to end, the objective is still $G/(T_d+T_v)$.
+
+The last axis can even become a hardware topology. NVIDIA describes an external-drafter configuration where Groq 3 LPX runs the draft model and Vera Rubin NVL72 verifies and commits tokens.[^rubin] Each side maintains its own KV cache, while only proposed tokens and rejected positions cross the link. This is the same algorithmic decomposition expressed physically: one system manufactures future tokens and another verifies them.
+
+I think this should be enough of an introduction to speculative decoding to convince you that it is not just some weird trick that came out of non-obvious concepts. It is a systems technique for converting predictable future work into concurrency while preserving the original decoder distribution.
+
+
+
+[^original]: The two foundational works are [Leviathan, Kalman, and Matias, *Fast Inference from Transformers via Speculative Decoding*](https://arxiv.org/abs/2211.17192) and [Chen et al., *Accelerating Large Language Model Decoding with Speculative Sampling*](https://arxiv.org/abs/2302.01318). They independently report roughly $2$–$3\\times$ latency improvements while preserving the target distribution.
+
+[^memory-techniques]: See [Shazeer, *Fast Transformer Decoding: One Write-Head is All You Need*](https://arxiv.org/abs/1911.02150) for multi-query attention, [vLLM](https://arxiv.org/abs/2309.06180) for PagedAttention, and [SGLang](https://arxiv.org/abs/2312.07104) for RadixAttention.
+
+[^shannon]: Shannon's [*Prediction and Entropy of Printed English*](https://doi.org/10.1002/j.1538-7305.1951.tb01366.x) is the classic information-theoretic study of redundancy and predictability in natural language.
+
+[^blockwise]: [Stern, Shazeer, and Uszkoreit, *Blockwise Parallel Decoding for Deep Autoregressive Models*](https://arxiv.org/abs/1811.03115) developed this idea for greedy decoding before lossless speculative sampling generalized it to stochastic decoding.
+
+[^batching]: The interaction with batch size is studied theoretically and empirically in [*The Synergy of Speculative Decoding and Batching*](https://arxiv.org/abs/2310.18813), the IBM production study [*Accelerating Production LLMs with Combined Token/Embedding Speculators*](https://arxiv.org/abs/2404.19124), and the production-grade vLLM evaluation [*Speculative Decoding: Performance or Illusion?*](https://arxiv.org/abs/2601.11580).
+
+[^dynamic-lookahead]: [*Dynamic Speculation Lookahead Accelerates Speculative Decoding of Large Language Models*](https://arxiv.org/abs/2405.04304) shows that a fixed lookahead is generally suboptimal and reports improvements from selecting it dynamically.
+
+[^trees]: Tree verification explores several candidate futures instead of one chain. See [SpecInfer](https://arxiv.org/abs/2305.09781) and [Sequoia](https://arxiv.org/abs/2402.12374).
+
+
+[^decode-memory-bound]: At low token batches, autoregressive decoding is commonly dominated by parameter and KV-cache movement rather than arithmetic. See [Pope et al., *Efficiently Scaling Transformer Inference*](https://arxiv.org/abs/2211.05102) and [Chen et al., *Accelerating Large Language Model Decoding with Speculative Sampling*](https://arxiv.org/abs/2302.01318).
+
+[^boundary-condition-caveat]: You can actually say that you would change the model architecture to do parallel decode, in turn increasing the arithmetic intensity of the decode operation.
+
+[^kv-batch-caveat]: You might still be bound by KV-cache bytes per token since they must be loaded separately for each request in the batch.
+
+[^proposal-mechanisms]: The proposer need not be a smaller Transformer. Examples include additional prediction heads such as [Medusa](https://arxiv.org/abs/2401.10774), [EAGLE](https://arxiv.org/abs/2401.15077), and [EAGLE-2](https://arxiv.org/abs/2406.16858); aligned draft models such as [DistillSpec](https://arxiv.org/abs/2310.08461); reference-based copying such as [LLMA](https://arxiv.org/abs/2304.04487); and retrieval-based proposals such as [REST](https://arxiv.org/abs/2311.08252).
+
+[^sampling-transforms]: Temperature, top-k, and top-p can all be viewed as transformations that produce the final distribution from which a token is sampled. Speculative sampling must preserve this transformed target distribution.
+
+[^greedy-assumption]: For this first intuition, both the proposer and target use greedy decoding.
+
+[^modified-rejection-sampling]: This resembles rejection sampling, but standard rejection sampling uses a global envelope $M$ and repeatedly samples from $q$, accepting with probability $p(y)/(Mq(y))$. Speculative sampling instead accepts the maximal shared mass $\min(p,q)$ and, on rejection, samples once from the residual target mass $\max(0,p-q)$. This is why [Chen et al.](https://arxiv.org/abs/2302.01318) call it **modified rejection sampling**.
+
+[^tv]: This is the acceptance-rate identity in [Leviathan et al., Theorem 3.5](https://arxiv.org/abs/2211.17192).
+
+[^magic]: [MagicDec](https://arxiv.org/abs/2408.11049) analyzes and measures this long-context regime, showing that KV-cache bandwidth can make speculative decoding useful again at large batches when verification and decode share a similar KV-loading budget. [TriForce](https://arxiv.org/abs/2404.11912) similarly uses hierarchical speculation and compressed KV caches for long-sequence generation.
+
+[^WRidge]: At $B=1$, an ideal H100 BF16 roofline gives $\rho=F/M\approx295$ FLOP/byte and, for short context with $c(L)\approx2N$ and $s=2$, $W_{\mathrm{ridge}}\approx\rho s/2\approx295$. This is a theoretical hardware ridge, not a useful draft width.
+
+[^rubin]: NVIDIA, [*How NVIDIA Groq 3 LPX Unlocks Ultrafast Interactivity at Long Context on NVIDIA Vera Rubin*](https://developer.nvidia.com/blog/how-nvidia-groq-3-lpx-unlocks-ultrafast-interactivity-at-long-context-on-nvidia-vera-rubin/). NVIDIA calls this configuration **external-drafter speculative decoding**.

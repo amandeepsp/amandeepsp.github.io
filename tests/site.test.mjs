@@ -18,7 +18,8 @@ const PUBLISHED_IDS = [
     "layout-algebra",
     "making-ml-models-smaller",
     "nvfp4-blackwell-gemv",
-    "power-of-2"
+    "power-of-2",
+    "spec-decode"
 ];
 
 async function filesUnder(directory) {
