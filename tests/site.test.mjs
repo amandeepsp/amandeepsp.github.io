@@ -197,7 +197,55 @@ test("published posts have canonical URLs and one deterministic social card", as
         assert.equal(metadata.width, 1200);
         assert.equal(metadata.height, 630);
         assert.equal(metadata.format, "png");
+
+        // Text must wrap before reaching either edge, not be clipped by the PNG canvas.
+        for (const left of [0, 1140]) {
+            const pixels = await sharp(path.join(DIST, "og", `${id}.png`))
+                .extract({ left, top: 110, width: 60, height: 410 })
+                .removeAlpha()
+                .raw()
+                .toBuffer();
+            for (let offset = 0; offset < pixels.length; offset += 3) {
+                assert.deepEqual(
+                    [...pixels.subarray(offset, offset + 3)],
+                    [242, 241, 236],
+                    `${id}: social card text enters the ${left ? "right" : "left"} safe margin`
+                );
+            }
+        }
     }
+});
+
+test("social cards render the bundled serif font rather than a system fallback", async () => {
+    const text = '<span foreground="#171717" size="28pt" weight="semibold">amandeep singh</span>';
+    const render = (font) =>
+        sharp({
+            text: {
+                text,
+                font,
+                fontfile: path.join(ROOT, "scripts/fonts/source-serif-4-variable.ttf"),
+                dpi: 72,
+                rgba: true
+            }
+        })
+            .flatten({ background: "#f2f1ec" })
+            .removeAlpha()
+            .raw()
+            .toBuffer({ resolveWithObject: true });
+    const expected = await render("Source Serif 4 Variable");
+    const fallback = await render("sans");
+    assert.notDeepEqual(expected.data, fallback.data, "bundled font silently fell back to sans-serif");
+
+    const actual = await sharp(path.join(DIST, "og", "layout-algebra.png"))
+        .extract({ left: 72, top: 30, width: expected.info.width, height: expected.info.height })
+        .removeAlpha()
+        .raw()
+        .toBuffer();
+    // Flattening and compositing alpha can differ by one channel level from rounding.
+    assert.ok(
+        actual.every((channel, index) => Math.abs(channel - expected.data[index]) <= 1),
+        "card header does not use Source Serif 4"
+    );
 });
 
 test("RSS is a summary feed with every published post", async () => {
