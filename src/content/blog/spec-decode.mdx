@@ -87,6 +87,15 @@ $$
 
 What do you do with these? Notice how you can verify the entire sequence using this forward pass by comparing $y$s and $\hat{y}$s. If they match the draft prediction, keep the token; at the first mismatch, emit the large model's token and drop the remaining draft tokens. The expectation is that more often than not a good chunk of the draft sequence will match. In the example above, say verification gives "sat", "on", "the" while the draft proposed "sat on a mat". The first two tokens match and are kept, "the" is emitted from the large model, and "a mat" is dropped because it was conditioned on a token that was not accepted.
 
+<Figure
+  src="/blog/spec-decode/leviathan-example.png"
+  alt="Nine speculative decoding iterations producing a sentence, with accepted draft tokens in green, rejected draft tokens in red, and target-model corrections in blue."
+>
+  <Fragment slot="caption">
+    A complete decode trace from Figure 1 of <a href="https://arxiv.org/abs/2211.17192">Leviathan, Kalman, and Matias</a>. Each row is one target-model iteration: green tokens are accepted draft suggestions, red tokens are rejected suggestions, and blue tokens are their target-model corrections.
+  </Fragment>
+</Figure>
+
 If all $k$ proposals are accepted, the final distribution computed by the same forward pass,
 
 $$
