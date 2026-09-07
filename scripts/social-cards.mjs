@@ -4,22 +4,14 @@ import process from "node:process";
 import YAML from "yaml";
 
 const root = process.cwd();
+process.env.FONTCONFIG_FILE = path.join(root, "scripts/fonts/fontconfig.conf");
 const sharp = (await import("sharp")).default;
 const contentRoot = path.join(root, "src/content/blog");
 const outputRoot = path.join(root, "dist/og");
-const card = { width: 1200, height: 630, padding: 72, textTop: 120, textHeight: 370 };
+const card = { width: 1200, height: 600, padding: 72, textTop: 105, textHeight: 360 };
 
-// Sharp's bundled text renderer needs TTF rather than the site's WOFF2 files.
-// Register both faces before rendering mixed regular/italic Pango markup.
-for (const style of ["", "-italic"]) {
-    await sharp({
-        text: {
-            text: ".",
-            font: "Source Serif 4 Variable",
-            fontfile: path.join(root, `scripts/fonts/source-serif-4-variable${style}.ttf`)
-        }
-    }).toBuffer();
-}
+// Sharp's Pango renderer needs TTF rather than the site's WOFF2 files.
+const cardFont = path.join(root, "scripts/fonts/source-serif-4-variable.ttf");
 
 function escapeXml(value) {
     return String(value)
@@ -62,6 +54,7 @@ async function renderText(text, height) {
         text: {
             text: `<span foreground="#171717">${text}</span>`,
             font: "Source Serif 4 Variable",
+            fontfile: cardFont,
             width: card.width - 2 * card.padding,
             ...(height ? { height } : { dpi: 72 }),
             wrap: "word-char",
@@ -97,7 +90,7 @@ async function renderCard(post) {
                 left: card.padding,
                 top: card.textTop + Math.floor((card.textHeight - content.info.height) / 2)
             },
-            { input: meta.data, left: card.padding, top: 550 }
+            { input: meta.data, left: card.padding, top: 522 }
         ])
         .png();
 }

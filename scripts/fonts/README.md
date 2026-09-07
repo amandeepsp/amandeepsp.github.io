@@ -3,7 +3,8 @@
 These TTF files are decompressed copies of the matching Source Serif 4 Variable
 WOFF2 files in `public/fonts`. Sharp's bundled Pango/FreeType renderer falls back
 to a system font with those WOFF2 files, so social cards use TTF instead.
-Both upright and italic faces are registered before rendering cards.
+A local Fontconfig file exposes both upright and italic faces to Sharp without
+depending on fonts installed on the build host.
 
 To regenerate after updating the web fonts, run from the repository root:
 

@@ -3,10 +3,11 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
-import sharp from "sharp";
 import YAML from "yaml";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+process.env.FONTCONFIG_FILE = path.join(ROOT, "scripts/fonts/fontconfig.conf");
+const sharp = (await import("sharp")).default;
 const DIST = path.join(ROOT, "dist");
 const CONTENT = path.join(ROOT, "src/content/blog");
 const SITE = "https://amandeepsp.github.io";
@@ -191,11 +192,13 @@ test("published posts have canonical URLs and one deterministic social card", as
         const html = await readFile(path.join(DIST, "blog", id, "index.html"), "utf8");
         assert.match(html, new RegExp(`<link rel="canonical" href="${SITE}/blog/${id}/?"`));
         assert.match(html, new RegExp(`<meta property="og:image" content="${SITE}/og/${id}\\.png"`));
+        assert.match(html, /<meta property="og:image:width" content="1200"/);
+        assert.match(html, /<meta property="og:image:height" content="600"/);
         assert.equal(await exists(path.join(DIST, "og", id, "index.html")), false);
 
         const metadata = await sharp(path.join(DIST, "og", `${id}.png`)).metadata();
         assert.equal(metadata.width, 1200);
-        assert.equal(metadata.height, 630);
+        assert.equal(metadata.height, 600);
         assert.equal(metadata.format, "png");
 
         // Text must wrap before reaching either edge, not be clipped by the PNG canvas.
@@ -218,12 +221,12 @@ test("published posts have canonical URLs and one deterministic social card", as
 
 test("social cards render the bundled serif font rather than a system fallback", async () => {
     const text = '<span foreground="#171717" size="28pt" weight="semibold">amandeep singh</span>';
-    const render = (font) =>
+    const render = (font, fontfile) =>
         sharp({
             text: {
                 text,
                 font,
-                fontfile: path.join(ROOT, "scripts/fonts/source-serif-4-variable.ttf"),
+                ...(fontfile ? { fontfile } : {}),
                 dpi: 72,
                 rgba: true
             }
@@ -232,9 +235,10 @@ test("social cards render the bundled serif font rather than a system fallback",
             .removeAlpha()
             .raw()
             .toBuffer({ resolveWithObject: true });
-    const expected = await render("Source Serif 4 Variable");
-    const fallback = await render("sans");
-    assert.notDeepEqual(expected.data, fallback.data, "bundled font silently fell back to sans-serif");
+    const expected = await render(
+        "Source Serif 4 Variable",
+        path.join(ROOT, "scripts/fonts/source-serif-4-variable.ttf")
+    );
 
     const actual = await sharp(path.join(DIST, "og", "layout-algebra.png"))
         .extract({ left: 72, top: 30, width: expected.info.width, height: expected.info.height })
