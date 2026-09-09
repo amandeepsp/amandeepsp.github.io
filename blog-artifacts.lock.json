@@ -12,10 +12,7 @@
     "blog/layout-algebra/divide_2d.svg": "94b866e2b97d549f7d9234ef14b71d5decc7ae044a03571858f261b1e5f05bee",
     "blog/layout-algebra/swizzle.svg": "cc710639280a5ec677403f7ce6d06ed158b7315b70044ba1843eb72f2e5214ad",
     "blog/power-of-2/heatmap.gif": "ed216b7b6167fc7b5e780c6370f31fcd69189d0d864ba4c48e7df237c8804501",
-    "blog/spec-decode/batch_ridges.svg": "ababd43500470804c504a31368800201ec97f8abca8b8669fdd9d8a147046e3f",
     "blog/spec-decode/expected_tokens.svg": "6b5a8a8d453a5597a7983c7cc87c6e35df3a7d28a3f46a13e5ba601520b4b52d",
-    "blog/spec-decode/long_context_ridges.svg": "f10354a7f33229b3b2a169d4cfb2016ce40b1264f5d74a577ad28abaeaddf8b6",
-    "blog/spec-decode/optimal_width.svg": "b48dd50a611ee82e7b7b47029c9597b3a5626983f3310f45421b04ce5063bc1c",
     "blog/spec-decode/surprisal.svg": "823ee88d31df250836ffa7e2daf810ab0f9f0a870efdb7851cfaaaa19c92fd5e"
   }
 }
