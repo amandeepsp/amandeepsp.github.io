@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import process from "node:process";
 import YAML from "yaml";
@@ -124,7 +125,23 @@ await Promise.all(
     posts.map(async (post) => {
         const output = path.join(outputRoot, `${post.slug}.png`);
         await fs.mkdir(path.dirname(output), { recursive: true });
-        await (await renderCard(post)).toFile(output);
+        const png = await (await renderCard(post)).toBuffer();
+        await fs.writeFile(output, png);
+
+        // Hash the rendered bytes so font and layout changes also invalidate cached cards.
+        const version = createHash("sha256").update(png).digest("hex").slice(0, 16);
+        const page = path.join(root, "dist/blog", post.slug, "index.html");
+        const html = await fs.readFile(page, "utf8");
+        const versioned = html.replace(
+            /(<meta property="(?:og:image|twitter:image)" content=")([^"]+)(")/g,
+            (tag, prefix, source, suffix) => {
+                const url = new URL(source);
+                if (url.pathname !== `/og/${post.slug}.png`) return tag;
+                url.searchParams.set("v", version);
+                return `${prefix}${url.toString()}${suffix}`;
+            }
+        );
+        await fs.writeFile(page, versioned);
     })
 );
 

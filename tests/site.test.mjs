@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
@@ -191,7 +192,13 @@ test("published posts have canonical URLs and one deterministic social card", as
     for (const id of PUBLISHED_IDS) {
         const html = await readFile(path.join(DIST, "blog", id, "index.html"), "utf8");
         assert.match(html, new RegExp(`<link rel="canonical" href="${SITE}/blog/${id}/?"`));
-        assert.match(html, new RegExp(`<meta property="og:image" content="${SITE}/og/${id}\\.png"`));
+        const png = await readFile(path.join(DIST, "og", `${id}.png`));
+        const version = createHash("sha256").update(png).digest("hex").slice(0, 16);
+        for (const property of ["og:image", "twitter:image"]) {
+            const source = html.match(new RegExp(`<meta property="${property}" content="([^"]+)"`))?.[1];
+            assert.equal(source, `${SITE}/og/${id}.png?v=${version}`);
+            assert.ok(await resolvesFrom(source, pageUrl(path.join(DIST, "blog", id, "index.html"))));
+        }
         assert.match(html, /<meta property="og:image:width" content="1200"/);
         assert.match(html, /<meta property="og:image:height" content="600"/);
         assert.equal(await exists(path.join(DIST, "og", id, "index.html")), false);
