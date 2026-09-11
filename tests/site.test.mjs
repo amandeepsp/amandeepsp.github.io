@@ -114,6 +114,7 @@ test("generated routes preserve every published post, tag, redirect, and index",
     const tags = [...new Set(published.flatMap(({ data }) => data.tags ?? []))].sort();
     const expected = new Set([
         "404.html",
+        "googlef553d0f039737bb4.html",
         "index.html",
         "blog/index.html",
         "contact-me/index.html",
