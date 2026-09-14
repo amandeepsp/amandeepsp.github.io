@@ -1,0 +1,44 @@
+---
+import { renderTypst } from "@/lib/typst";
+
+interface Props {
+    alt: string;
+    minWidth?: string;
+    src: string;
+    width?: string;
+}
+
+const { alt, minWidth, src, width } = Astro.props;
+const hasCaption = Astro.slots.has("caption");
+const styles = [width && `width: ${width}`, minWidth && `--typst-figure-min-width: ${minWidth}`]
+    .filter(Boolean)
+    .join("; ");
+const svg = await renderTypst(src);
+---
+
+<figure class="media-figure">
+    <div class="typst-figure" role="img" aria-label={alt} style={styles || undefined} set:html={svg} />
+    {
+        hasCaption && (
+            <figcaption class="media-caption">
+                <slot name="caption" />
+            </figcaption>
+        )
+    }
+</figure>
+
+<style>
+    .typst-figure {
+        max-width: 100%;
+        margin-inline: auto;
+        overflow-x: auto;
+    }
+
+    .typst-figure :global(svg) {
+        display: block;
+        width: 100%;
+        min-width: var(--typst-figure-min-width, 0);
+        height: auto;
+        margin-inline: auto;
+    }
+</style>
