@@ -296,6 +296,28 @@ test("sitemap URLs resolve and include all posts and tags", async () => {
     for (const url of urls) assert.ok(await resolvesFrom(url, `${SITE}/`), `sitemap URL is broken: ${url}`);
 });
 
+test("speculative decoding figures reserve space and defer offscreen downloads", async () => {
+    const html = await readFile(path.join(DIST, "blog/spec-decode/index.html"), "utf8");
+    const images = [...html.matchAll(/<img\b[^>]*class="media-figure-image"[^>]*>/g)].map((match) => match[0]);
+    assert.equal(images.length, 7);
+    for (const image of images) {
+        assert.match(image, /loading="lazy"/);
+        assert.match(image, /decoding="async"/);
+        assert.ok(Number(attributeValues(image, "width")[0]) > 0);
+        assert.ok(Number(attributeValues(image, "height")[0]) > 0);
+    }
+    const chart = images.find((image) => image.includes("performance-illusion-figure-1.png"));
+    assert.equal(attributeValues(chart, "width")[0], "1344");
+    assert.equal(attributeValues(chart, "height")[0], "1005");
+    for (const font of ["source-serif-4-variable", "source-sans-3-variable"]) {
+        const link = html.match(new RegExp(`<link\\b[^>]*href="/fonts/${font}\\.woff2"[^>]*>`))?.[0];
+        assert.ok(link, `missing preload for ${font}`);
+        assert.match(link, /rel="preload"/);
+        assert.match(link, /as="font"/);
+        assert.match(link, /crossorigin/);
+    }
+});
+
 test("resume export is the only resume source in the site", async () => {
     const pdf = await readFile(path.join(DIST, "resume.pdf"));
     assert.equal(pdf.subarray(0, 5).toString(), "%PDF-");

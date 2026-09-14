@@ -10,6 +10,8 @@ import mdx from "@astrojs/mdx";
 
 export default defineConfig({
     site: "https://amandeepsp.github.io",
+    // Avoid loading the toolbar's audit modules over high-latency preview connections.
+    devToolbar: { enabled: false },
     integrations: [sitemap(), mdx()],
     markdown: {
         processor: unified({

@@ -1,4 +1,7 @@
 ---
+import sharp from "sharp";
+import path from "node:path";
+
 interface Props {
     src: string;
     alt: string;
@@ -7,10 +10,20 @@ interface Props {
 
 const { src, alt, width } = Astro.props;
 const hasCaption = Astro.slots.has("caption");
+const dimensions = await sharp(path.join(process.cwd(), "public", src)).metadata();
 ---
 
 <figure class="media-figure">
-    <img src={src} alt={alt} class="media-figure-image" style={width ? `width: ${width}` : undefined} />
+    <img
+        src={src}
+        alt={alt}
+        width={dimensions.width}
+        height={dimensions.height}
+        loading="lazy"
+        decoding="async"
+        class="media-figure-image"
+        style={width ? `width: ${width}` : undefined}
+    />
     {
         hasCaption && (
             <figcaption class="media-caption">

@@ -803,8 +803,13 @@ html.dark .astro-code span {
     width: max-content;
     max-width: 100%;
     overflow-x: auto;
+    overflow-wrap: normal;
     border-collapse: collapse;
     font-size: 0.9em;
+}
+
+.post-content table .katex {
+    white-space: nowrap;
 }
 
 .post-content :is(th, td) {
@@ -832,6 +837,11 @@ html.dark .post-content img {
     margin-block: 2.5rem;
     border: 0;
     border-top: 1px solid var(--border);
+}
+
+.post-content .katex {
+    /* Keep absolutely positioned, visually hidden MathML inside its equation. */
+    position: relative;
 }
 
 .post-content .katex-display {
@@ -898,6 +908,12 @@ html.dark .post-content img {
 
 .read-next {
     margin-block: 4rem;
+}
+
+@media (max-width: 39.999rem) {
+    .media-figure {
+        margin-inline: 0;
+    }
 }
 
 @media (min-width: 40rem) {
