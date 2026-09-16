@@ -474,12 +474,28 @@ html.dark .theme-icon--moon {
 .contact-intro {
     max-width: 36rem;
     margin: 0 0 2.5rem;
-    color: var(--muted);
+    font-family: var(--serif);
+    font-size: 1.125rem;
+    line-height: 1.6;
 }
 
 .contact-sections {
     display: grid;
     gap: 2.5rem;
+}
+
+.contact-signoff {
+    margin-top: 2.5rem;
+    font-family: var(--serif);
+    font-style: italic;
+}
+
+.contact-signoff p {
+    margin: 0 0 1rem;
+}
+
+.contact-signoff img {
+    display: block;
 }
 
 .contact-section-title {
@@ -544,8 +560,45 @@ html.dark .theme-icon--moon {
     width: 100%;
 }
 
+.article-layout .post {
+    margin-bottom: 0;
+}
+
 .post-header {
     margin-bottom: 2rem;
+}
+
+.post-ornament {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    color: var(--text);
+}
+
+.post-ornament::before,
+.post-ornament::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--muted);
+    opacity: 0.5;
+}
+
+.post-ornament-mark {
+    flex: none;
+    width: 64px;
+    height: 24px;
+    background: currentColor;
+    mask: url("/article-divider.svg") center / contain no-repeat;
+}
+
+.post-end-ornament {
+    width: 64px;
+    height: 24px;
+    margin: 2rem auto 0;
+    background: currentColor;
+    mask: url("/article-end.svg") center / contain no-repeat;
 }
 
 .post-title {
@@ -693,6 +746,15 @@ html.dark .theme-icon--moon {
 
 .post-content > :first-child {
     margin-top: 0;
+}
+
+@supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
+    .post-content > p:first-child::first-letter {
+        -webkit-initial-letter: 3;
+        initial-letter: 3;
+        margin-right: 0.15em;
+        font-weight: 500;
+    }
 }
 
 .post-content > :last-child {
@@ -902,12 +964,15 @@ html.dark .post-content img {
 }
 
 .post-share {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
     margin-top: 2rem;
     font-size: 0.875rem;
 }
 
 .read-next {
-    margin-block: 4rem;
+    margin-block: 3rem 4rem;
 }
 
 @media (max-width: 39.999rem) {
@@ -964,9 +1029,12 @@ html.dark .post-content img {
         display: inline-flex;
     }
 
-    .pagination,
-    .read-next {
+    .pagination {
         margin-block: 6rem;
+    }
+
+    .read-next {
+        margin-bottom: 6rem;
     }
 
     .series-group {

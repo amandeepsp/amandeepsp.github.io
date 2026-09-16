@@ -13,6 +13,12 @@ export default defineConfig({
     trailingSlash: "always",
     // Avoid loading the toolbar's audit modules over high-latency preview connections.
     devToolbar: { enabled: false },
+    vite: {
+        server: {
+            // Amp assigns a different preview subdomain to each thread.
+            allowedHosts: [".onamp.dev"]
+        }
+    },
     integrations: [sitemap(), mdx()],
     markdown: {
         processor: unified({
