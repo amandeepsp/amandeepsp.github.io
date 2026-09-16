@@ -38,15 +38,15 @@ const siteConfig: SiteConfig = {
         },
         {
             text: "Blog",
-            href: "/blog"
+            href: "/blog/"
         },
         {
             text: "Tags",
-            href: "/tags"
+            href: "/tags/"
         },
         {
             text: "Contact",
-            href: "/contact-me"
+            href: "/contact-me/"
         }
     ],
     socialLinks: [
@@ -64,7 +64,7 @@ const siteConfig: SiteConfig = {
         },
         {
             text: "Email",
-            href: "/contact-me"
+            href: "/contact-me/"
         },
         {
             text: "RSS",

@@ -10,6 +10,7 @@ import mdx from "@astrojs/mdx";
 
 export default defineConfig({
     site: "https://amandeepsp.github.io",
+    trailingSlash: "always",
     // Avoid loading the toolbar's audit modules over high-latency preview connections.
     devToolbar: { enabled: false },
     integrations: [sitemap(), mdx()],
@@ -46,7 +47,7 @@ export default defineConfig({
         }
     },
     redirects: {
-        "/making-models-smaller-1": "/blog/making-ml-models-smaller",
-        "/ml-model-compression-part1": "/blog/making-ml-models-smaller"
+        "/making-models-smaller-1": "/blog/making-ml-models-smaller/",
+        "/ml-model-compression-part1": "/blog/making-ml-models-smaller/"
     }
 });

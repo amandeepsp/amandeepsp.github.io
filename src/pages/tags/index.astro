@@ -23,7 +23,7 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
             tags.map((tag) => {
                 const postCount = getPostsByTag(posts, tag.id).length;
                 return (
-                    <a class="tag-row" href={`/tags/${tag.id}`}>
+                    <a class="tag-row" href={`/tags/${tag.id}/`}>
                         <div class="tag-label">
                             <h2 class="tag-name">{tag.name}</h2>
                             <div class="tag-count">

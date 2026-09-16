@@ -11,7 +11,7 @@ seo:
 
 I recently participated in [GPU Mode's](https://discord.gg/gpumode) NVFP4 Kernel Hackathon. The goal was to write CUDA kernels for Blackwell's new 4-bit floating point format (NVFP4) and get as close as possible to the hardware's speed of light. The competition ran on B200 GPUs, and there were four tasks in total: matrix-vector multiplication (GEMV), matrix-matrix multiplication (GEMM), gated GEMM (with SiLU activation), and grouped GEMM. All tasks use [block-scaled FP4](https://docs.nvidia.com/cuda/cublas/index.html#d-block-scaling-factors-layout) inputs where every 16 elements of `e2m1` data share a single `e4m3` FP8 scale factor, with `fp16` output. I was able to complete the GEMV and GEMM tasks but ran out of time for the gated and grouped variants.
 
-If you want background on CuTe's layout algebra (which underpins a lot of what follows), I wrote about it [here](/blog/layout-algebra).
+If you want background on CuTe's layout algebra (which underpins a lot of what follows), I wrote about it [here](/blog/layout-algebra/).
 
 ## The Task
 

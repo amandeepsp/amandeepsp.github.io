@@ -87,7 +87,7 @@ const seriesPosts = series ? getSeriesPosts(series.name, allPosts) : [];
                         tags.length > 0 && (
                             <div class="post-tags">
                                 {tags.map((tag) => (
-                                    <a class="post-tag" href={`/tags/${slugify(tag)}`}>
+                                    <a class="post-tag" href={`/tags/${slugify(tag)}/`}>
                                         #{tag}
                                     </a>
                                 ))}

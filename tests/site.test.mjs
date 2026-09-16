@@ -88,7 +88,7 @@ async function resolvesFrom(reference, fromUrl) {
     const relative = decodedPath.replace(/^\/+/, "");
     const candidates = decodedPath.endsWith("/")
         ? [path.join(DIST, relative, "index.html")]
-        : [path.join(DIST, relative), path.join(DIST, relative, "index.html")];
+        : [path.join(DIST, relative)];
     return (await Promise.all(candidates.map(exists))).some(Boolean);
 }
 
@@ -132,7 +132,7 @@ test("generated routes preserve every published post, tag, redirect, and index",
     assert.deepEqual([...actual].sort(), [...expected].sort(), "generated HTML route inventory changed");
 });
 
-test("all internal links, images, styles, and scripts resolve", async () => {
+test("all internal links, images, styles, and scripts resolve without directory redirects", async () => {
     const htmlFiles = (await filesUnder(DIST)).filter((file) => file.endsWith(".html"));
     const broken = [];
     for (const file of htmlFiles) {
@@ -192,7 +192,7 @@ test("published posts have canonical URLs and one deterministic social card", as
 
     for (const id of PUBLISHED_IDS) {
         const html = await readFile(path.join(DIST, "blog", id, "index.html"), "utf8");
-        assert.match(html, new RegExp(`<link rel="canonical" href="${SITE}/blog/${id}/?"`));
+        assert.match(html, new RegExp(`<link rel="canonical" href="${SITE}/blog/${id}/"`));
         const png = await readFile(path.join(DIST, "og", `${id}.png`));
         const version = createHash("sha256").update(png).digest("hex").slice(0, 16);
         for (const property of ["og:image", "twitter:image"]) {

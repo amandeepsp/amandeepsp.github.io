@@ -24,7 +24,7 @@ const totalParts = posts.length;
                     {post.id === currentPostId ? (
                         <strong>{post.data.title}</strong>
                     ) : (
-                        <a href={`/blog/${post.id}`} class="series-link">
+                        <a href={`/blog/${post.id}/`} class="series-link">
                             {post.data.title}
                         </a>
                     )}
