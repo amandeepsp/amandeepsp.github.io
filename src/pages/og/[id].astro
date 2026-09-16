@@ -1,0 +1,108 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import { calculateReadingTime, filterDrafts } from "../../utils/data-utils";
+
+export async function getStaticPaths() {
+    return filterDrafts(await getCollection("blog")).map((post) => ({
+        params: { id: post.id },
+        props: { post }
+    }));
+}
+
+type Props = { post: CollectionEntry<"blog"> };
+const { post } = Astro.props;
+const { title, subTitle } = post.data;
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="robots" content="noindex, nofollow" />
+        <title>{title}</title>
+        <style>
+            @font-face {
+                font-family: "Source Serif 4";
+                src: url("/fonts/source-serif-4-variable.woff2");
+                font-weight: 200 900;
+            }
+            @font-face {
+                font-family: "Source Serif 4";
+                src: url("/fonts/source-serif-4-variable-italic.woff2");
+                font-weight: 200 900;
+                font-style: italic;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                position: relative;
+                margin: 0;
+                padding: 24px 72px 80px;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                background: #f2f1ec;
+                color: #171717;
+                font-family: "Source Serif 4", serif;
+            }
+            header {
+                padding-bottom: 12px;
+                border-bottom: 1px solid;
+                font-size: 28px;
+                font-weight: 600;
+            }
+            main {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                justify-content: center;
+                gap: 16px;
+                padding-top: 24px;
+            }
+            h1,
+            p {
+                margin: 0;
+            }
+            h1 {
+                font-size: 100px;
+                line-height: 1.04;
+                font-weight: 600;
+                text-wrap: balance;
+            }
+            .subtitle {
+                padding-right: 112px;
+                font-size: 32px;
+                line-height: 1.3;
+                font-style: italic;
+                color: #666;
+            }
+            .subtitle:empty {
+                display: none;
+            }
+            footer {
+                padding-right: 112px;
+                color: #666;
+                font-size: 22px;
+            }
+            footer img {
+                position: absolute;
+                right: 72px;
+                bottom: 80px;
+                width: 88px;
+                height: 88px;
+            }
+        </style>
+    </head>
+    <body>
+        <header>amandeep singh</header>
+        <main>
+            <h1>{title}</h1>
+            <p class="subtitle">{subTitle}</p>
+            <footer>
+                <p class="reading-time">{calculateReadingTime(post.body)}</p>
+                <img src="/wax-seal.webp" alt="as wax seal" />
+            </footer>
+        </main>
+    </body>
+</html>

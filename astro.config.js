@@ -19,7 +19,7 @@ export default defineConfig({
             allowedHosts: [".onamp.dev"]
         }
     },
-    integrations: [sitemap(), mdx()],
+    integrations: [sitemap({ filter: (page) => !new URL(page).pathname.startsWith("/og/") }), mdx()],
     markdown: {
         processor: unified({
             remarkPlugins: [remarkMath, remarkAlert, remarkGfm],

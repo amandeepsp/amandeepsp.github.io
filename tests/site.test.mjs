@@ -122,6 +122,7 @@ test("generated routes preserve every published post, tag, redirect, and index",
         "making-models-smaller-1/index.html",
         "ml-model-compression-part1/index.html",
         ...PUBLISHED_IDS.map((id) => `blog/${id}/index.html`),
+        ...PUBLISHED_IDS.map((id) => `og/${id}/index.html`),
         ...tags.map((tag) => `tags/${tag}/index.html`)
     ]);
     const actual = new Set(
@@ -202,7 +203,7 @@ test("published posts have canonical URLs and one deterministic social card", as
         }
         assert.match(html, /<meta property="og:image:width" content="1200"/);
         assert.match(html, /<meta property="og:image:height" content="600"/);
-        assert.equal(await exists(path.join(DIST, "og", id, "index.html")), false);
+        assert.equal(await exists(path.join(DIST, "og", id, "index.html")), true);
 
         const metadata = await sharp(path.join(DIST, "og", `${id}.png`)).metadata();
         assert.equal(metadata.width, 1200);
@@ -227,37 +228,44 @@ test("published posts have canonical URLs and one deterministic social card", as
     }
 });
 
-test("social cards render the bundled serif font rather than a system fallback", async () => {
-    const text = '<span foreground="#171717" size="28pt" weight="semibold">amandeep singh</span>';
-    const render = (font, fontfile) =>
-        sharp({
-            text: {
-                text,
-                font,
-                ...(fontfile ? { fontfile } : {}),
-                dpi: 72,
-                rgba: true
-            }
-        })
-            .flatten({ background: "#f2f1ec" })
+test("social cards keep the bottom overlay area empty and include the red seal", async () => {
+    for (const id of PUBLISHED_IDS) {
+        const image = sharp(path.join(DIST, "og", `${id}.png`));
+        const seal = await image
+            .clone()
+            .extract({ left: 1040, top: 432, width: 88, height: 88 })
             .removeAlpha()
             .raw()
-            .toBuffer({ resolveWithObject: true });
-    const expected = await render(
-        "Source Serif 4 Variable",
-        path.join(ROOT, "scripts/fonts/source-serif-4-variable.ttf")
-    );
+            .toBuffer();
+        assert.ok(
+            seal.some((channel, index) => index % 3 === 0 && channel > seal[index + 1] * 2 && channel > 60),
+            `${id}: red seal is missing from the safe area`
+        );
 
-    const actual = await sharp(path.join(DIST, "og", "layout-algebra.png"))
-        .extract({ left: 72, top: 30, width: expected.info.width, height: expected.info.height })
-        .removeAlpha()
-        .raw()
-        .toBuffer();
-    // Flattening and compositing alpha can differ by one channel level from rounding.
-    assert.ok(
-        actual.every((channel, index) => Math.abs(channel - expected.data[index]) <= 1),
-        "card header does not use Source Serif 4"
-    );
+        const footer = await image
+            .clone()
+            .extract({ left: 0, top: 520, width: 1200, height: 80 })
+            .removeAlpha()
+            .raw()
+            .toBuffer();
+        assert.ok(
+            footer.every((channel, index) => channel === [242, 241, 236][index % 3]),
+            `${id}: content enters the bottom overlay area`
+        );
+    }
+});
+
+test("Astro renders noindex social pages with the article title and reading time", async () => {
+    assert.equal(await exists(path.join(DIST, "og/posts.json")), false);
+    for (const id of PUBLISHED_IDS) {
+        const html = await readFile(path.join(DIST, "blog", id, "index.html"), "utf8");
+        const card = await readFile(path.join(DIST, "og", id, "index.html"), "utf8");
+        const title = card.match(/<h1\b[^>]*>(.*?)<\/h1>/s)?.[1];
+        const time = card.match(/class="reading-time"[^>]*>(.*?)<\/p>/s)?.[1];
+        assert.ok(title && html.includes(title), `${id}: title differs from article`);
+        assert.ok(time && html.includes(time), `${id}: reading time differs from article`);
+        assert.match(card, /<meta name="robots" content="noindex, nofollow"/);
+    }
 });
 
 test("RSS is a summary feed with every published post", async () => {
@@ -282,6 +290,10 @@ test("RSS is a summary feed with every published post", async () => {
 test("sitemap URLs resolve and include all posts and tags", async () => {
     const sitemap = await readFile(path.join(DIST, "sitemap-0.xml"), "utf8");
     const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
+    assert.ok(
+        urls.every((url) => !new URL(url).pathname.startsWith("/og/")),
+        "OG pages appear in sitemap"
+    );
     const entries = await contentEntries();
     const tags = [...new Set(entries.filter(({ data }) => !data.draft).flatMap(({ data }) => data.tags ?? []))];
     for (const expected of [

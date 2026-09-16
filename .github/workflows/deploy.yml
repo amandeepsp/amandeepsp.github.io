@@ -20,11 +20,16 @@ jobs:
         steps:
             - name: Checkout your repository using git
               uses: actions/checkout@v4
-            - name: Install, build, and upload your site
-              uses: withastro/action@v3
+            - uses: actions/setup-node@v4
               with:
                   node-version: 22
-                  package-manager: npm@latest
+                  cache: npm
+            - run: npm ci
+            - run: npx playwright install --with-deps chromium
+            - run: npm run build
+            - uses: actions/upload-pages-artifact@v3
+              with:
+                  path: dist
 
     deploy:
         needs: build
