@@ -120,20 +120,21 @@
             // Ensure footnotes are visible on smaller screens
             footnotesSection.classList.remove("footnotes-hidden");
         }
-
-        // Handle resize events
-        const resizeHandler = () => {
-            const wasLarge = document.querySelector(".sidenote") !== null;
-            const isNowLarge = window.matchMedia("(min-width: 1280px)").matches;
-
-            if (wasLarge !== isNowLarge) {
-                // Reinitialize on breakpoint change
-                initSidenotes();
-            }
-        };
-
-        window.addEventListener("resize", resizeHandler);
     }
+
+    // Register once, rather than adding another listener on every breakpoint change.
+    // Reflow within the desktop layout also changes reference and note positions.
+    let pendingFrame = 0;
+    function scheduleSidenotes() {
+        cancelAnimationFrame(pendingFrame);
+        pendingFrame = requestAnimationFrame(initSidenotes);
+    }
+
+    window.addEventListener("resize", scheduleSidenotes);
+    document.fonts.ready.then(scheduleSidenotes);
+    document.querySelectorAll(".prose-blog img").forEach((image) => {
+        image.addEventListener("load", scheduleSidenotes);
+    });
 
     initSidenotes();
 </script>

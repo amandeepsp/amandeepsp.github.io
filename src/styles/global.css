@@ -494,13 +494,16 @@ html.dark .theme-icon--moon {
 }
 
 .contact-signoff {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     margin-top: 2.5rem;
     font-family: var(--serif);
     font-style: italic;
 }
 
 .contact-signoff p {
-    margin: 0 0 1rem;
+    margin: 0;
 }
 
 .contact-signoff img {
@@ -517,6 +520,8 @@ html.dark .theme-icon--moon {
 
 .contact-email {
     padding: 0.5rem 1.25rem;
+    font-family: var(--serif);
+    font-style: italic;
 }
 
 .contact-links {
@@ -1090,6 +1095,10 @@ html.dark .post-content img {
 
     .site-header {
         gap: 0.5rem;
+    }
+
+    .post-header {
+        margin-bottom: 0.5rem;
     }
 
     .media-figure {
