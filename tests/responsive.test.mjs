@@ -56,3 +56,29 @@ test("article layout survives resizing and desktop text reflow", async () => {
         await browser.close();
     }
 });
+
+test("scroll-to-top visibility and keyboard activation respect motion preferences", async () => {
+    const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
+    try {
+        const page = await browser.newPage();
+        await page.goto(`${process.env.SITE_URL ?? "http://localhost:4321"}/blog/spec-decode/`);
+        const button = page.getByRole("button", { name: "Scroll to top", exact: true });
+        await page.waitForFunction(() => document.querySelector(".scroll-to-top")?.hidden);
+        assert.equal(await button.isVisible(), false);
+
+        for (const reducedMotion of ["no-preference", "reduce"]) {
+            await page.emulateMedia({ reducedMotion });
+            await page.evaluate(() => window.scrollTo(0, 400));
+            await page.waitForFunction(() => window.scrollY === 400);
+            assert.equal(await button.isVisible(), false, "hidden at the threshold");
+            await page.evaluate(() => window.scrollTo(0, 401));
+            await button.waitFor({ state: "visible" });
+            await button.focus();
+            await page.keyboard.press("Enter");
+            await page.waitForFunction(() => window.scrollY === 0);
+            await button.waitFor({ state: "hidden" });
+        }
+    } finally {
+        await browser.close();
+    }
+});

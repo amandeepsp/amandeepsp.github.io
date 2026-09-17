@@ -3,6 +3,7 @@ import { type CollectionEntry, getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Button from "../../components/Button.astro";
 import ReadingProgress from "../../components/ReadingProgress.astro";
+import ScrollToTop from "../../components/ScrollToTop.astro";
 import FormattedDate from "../../components/FormattedDate.astro";
 import PostPreview from "../../components/PostPreview.astro";
 import TableOfContents from "../../components/TableOfContents.astro";
@@ -69,6 +70,7 @@ const seriesPosts = series ? getSeriesPosts(series.name, allPosts) : [];
     noindex={seo?.noindex ?? false}
 >
     <ReadingProgress />
+    <ScrollToTop />
     <Sidenotes />
     <div class:list={["article-layout", { "article-layout--with-toc": toc }]}>
         {toc && <TableOfContents headings={headings} />}

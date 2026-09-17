@@ -1,0 +1,54 @@
+---
+import IconButton from "./IconButton.astro";
+---
+
+<IconButton class="scroll-to-top" type="button" aria-label="Scroll to top" title="Scroll to top" hidden>
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+    >
+        <path d="m6 10 6-6 6 6M12 4v16"></path>
+    </svg>
+</IconButton>
+
+<style>
+    :global(.scroll-to-top) {
+        position: fixed;
+        right: max(1rem, env(safe-area-inset-right));
+        bottom: max(1rem, env(safe-area-inset-bottom));
+        z-index: 40;
+        width: 44px;
+        height: 44px;
+        cursor: pointer;
+    }
+
+    :global(.scroll-to-top[hidden]) {
+        display: none;
+    }
+</style>
+
+<script>
+    const button = document.querySelector<HTMLButtonElement>(".scroll-to-top");
+
+    if (button) {
+        const updateVisibility = () => {
+            button.hidden = window.scrollY <= 400;
+        };
+
+        window.addEventListener("scroll", updateVisibility, { passive: true });
+        window.addEventListener("pageshow", updateVisibility);
+        updateVisibility();
+
+        button.addEventListener("click", () => {
+            window.scrollTo({
+                top: 0,
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"
+            });
+        });
+    }
+</script>
