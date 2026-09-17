@@ -14,16 +14,24 @@ const dimensions = await sharp(path.join(process.cwd(), "public", src)).metadata
 ---
 
 <figure class="media-figure">
-    <img
-        src={src}
-        alt={alt}
-        width={dimensions.width}
-        height={dimensions.height}
-        loading="lazy"
-        decoding="async"
-        class="media-figure-image"
-        style={width ? `width: ${width}` : undefined}
-    />
+    <a
+        class="figure-full-size"
+        href={src}
+        target="_blank"
+        rel="noopener"
+        aria-label={`Open full-size image: ${alt} (new tab)`}
+    >
+        <img
+            src={src}
+            alt={alt}
+            width={dimensions.width}
+            height={dimensions.height}
+            loading="lazy"
+            decoding="async"
+            class="media-figure-image"
+            style={width ? `width: ${width}` : undefined}
+        />
+    </a>
     {
         hasCaption && (
             <figcaption class="media-caption">

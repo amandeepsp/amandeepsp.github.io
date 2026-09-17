@@ -330,6 +330,33 @@ test("speculative decoding figures reserve space and defer offscreen downloads",
     }
 });
 
+test("article reading tools preserve metadata, links, and relevant recommendations", async () => {
+    const html = await readFile(path.join(DIST, "blog/spec-decode/index.html"), "utf8");
+    assert.doesNotMatch(html, /class="(?:post-author|figure-open|code-toolbar)"/);
+    const mobileToc = html.match(/<nav class="toc-mobile"[\s\S]*?<\/nav>/)?.[0];
+    assert.ok(mobileToc);
+    assert.match(mobileToc, /<details><summary>\s*Contents/);
+    assert.match(mobileToc, /class="toc-chevron"/);
+    assert.match(mobileToc, /href="#starting-with-the-constraints"/);
+    assert.match(html, /href="#starting-with-the-constraints"/);
+    const primaryMeta = html.match(/<div class="post-meta-row">([\s\S]*?)<\/div>/)?.[1];
+    assert.match(primaryMeta, /min read/);
+    assert.doesNotMatch(primaryMeta, /Updated/);
+    assert.match(html, /class="post-updated"/);
+    const figureLink = html.match(/<a class="figure-full-size"[^>]*>/)?.[0];
+    assert.equal(attributeValues(figureLink, "href")[0], "/blog/spec-decode/surprisal.svg");
+    assert.equal(attributeValues(figureLink, "target")[0], "_blank");
+
+    // The GPU post shares all three tags with layout algebra; the newer high-dims post shares only ML.
+    const gpu = await readFile(path.join(DIST, "blog/nvfp4-blackwell-gemv/index.html"), "utf8");
+    const recommendations = gpu.match(/<section class="read-next">([\s\S]*?)<\/section>/)?.[1];
+    const links = attributeValues(recommendations, "href");
+    assert.equal(links[0], "/blog/layout-algebra/");
+    assert.equal(links.length, 2);
+    assert.equal(new Set(links).size, 2);
+    assert.ok(!links.includes("/blog/nvfp4-blackwell-gemv/"));
+});
+
 test("resume export is the only resume source in the site", async () => {
     const pdf = await readFile(path.join(DIST, "resume.pdf"));
     assert.equal(pdf.subarray(0, 5).toString(), "%PDF-");

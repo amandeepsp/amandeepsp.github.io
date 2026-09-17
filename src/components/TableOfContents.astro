@@ -7,9 +7,12 @@ interface Heading {
 
 interface Props {
     headings: Heading[];
+    mobile?: boolean;
 }
 
-const { headings } = Astro.props;
+const { headings, mobile = false } = Astro.props;
+const Container = mobile ? "details" : "div";
+const Label = mobile ? "summary" : "h2";
 
 // Filter to only h2 and h3
 const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
@@ -17,19 +20,43 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
 {
     tocHeadings.length > 0 && (
-        <nav class="toc" aria-label="Table of contents">
-            <div>
-                <h2>On this page</h2>
+        <nav class={mobile ? "toc-mobile" : "toc"} aria-label="Table of contents">
+            <Container>
+                <Label>
+                    {mobile ? "Contents" : "On this page"}
+                    {mobile && (
+                        <svg
+                            class="toc-chevron"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            aria-hidden="true"
+                        >
+                            <path
+                                d="M6 9L12 15L18 9"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                    )}
+                </Label>
                 <ul>
                     {tocHeadings.map((heading) => (
                         <li class={heading.depth === 3 ? "toc-nested" : ""}>
-                            <a href={`#${heading.slug}`} class="toc-link" data-slug={heading.slug}>
+                            <a
+                                href={`#${heading.slug}`}
+                                class={mobile ? "toc-mobile-link" : "toc-link"}
+                                data-slug={heading.slug}
+                            >
                                 {heading.text}
                             </a>
                         </li>
                     ))}
                 </ul>
-            </div>
+            </Container>
         </nav>
     )
 }
