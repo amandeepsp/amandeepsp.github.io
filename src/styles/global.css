@@ -1006,6 +1006,7 @@ html.dark .post-content img {
 
 .footnotes {
     margin-top: 3rem;
+    font-family: var(--serif);
     font-size: 0.875em;
 }
 
@@ -1018,7 +1019,7 @@ html.dark .post-content img {
     right: -236px;
     width: 200px;
     color: var(--muted);
-    font-family: var(--sans);
+    font-family: var(--serif);
     font-size: 0.875rem;
     line-height: 1.375;
 }
