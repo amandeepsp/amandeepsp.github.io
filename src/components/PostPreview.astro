@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry } from "astro:content";
 import FormattedDate from "./FormattedDate.astro";
+import { calculateReadingTime } from "../utils/data-utils";
 
 type Props = { post: CollectionEntry<"blog">; class?: string; headingLevel?: "h2" | "h3"; showFeatured?: boolean };
 
@@ -24,6 +25,8 @@ const TitleTag = headingLevel;
         {subTitle && <p class="post-preview-subtitle">{subTitle}</p>}
         <div class="post-preview-date">
             <FormattedDate date={publishDate} />
+            <span aria-hidden="true"> · </span>
+            <span>{calculateReadingTime(post.body)}</span>
             {
                 updatedDate && (
                     <>
