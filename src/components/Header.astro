@@ -1,8 +1,11 @@
 ---
 import siteConfig from "../data/site-config";
+
+const nameParts = siteConfig.title.split(" ");
+const surname = nameParts.pop();
 ---
 
 <header class="site-brand">
-    <a class="site-title" href="/">{siteConfig.title}</a>
+    <a class="site-title" href="/">{nameParts.join(" ")} <span class="site-title-surname">{surname}</span></a>
     {siteConfig.subtitle && <p class="site-subtitle">{siteConfig.subtitle}</p>}
 </header>

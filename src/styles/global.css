@@ -55,6 +55,7 @@
     --background: #f2f1ec;
     --background-muted: #eae9e1;
     --border: #171717;
+    --accent: #3157b7;
     --serif: "Source Serif 4", ui-serif, Georgia, serif;
     --sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
     --mono: "Source Code Pro", ui-monospace, monospace;
@@ -67,6 +68,7 @@ html.dark {
     --background: #171717;
     --background-muted: #242424;
     --border: #f2f1ec;
+    --accent: #91adff;
 }
 
 *,
@@ -110,7 +112,7 @@ video {
 
 ::selection {
     color: var(--text);
-    background: color-mix(in srgb, var(--text) 16%, transparent);
+    background: color-mix(in srgb, var(--accent) 24%, var(--background));
 }
 
 :where(a, button, input, textarea, select, summary):focus-visible {
@@ -161,6 +163,11 @@ video {
     text-underline-offset: 2px;
 }
 
+.site-title-surname {
+    color: var(--accent);
+    font-style: italic;
+}
+
 .site-subtitle {
     margin: 0.25rem 0 0;
     font-size: 0.875rem;
@@ -178,7 +185,7 @@ video {
 }
 
 .nav-link {
-    font-family: var(--serif);
+    font-family: var(--sans);
 }
 
 .nav-link.active {
@@ -263,8 +270,8 @@ html.dark .theme-icon--moon {
     border: 1px solid var(--border);
     border-radius: 999px;
     background: var(--background);
-    font-family: var(--serif);
-    font-style: italic;
+    font-family: var(--sans);
+    font-style: normal;
     transition: background-color 150ms ease;
 }
 
@@ -589,7 +596,6 @@ html.dark .theme-icon--moon {
     flex: none;
     width: 64px;
     height: 24px;
-    background: currentColor;
     mask: url("/article-divider.svg") center / contain no-repeat;
 }
 
@@ -597,8 +603,13 @@ html.dark .theme-icon--moon {
     width: 64px;
     height: 24px;
     margin: 2rem auto 0;
-    background: currentColor;
     mask: url("/article-end.svg") center / contain no-repeat;
+}
+
+.post-ornament-mark,
+.post-end-ornament {
+    /* Color only the central diamond in the 64px-wide SVG masks. */
+    background: linear-gradient(to right, currentColor 24px, var(--accent) 24px, var(--accent) 40px, currentColor 40px);
 }
 
 .post-title {
@@ -694,7 +705,7 @@ html.dark .theme-icon--moon {
 .reading-progress-bar {
     width: 0;
     height: 100%;
-    background: color-mix(in srgb, var(--text) 70%, transparent);
+    background: var(--accent);
     transition: width 50ms ease-out;
 }
 
@@ -722,6 +733,7 @@ html.dark .theme-icon--moon {
 }
 
 .toc-link {
+    position: relative;
     display: block;
     color: var(--muted);
     transition: color 150ms ease;
@@ -734,6 +746,15 @@ html.dark .theme-icon--moon {
 
 .toc-link.toc-active {
     font-weight: 500;
+}
+
+.toc-link.toc-active::before {
+    position: absolute;
+    inset-block: 0.15em;
+    left: -0.625rem;
+    width: 2px;
+    background: var(--accent);
+    content: "";
 }
 
 .post-content {
@@ -810,6 +831,13 @@ html.dark .theme-icon--moon {
     padding-left: 0.375rem;
     color: var(--muted);
     font-size: 0.75em;
+}
+
+.post-content a[data-footnote-ref],
+.post-content a[data-footnote-backref],
+.post-content a.anchor-link:hover,
+.post-content a.anchor-link:focus-visible {
+    color: var(--accent);
 }
 
 .post-content blockquote {
@@ -926,12 +954,13 @@ html.dark .post-content img {
     right: -236px;
     width: 200px;
     color: var(--muted);
-    font-family: var(--serif);
+    font-family: var(--sans);
     font-size: 0.875rem;
     line-height: 1.375;
 }
 
 .sidenote-number {
+    color: var(--accent);
     font-weight: 600;
 }
 
@@ -976,6 +1005,14 @@ html.dark .post-content img {
 }
 
 @media (max-width: 39.999rem) {
+    .site-header-wrap {
+        padding-bottom: 1.5rem;
+    }
+
+    .site-header {
+        gap: 0.5rem;
+    }
+
     .media-figure {
         margin-inline: 0;
     }
