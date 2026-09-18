@@ -582,41 +582,15 @@ html.dark .theme-icon--moon {
     margin-bottom: 2rem;
 }
 
-.post-ornament {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
-    color: var(--text);
-}
-
-.post-ornament::before,
-.post-ornament::after {
-    content: "";
-    flex: 1;
+.post-divider {
     height: 1px;
+    margin-bottom: 2rem;
     background: var(--muted);
     opacity: 0.5;
 }
 
-.post-ornament-mark {
-    flex: none;
-    width: 64px;
-    height: 24px;
-    mask: url("/article-divider.svg") center / contain no-repeat;
-}
-
-.post-end-ornament {
-    width: 64px;
-    height: 24px;
-    margin: 2rem auto 0;
-    mask: url("/article-end.svg") center / contain no-repeat;
-}
-
-.post-ornament-mark,
-.post-end-ornament {
-    /* Color only the central diamond in the 64px-wide SVG masks. */
-    background: linear-gradient(to right, currentColor 24px, var(--accent) 24px, var(--accent) 40px, currentColor 40px);
+.post-divider--end {
+    margin: 2rem 0 0;
 }
 
 .post-title {

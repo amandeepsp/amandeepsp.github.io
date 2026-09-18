@@ -110,13 +110,11 @@ const seriesPosts = series ? getSeriesPosts(series.name, allPosts) : [];
                 </div>
                 {toc && <TableOfContents headings={headings} mobile />}
             </header>
-            <div class="post-ornament" aria-hidden="true">
-                <span class="post-ornament-mark"></span>
-            </div>
+            <div class="post-divider" aria-hidden="true"></div>
             <div class="post-content prose-blog">
                 <Content />
             </div>
-            <div class="post-end-ornament" aria-hidden="true"></div>
+            <div class="post-divider post-divider--end" aria-hidden="true"></div>
             <div class="post-share">
                 <img src="/wax-seal.webp" alt="" width="64" height="64" loading="lazy" decoding="async" />
                 <Button
