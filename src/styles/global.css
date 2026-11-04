@@ -962,8 +962,10 @@ html.dark .astro-code span {
     margin-inline: auto;
 }
 
+/* Figures are drawn for the light theme, many with transparent backgrounds:
+   in dark mode give them the light theme's paper, not glaring white. */
 html.dark .post-content img {
-    background: white;
+    background: #f2f1ec;
 }
 
 .post-content hr {
