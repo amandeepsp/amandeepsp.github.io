@@ -9,7 +9,7 @@ export async function GET(context: APIContext) {
     const items = posts.map((item) => ({
         title: item.data.title,
         description: item.data.excerpt ?? item.data.seo?.description ?? item.data.subTitle ?? "",
-        link: `/blog/${item.id}/`,
+        link: `/${item.id}/`,
         pubDate: item.data.publishDate
     }));
     return rss({

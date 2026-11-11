@@ -36,7 +36,7 @@ try {
 
         // Hash the rendered bytes so font and layout changes also invalidate cached cards.
         const version = createHash("sha256").update(png).digest("hex").slice(0, 16);
-        const page = path.join(root, "dist/blog", slug, "index.html");
+        const page = path.join(root, "dist", slug, "index.html");
         const html = await fs.readFile(page, "utf8");
         const versioned = html.replace(
             /(<meta property="(?:og:image|twitter:image)" content=")([^"]+)(")/g,

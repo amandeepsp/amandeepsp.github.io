@@ -121,7 +121,7 @@ test("generated routes preserve every published post, tag, redirect, and index",
         "tags/index.html",
         "making-models-smaller-1/index.html",
         "ml-model-compression-part1/index.html",
-        ...PUBLISHED_IDS.map((id) => `blog/${id}/index.html`),
+        ...PUBLISHED_IDS.map((id) => `${id}/index.html`),
         ...PUBLISHED_IDS.map((id) => `og/${id}/index.html`),
         ...tags.map((tag) => `tags/${tag}/index.html`)
     ]);
@@ -131,6 +131,13 @@ test("generated routes preserve every published post, tag, redirect, and index",
             .map((file) => path.relative(DIST, file).replaceAll(path.sep, "/"))
     );
     assert.deepEqual([...actual].sort(), [...expected].sort(), "generated HTML route inventory changed");
+
+    const reserved = ["blog", "og", "tags", "contact-me", "making-models-smaller-1", "ml-model-compression-part1"];
+    for (const id of PUBLISHED_IDS) assert.ok(!reserved.includes(id), `${id} collides with a top-level route`);
+
+    // Posts moved from /blog/<id>/ to /<id>/; Cloudflare Pages 301s the old URLs.
+    const redirects = await readFile(path.join(DIST, "_redirects"), "utf8");
+    assert.match(redirects, /^\/blog\/:slug\/ \/:slug\/ 301$/m);
 });
 
 test("all internal links, images, styles, and scripts resolve without directory redirects", async () => {
@@ -181,7 +188,7 @@ test("Cloudflare Web Analytics is installed once on site pages", async () => {
     const representativePages = [
         path.join(DIST, "index.html"),
         path.join(DIST, "contact-me", "index.html"),
-        path.join(DIST, "blog", "hnsw", "index.html")
+        path.join(DIST, "hnsw", "index.html")
     ];
 
     for (const file of representativePages) {
@@ -196,14 +203,14 @@ test("published posts have canonical URLs and one deterministic social card", as
     assert.deepEqual(cards, PUBLISHED_IDS.map((id) => `${id}.png`).sort());
 
     for (const id of PUBLISHED_IDS) {
-        const html = await readFile(path.join(DIST, "blog", id, "index.html"), "utf8");
-        assert.match(html, new RegExp(`<link rel="canonical" href="${SITE}/blog/${id}/"`));
+        const html = await readFile(path.join(DIST, id, "index.html"), "utf8");
+        assert.match(html, new RegExp(`<link rel="canonical" href="${SITE}/${id}/"`));
         const png = await readFile(path.join(DIST, "og", `${id}.png`));
         const version = createHash("sha256").update(png).digest("hex").slice(0, 16);
         for (const property of ["og:image", "twitter:image"]) {
             const source = html.match(new RegExp(`<meta property="${property}" content="([^"]+)"`))?.[1];
             assert.equal(source, `${SITE}/og/${id}.png?v=${version}`);
-            assert.ok(await resolvesFrom(source, pageUrl(path.join(DIST, "blog", id, "index.html"))));
+            assert.ok(await resolvesFrom(source, pageUrl(path.join(DIST, id, "index.html"))));
         }
         assert.match(html, /<meta property="og:image:width" content="1200"/);
         assert.match(html, /<meta property="og:image:height" content="600"/);
@@ -262,7 +269,7 @@ test("social cards keep the bottom overlay area empty and include the red seal",
 test("Astro renders noindex social pages with the article title and reading time", async () => {
     assert.equal(await exists(path.join(DIST, "og/posts.json")), false);
     for (const id of PUBLISHED_IDS) {
-        const html = await readFile(path.join(DIST, "blog", id, "index.html"), "utf8");
+        const html = await readFile(path.join(DIST, id, "index.html"), "utf8");
         const card = await readFile(path.join(DIST, "og", id, "index.html"), "utf8");
         const title = card.match(/<h1\b[^>]*>(.*?)<\/h1>/s)?.[1];
         const time = card.match(/class="reading-time"[^>]*>(.*?)<\/p>/s)?.[1];
@@ -280,7 +287,7 @@ test("RSS is a summary feed with every published post", async () => {
     assert.doesNotMatch(rss, /<content:encoded/i);
 
     for (const id of PUBLISHED_IDS) {
-        const item = items.find((candidate) => candidate.includes(`${SITE}/blog/${id}/`));
+        const item = items.find((candidate) => candidate.includes(`${SITE}/${id}/`));
         const entry = entries.find((candidate) => candidate.id === id);
         const summary = entry?.data.excerpt ?? entry?.data.seo?.description ?? entry?.data.subTitle;
         assert.ok(item, `RSS entry missing for ${id}`);
@@ -304,7 +311,7 @@ test("sitemap URLs resolve and include all posts and tags", async () => {
         `${SITE}/`,
         `${SITE}/blog/`,
         `${SITE}/tags/`,
-        ...PUBLISHED_IDS.map((id) => `${SITE}/blog/${id}/`),
+        ...PUBLISHED_IDS.map((id) => `${SITE}/${id}/`),
         ...tags.map((tag) => `${SITE}/tags/${tag}/`)
     ]) {
         assert.ok(urls.includes(expected), `sitemap URL missing: ${expected}`);
@@ -313,7 +320,7 @@ test("sitemap URLs resolve and include all posts and tags", async () => {
 });
 
 test("speculative decoding figures reserve space and defer offscreen downloads", async () => {
-    const html = await readFile(path.join(DIST, "blog/spec-decode/index.html"), "utf8");
+    const html = await readFile(path.join(DIST, "spec-decode/index.html"), "utf8");
     const images = [...html.matchAll(/<img\b[^>]*class="media-figure-image"[^>]*>/g)].map((match) => match[0]);
     assert.equal(images.length, 7);
     for (const image of images) {
@@ -335,7 +342,7 @@ test("speculative decoding figures reserve space and defer offscreen downloads",
 });
 
 test("article reading tools preserve metadata, links, and relevant recommendations", async () => {
-    const html = await readFile(path.join(DIST, "blog/spec-decode/index.html"), "utf8");
+    const html = await readFile(path.join(DIST, "spec-decode/index.html"), "utf8");
     assert.doesNotMatch(html, /class="(?:post-author|figure-open|code-toolbar)"/);
     const mobileToc = html.match(/<nav class="toc-mobile"[\s\S]*?<\/nav>/)?.[0];
     assert.ok(mobileToc);
@@ -352,13 +359,13 @@ test("article reading tools preserve metadata, links, and relevant recommendatio
     assert.equal(attributeValues(figureLink, "target")[0], "_blank");
 
     // The GPU post shares all three tags with layout algebra; the newer high-dims post shares only ML.
-    const gpu = await readFile(path.join(DIST, "blog/nvfp4-blackwell-gemv/index.html"), "utf8");
+    const gpu = await readFile(path.join(DIST, "nvfp4-blackwell-gemv/index.html"), "utf8");
     const recommendations = gpu.match(/<section class="read-next">([\s\S]*?)<\/section>/)?.[1];
     const links = attributeValues(recommendations, "href");
-    assert.equal(links[0], "/blog/layout-algebra/");
+    assert.equal(links[0], "/layout-algebra/");
     assert.equal(links.length, 2);
     assert.equal(new Set(links).size, 2);
-    assert.ok(!links.includes("/blog/nvfp4-blackwell-gemv/"));
+    assert.ok(!links.includes("/nvfp4-blackwell-gemv/"));
 });
 
 test("resume export is the only resume source in the site", async () => {

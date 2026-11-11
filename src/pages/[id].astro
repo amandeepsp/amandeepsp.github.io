@@ -1,16 +1,16 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import Button from "../../components/Button.astro";
-import ReadingProgress from "../../components/ReadingProgress.astro";
-import ScrollToTop from "../../components/ScrollToTop.astro";
-import FormattedDate from "../../components/FormattedDate.astro";
-import PostPreview from "../../components/PostPreview.astro";
-import TableOfContents from "../../components/TableOfContents.astro";
-import Sidenotes from "../../components/Sidenotes.astro";
-import SeriesNav from "../../components/SeriesNav.astro";
-import { sortItemsByDateDesc, calculateReadingTime, filterDrafts, getSeriesPosts } from "../../utils/data-utils";
-import { slugify } from "../../utils/common-utils";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Button from "../components/Button.astro";
+import ReadingProgress from "../components/ReadingProgress.astro";
+import ScrollToTop from "../components/ScrollToTop.astro";
+import FormattedDate from "../components/FormattedDate.astro";
+import PostPreview from "../components/PostPreview.astro";
+import TableOfContents from "../components/TableOfContents.astro";
+import Sidenotes from "../components/Sidenotes.astro";
+import SeriesNav from "../components/SeriesNav.astro";
+import { sortItemsByDateDesc, calculateReadingTime, filterDrafts, getSeriesPosts } from "../utils/data-utils";
+import { slugify } from "../utils/common-utils";
 import "remark-github-blockquote-alert/alert.css";
 
 export async function getStaticPaths() {

@@ -53,7 +53,7 @@ export default defineConfig({
         }
     },
     redirects: {
-        "/making-models-smaller-1": "/blog/making-ml-models-smaller/",
-        "/ml-model-compression-part1": "/blog/making-ml-models-smaller/"
+        "/making-models-smaller-1": "/making-ml-models-smaller/",
+        "/ml-model-compression-part1": "/making-ml-models-smaller/"
     }
 });
