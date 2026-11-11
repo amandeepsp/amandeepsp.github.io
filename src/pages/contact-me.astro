@@ -59,9 +59,7 @@ const socialLinks = [
 
 <script>
     const emailLink = document.querySelector("[data-contact-email]");
-    const emailCodePoints = [
-        97, 109, 97, 110, 100, 101, 101, 112, 115, 112, 100, 104, 114, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109
-    ];
+    const emailCodePoints = [104, 105, 64, 97, 109, 97, 110, 100, 101, 101, 112, 115, 46, 110, 101, 116];
 
     if (emailLink instanceof HTMLAnchorElement) {
         const address = String.fromCodePoint(...emailCodePoints);

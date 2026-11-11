@@ -11,7 +11,7 @@ process.env.FONTCONFIG_FILE = path.join(ROOT, "scripts/fonts/fontconfig.conf");
 const sharp = (await import("sharp")).default;
 const DIST = path.join(ROOT, "dist");
 const CONTENT = path.join(ROOT, "src/content/blog");
-const SITE = "https://amandeepsp.github.io";
+const SITE = "https://blog.amandeeps.net";
 const PUBLISHED_IDS = [
     "clojure-aoc21",
     "fs-watcher",
@@ -152,7 +152,11 @@ test("all internal links, images, styles, and scripts resolve without directory 
 });
 
 test("email addresses are absent from generated HTML", async () => {
-    const protectedAddresses = [["amandeepspdhr", "gmail.com"].join("@"), ["amandeepsp", "gmail.com"].join("@")];
+    const protectedAddresses = [
+        ["amandeepspdhr", "gmail.com"].join("@"),
+        ["amandeepsp", "gmail.com"].join("@"),
+        ["hi", "amandeeps.net"].join("@")
+    ];
     const htmlFiles = (await filesUnder(DIST)).filter((file) => file.endsWith(".html"));
 
     for (const file of htmlFiles) {

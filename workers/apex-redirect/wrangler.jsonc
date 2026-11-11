@@ -1,0 +1,10 @@
+{
+    "name": "amandeeps-apex-redirect",
+    "main": "index.js",
+    "compatibility_date": "2026-11-01",
+    "workers_dev": false,
+    "routes": [
+        { "pattern": "amandeeps.net", "custom_domain": true },
+        { "pattern": "www.amandeeps.net", "custom_domain": true }
+    ]
+}

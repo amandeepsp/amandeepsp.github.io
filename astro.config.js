@@ -9,7 +9,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdx from "@astrojs/mdx";
 
 export default defineConfig({
-    site: "https://amandeepsp.github.io",
+    site: "https://blog.amandeeps.net",
     trailingSlash: "always",
     // Avoid loading the toolbar's audit modules over high-latency preview connections.
     devToolbar: { enabled: false },
