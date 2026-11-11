@@ -135,9 +135,13 @@ test("generated routes preserve every published post, tag, redirect, and index",
     const reserved = ["blog", "og", "tags", "contact-me", "making-models-smaller-1", "ml-model-compression-part1"];
     for (const id of PUBLISHED_IDS) assert.ok(!reserved.includes(id), `${id} collides with a top-level route`);
 
-    // Posts moved from /blog/<id>/ to /<id>/; Cloudflare Pages 301s the old URLs.
-    const redirects = await readFile(path.join(DIST, "_redirects"), "utf8");
-    assert.match(redirects, /^\/blog\/:slug\/ \/:slug\/ 301$/m);
+    // Posts moved from /blog/<id>/ to /<id>/; Cloudflare Pages 301s each old URL explicitly.
+    const redirects = (await readFile(path.join(DIST, "_redirects"), "utf8"))
+        .split("\n")
+        .filter((line) => line.startsWith("/blog/"))
+        .sort();
+    const expectedRedirects = PUBLISHED_IDS.flatMap((id) => [`/blog/${id}/ /${id}/ 301`, `/blog/${id} /${id}/ 301`]);
+    assert.deepEqual(redirects, expectedRedirects.sort(), "old /blog/<id>/ redirects changed");
 });
 
 test("all internal links, images, styles, and scripts resolve without directory redirects", async () => {

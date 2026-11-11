@@ -10,7 +10,7 @@
     "scripts": {
         "dev": "astro dev",
         "build": "astro build",
-        "postbuild": "node scripts/social-cards.mjs && node --test tests/site.test.mjs",
+        "postbuild": "node scripts/social-cards.mjs && node scripts/redirects.mjs && node --test tests/site.test.mjs",
         "check": "astro check",
         "format": "prettier --write .",
         "format:check": "prettier --check ."

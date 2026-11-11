@@ -1,8 +1,5 @@
-# Cloudflare Pages redirects. Posts moved from /blog/<slug>/ to /<slug>/.
-# :slug matches one path segment, so the /blog/ archive and post assets
-# such as /blog/hnsw/nsw_graph.svg are still served as files.
-/blog/:slug/ /:slug/ 301
-/blog/:slug /:slug/ 301
+# Cloudflare Pages redirects. scripts/redirects.mjs appends one rule per post
+# for the move from /blog/<slug>/ to /<slug>/.
 /making-models-smaller-1 /making-ml-models-smaller/ 301
 /making-models-smaller-1/ /making-ml-models-smaller/ 301
 /ml-model-compression-part1 /making-ml-models-smaller/ 301
