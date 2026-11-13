@@ -3,6 +3,7 @@ import BaseHead, { type Props as HeadProps } from "../components/BaseHead.astro"
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import Nav from "../components/Nav.astro";
+import PostHog from "../components/posthog.astro";
 
 export type Props = HeadProps;
 
@@ -13,6 +14,7 @@ const { ...head } = Astro.props;
 <html lang="en">
     <head>
         <BaseHead {...head} />
+        <PostHog />
         <script is:inline>
             const savedTheme = localStorage.getItem("theme");
             const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
