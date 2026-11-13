@@ -21,6 +21,11 @@
 </button>
 
 <script>
+    import type { PostHog } from "posthog-js";
+
+    // Read at call time: the loader stub is replaced by the real client once it loads.
+    const posthog = () => (window as typeof window & { posthog?: PostHog }).posthog;
+
     function getTheme() {
         const savedTheme = localStorage.getItem("theme");
         if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
@@ -43,6 +48,7 @@
             const nextTheme = document.documentElement.classList.contains("dark") ? "light" : "dark";
             localStorage.setItem("theme", nextTheme);
             applyTheme(nextTheme);
+            posthog()?.capture("theme_changed", { theme: nextTheme });
         });
     }
 

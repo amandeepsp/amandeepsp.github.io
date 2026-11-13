@@ -142,6 +142,11 @@ const seriesPosts = series ? getSeriesPosts(series.name, allPosts) : [];
 </BaseLayout>
 
 <script>
+    import type { PostHog } from "posthog-js";
+
+    // Read at call time: the loader stub is replaced by the real client once it loads.
+    const posthog = () => (window as typeof window & { posthog?: PostHog }).posthog;
+
     function initCopyLink() {
         const copyUrlButton = document.querySelector(".copy-url-button") as HTMLButtonElement;
         copyUrlButton?.addEventListener("click", async () => {
@@ -153,6 +158,7 @@ const seriesPosts = series ? getSeriesPosts(series.name, allPosts) : [];
             const label = button.innerText;
 
             await navigator.clipboard.writeText(url);
+            posthog()?.capture("article_link_copied", { sharing_method: "clipboard" });
 
             button.innerText = "Copied";
 
