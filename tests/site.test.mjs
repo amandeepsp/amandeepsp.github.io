@@ -186,19 +186,14 @@ test("email addresses are absent from generated HTML", async () => {
     assert.doesNotMatch(contactPage, /href=["']mailto:/i);
 });
 
-test("Cloudflare Web Analytics is installed once on site pages", async () => {
-    const beaconSource = "https://static.cloudflareinsights.com/beacon.min.js";
-    const beaconToken = "7af3e5dee991434cb956b9f30f59a409";
-    const representativePages = [
-        path.join(DIST, "index.html"),
-        path.join(DIST, "contact-me", "index.html"),
-        path.join(DIST, "hnsw", "index.html")
-    ];
+// Cloudflare Pages injects the Web Analytics beacon at the edge; a beacon in the build would count every visit twice.
+test("built pages leave the Cloudflare Web Analytics beacon to Cloudflare Pages", async () => {
+    const htmlFiles = (await filesUnder(DIST)).filter((file) => file.endsWith(".html"));
+    assert.ok(htmlFiles.length > 0);
 
-    for (const file of representativePages) {
+    for (const file of htmlFiles) {
         const html = await readFile(file, "utf8");
-        assert.equal(html.split(beaconSource).length - 1, 1, `${path.relative(DIST, file)} has the wrong beacon count`);
-        assert.match(html, new RegExp(`data-cf-beacon=["'][^"']*${beaconToken}`));
+        assert.doesNotMatch(html, /cloudflareinsights|data-cf-beacon/, `${path.relative(DIST, file)} has a beacon`);
     }
 });
 
